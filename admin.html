@@ -88,6 +88,7 @@
       <button id="tabNavEnquiries" class="tab-nav-btn active">
         <i class="fa-solid fa-users"></i>
         <span>Enquiries CRM</span>
+        <span class="tab-count-badge green" id="navInterestedPill" title="Interested leads">0</span>
       </button>
       <button id="tabNavPrograms" class="tab-nav-btn">
         <i class="fa-solid fa-graduation-cap"></i>
@@ -96,6 +97,7 @@
       <button id="tabNavCertificates" class="tab-nav-btn">
         <i class="fa-solid fa-award"></i>
         <span>Student Certifications</span>
+        <span class="tab-count-badge gold" id="navCertificatesPill" title="Issued certificates">0</span>
       </button>
     </nav>
 
@@ -117,6 +119,24 @@
             <span class="stat-card-sub">All-time registered leads</span>
           </div>
 
+          <div class="stat-card" style="border-top: 3px solid #059669;">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Interested Leads</span>
+              <div class="stat-icon" style="background: rgba(5,150,105,0.12); color: #059669;"><i class="fa-solid fa-star"></i></div>
+            </div>
+            <div class="stat-card-value" id="statInterested" style="color: #059669;">--</div>
+            <span class="stat-card-sub">High-intent prospective students</span>
+          </div>
+
+          <div class="stat-card" style="border-top: 3px solid #dc2626;">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Not Interested</span>
+              <div class="stat-icon" style="background: rgba(220,38,38,0.12); color: #dc2626;"><i class="fa-solid fa-circle-xmark"></i></div>
+            </div>
+            <div class="stat-card-value" id="statNotInterested" style="color: #dc2626;">--</div>
+            <span class="stat-card-sub">Archived / drop-off enquiries</span>
+          </div>
+
           <div class="stat-card">
             <div class="stat-card-top">
               <span class="stat-card-title">Received Today</span>
@@ -135,6 +155,30 @@
             <span class="stat-card-sub">Training tracks available ↗</span>
           </div>
         </section>
+
+        <!-- Lead Interest Filter Tabs in Enquiries CRM Dashboard -->
+        <div class="lead-filter-tabs" id="leadStatusTabs">
+          <button class="lead-tab-btn active" data-interest="All">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>All Leads</span>
+            <span class="lead-count-badge" id="tabCountAll">0</span>
+          </button>
+          <button class="lead-tab-btn" data-interest="Interested">
+            <i class="fa-solid fa-star" style="color: #059669;"></i>
+            <span>Interested</span>
+            <span class="lead-count-badge green" id="tabCountInterested">0</span>
+          </button>
+          <button class="lead-tab-btn" data-interest="Not Interested">
+            <i class="fa-solid fa-circle-xmark" style="color: #dc2626;"></i>
+            <span>Not Interested</span>
+            <span class="lead-count-badge red" id="tabCountNotInterested">0</span>
+          </button>
+          <button class="lead-tab-btn" data-interest="Pending">
+            <i class="fa-solid fa-clock" style="color: #d97706;"></i>
+            <span>Pending Review</span>
+            <span class="lead-count-badge amber" id="tabCountPending">0</span>
+          </button>
+        </div>
 
         <!-- Controls Toolbar -->
         <section class="controls-toolbar">

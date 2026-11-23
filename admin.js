@@ -180,10 +180,27 @@ async function fetchStats() {
       const statTotalEl = document.getElementById('statTotal');
       const statTodayEl = document.getElementById('statToday');
       const statProgramsEl = document.getElementById('statPrograms');
+      const statInterestedEl = document.getElementById('statInterested');
+      const statNotInterestedEl = document.getElementById('statNotInterested');
 
       if (statTotalEl) statTotalEl.innerText = s.total || 0;
       if (statTodayEl) statTodayEl.innerText = s.today || 0;
       if (statProgramsEl) statProgramsEl.innerText = Object.keys(s.coursesBreakdown || {}).length || 6;
+      if (statInterestedEl) statInterestedEl.innerText = s.interested || 0;
+      if (statNotInterestedEl) statNotInterestedEl.innerText = s.notInterested || 0;
+
+      // Update lead status tab count badges in Enquiries CRM
+      const tabCountAll = document.getElementById('tabCountAll');
+      const tabCountInterested = document.getElementById('tabCountInterested');
+      const tabCountNotInterested = document.getElementById('tabCountNotInterested');
+      const tabCountPending = document.getElementById('tabCountPending');
+      const navInterestedPill = document.getElementById('navInterestedPill');
+
+      if (tabCountAll) tabCountAll.innerText = s.total || 0;
+      if (tabCountInterested) tabCountInterested.innerText = s.interested || 0;
+      if (tabCountNotInterested) tabCountNotInterested.innerText = s.notInterested || 0;
+      if (tabCountPending) tabCountPending.innerText = s.pending || 0;
+      if (navInterestedPill) navInterestedPill.innerText = s.interested || 0;
     }
   } catch (err) {
     console.warn('Could not fetch stats from backend:', err);
@@ -322,6 +339,9 @@ window.updateLeadInterest = async function(id, newInterest, event) {
       if (event && event.target) {
         event.target.className = `interest-pill-select ${newInterest.toLowerCase().replace(/\s+/g, '-')}`;
       }
+
+      // Re-fetch stats immediately to update KPI numbers and lead tab badges live
+      fetchStats();
     } else {
       alert('Could not update interest status: ' + (data.error || 'Server error'));
     }
@@ -372,7 +392,32 @@ function initDashboardControls() {
   }
 
   if (courseFilter) courseFilter.addEventListener('change', fetchEnquiries);
-  if (interestFilter) interestFilter.addEventListener('change', fetchEnquiries);
+
+  // Lead Interest Status Filter Tabs
+  const leadTabs = document.querySelectorAll('#leadStatusTabs .lead-tab-btn');
+  leadTabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      leadTabs.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.dataset.interest || 'All';
+      if (interestFilter) {
+        interestFilter.value = val;
+      }
+      fetchEnquiries();
+    });
+  });
+
+  if (interestFilter) {
+    interestFilter.addEventListener('change', () => {
+      const targetVal = interestFilter.value || 'All';
+      const matchingTab = document.querySelector(`#leadStatusTabs .lead-tab-btn[data-interest="${targetVal}"]`);
+      if (matchingTab) {
+        leadTabs.forEach(b => b.classList.remove('active'));
+        matchingTab.classList.add('active');
+      }
+      fetchEnquiries();
+    });
+  }
 
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
@@ -1022,8 +1067,10 @@ async function fetchCertificateStats() {
       const s = data.stats;
       const elTotal = document.getElementById('statCertTotal');
       const elVerified = document.getElementById('statCertVerified');
+      const navCertificatesPill = document.getElementById('navCertificatesPill');
       if (elTotal) elTotal.innerText = s.total || 0;
       if (elVerified) elVerified.innerText = `${s.verified || 0} Active`;
+      if (navCertificatesPill) navCertificatesPill.innerText = s.total || 0;
     }
   } catch (err) {
     console.warn('Could not fetch certificate stats:', err);

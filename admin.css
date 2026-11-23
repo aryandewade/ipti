@@ -334,9 +334,9 @@ body {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
@@ -943,6 +943,117 @@ td {
   color: #ffffff;
   border-color: var(--primary);
   box-shadow: 0 4px 12px rgba(15, 67, 50, 0.22);
+}
+
+.tab-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-left: 4px;
+}
+
+.tab-count-badge.green {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+.tab-count-badge.gold {
+  background: var(--accent-gold-bg);
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold-border);
+}
+
+.tab-nav-btn.active .tab-count-badge.green {
+  background: #ffffff;
+  color: #059669;
+}
+
+.tab-nav-btn.active .tab-count-badge.gold {
+  background: #ffffff;
+  color: var(--accent-gold);
+}
+
+/* --------------------------------------------------------------------------
+   LEAD INTEREST FILTER TABS (CRM VIEW)
+   -------------------------------------------------------------------------- */
+.lead-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 8px rgba(15, 45, 34, 0.02);
+  overflow-x: auto;
+}
+
+.lead-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.lead-tab-btn:hover {
+  background: var(--bg-recessed);
+  border-color: rgba(15, 67, 50, 0.25);
+  color: var(--primary);
+}
+
+.lead-tab-btn.active {
+  background: #ffffff;
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(15, 67, 50, 0.12);
+}
+
+.lead-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.74rem;
+  font-weight: 800;
+  background: var(--bg-recessed);
+  color: var(--text-dim);
+  border: 1px solid var(--border-subtle);
+}
+
+.lead-count-badge.green {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: rgba(5, 150, 105, 0.3);
+}
+
+.lead-count-badge.red {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.lead-count-badge.amber {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.3);
 }
 
 /* Section Header for Programs */

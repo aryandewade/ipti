@@ -578,6 +578,9 @@ app.get('/api/enquiries/stats', requireAdmin, (req, res) => {
     const stats = {
       total: list.length,
       today: list.filter(i => (i.createdAt || '').slice(0, 10) === today).length,
+      interested: list.filter(i => (i.interest || '').toLowerCase() === 'interested').length,
+      notInterested: list.filter(i => (i.interest || '').toLowerCase() === 'not interested').length,
+      pending: list.filter(i => (i.interest || 'pending').toLowerCase() === 'pending').length,
       new: list.filter(i => (i.status || '').toLowerCase() === 'new').length,
       contacted: list.filter(i => (i.status || '').toLowerCase() === 'contacted').length,
       inDiscussion: list.filter(i => (i.status || '').toLowerCase() === 'counseling scheduled').length,
