@@ -93,6 +93,10 @@
         <i class="fa-solid fa-graduation-cap"></i>
         <span>Training Programs & Analytics</span>
       </button>
+      <button id="tabNavCertificates" class="tab-nav-btn">
+        <i class="fa-solid fa-award"></i>
+        <span>Student Certifications</span>
+      </button>
     </nav>
 
     <!-- Main Dashboard -->
@@ -149,6 +153,13 @@
               <option value="AI, Machine Learning">AI & Computer Vision</option>
               <option value="Electric Vehicle">Electric Vehicle (EV) BMS</option>
             </select>
+
+            <select id="interestFilter" class="filter-select">
+              <option value="All">All Interest Status</option>
+              <option value="Interested">⭐ Interested Leads</option>
+              <option value="Not Interested">❌ Not Interested</option>
+              <option value="Pending">⏳ Pending Review</option>
+            </select>
           </div>
 
           <div class="toolbar-actions">
@@ -172,6 +183,7 @@
                 <tr>
                   <th>Candidate Details</th>
                   <th>Program & Mode</th>
+                  <th>Lead Interest</th>
                   <th>Reference & Date</th>
                   <th>Direct Outreach</th>
                   <th>Actions</th>
@@ -180,7 +192,7 @@
               <tbody id="enquiriesTableBody">
                 <!-- Dynamically rendered -->
                 <tr>
-                  <td colspan="5">
+                  <td colspan="6">
                     <div class="empty-state">
                       <i class="fa-solid fa-spinner fa-spin"></i>
                       <p>Loading enquiries from database...</p>
@@ -235,6 +247,111 @@
 
       </div>
 
+      <!-- =====================================================================
+           VIEW 3: STUDENT CERTIFICATIONS & CREDENTIAL LEDGER
+           ===================================================================== -->
+      <div id="viewCertificates" class="hidden">
+        
+        <!-- Header & Action Row -->
+        <div class="programs-view-header">
+          <div>
+            <h2>Student Certifications & Credential Ledger</h2>
+            <p>Issue, verify, and manage official ISO 9001:2015 accredited course completion certificates.</p>
+          </div>
+          <button id="openAddCertBtn" class="btn-csv-export" style="padding: 10px 20px; font-size: 0.88rem;">
+            <i class="fa-solid fa-award"></i>
+            <span>Issue New Certificate</span>
+          </button>
+        </div>
+
+        <!-- Certificate KPI Stats Grid -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Certificates Issued</span>
+              <div class="stat-icon enrolled"><i class="fa-solid fa-award"></i></div>
+            </div>
+            <div class="stat-card-value" id="statCertTotal">--</div>
+            <span class="stat-card-sub">Total student credentials</span>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Verified Status</span>
+              <div class="stat-icon total"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+            <div class="stat-card-value" id="statCertVerified" style="color: #059669;">--</div>
+            <span class="stat-card-sub">Active in online registry</span>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Accredited Standard</span>
+              <div class="stat-icon today"><i class="fa-solid fa-shield-halved"></i></div>
+            </div>
+            <div class="stat-card-value" style="font-size: 1.35rem; color: var(--primary);">ISO 9001:2015</div>
+            <span class="stat-card-sub">Audited Quality Benchmark</span>
+          </div>
+        </section>
+
+        <!-- Cert Controls Toolbar -->
+        <section class="controls-toolbar">
+          <div class="toolbar-filters">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="certSearchInput" placeholder="Search by student name, cert ID, email...">
+            </div>
+
+            <select id="certProgramFilter" class="filter-select">
+              <option value="All">All Programs</option>
+              <option value="Industrial Automation">Industrial Automation (PLC/SCADA)</option>
+              <option value="Embedded Systems">Embedded Systems & IoT</option>
+              <option value="CAD / CAM">CAD / CAM & Mechanical</option>
+              <option value="Full-Stack">Full-Stack Software</option>
+              <option value="AI, Machine Learning">AI & Vision Systems</option>
+              <option value="Electric Vehicle">Electric Vehicle (EV) BMS</option>
+            </select>
+          </div>
+
+          <div class="toolbar-actions">
+            <button id="refreshCertBtn" class="btn-refresh" title="Refresh certificates">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Certificates Table Card -->
+        <section class="table-card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Certificate ID</th>
+                  <th>Student Details</th>
+                  <th>Certified Program</th>
+                  <th>Issue Date & Grade</th>
+                  <th>Verification</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="certificatesTableBody">
+                <!-- Dynamically rendered -->
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="fa-solid fa-spinner fa-spin"></i>
+                      <p>Loading certificate ledger...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+
     </main>
   </div>
 
@@ -275,6 +392,17 @@
         <div class="detail-item">
           <span class="label">Lead Source</span>
           <span class="value" id="modalSource">--</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Lead Interest Status</span>
+          <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+            <select id="modalInterestSelect" style="padding: 6px 10px; font-family: var(--font-sans); font-size: 0.85rem; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); outline: none;">
+              <option value="Interested">⭐ Interested</option>
+              <option value="Not Interested">❌ Not Interested</option>
+              <option value="Pending">⏳ Pending Review</option>
+            </select>
+            <button type="button" id="updateModalInterestBtn" class="btn-refresh" style="padding: 6px 12px; font-size: 0.78rem;">Save</button>
+          </div>
         </div>
       </div>
 
@@ -381,6 +509,133 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       05. ISSUE / EDIT CERTIFICATE MODAL
+       ========================================================================= -->
+  <div id="certModal">
+    <div class="detail-modal-card" style="max-width: 600px;">
+      <button class="detail-modal-close" id="closeCertModalBtn">&times;</button>
+      
+      <div class="detail-modal-header">
+        <div style="font-size: 0.76rem; font-weight: 700; color: var(--accent-gold); text-transform: uppercase; margin-bottom: 4px;">CREDENTIAL MANAGEMENT</div>
+        <h3 id="certModalHeading">Issue New Student Certificate</h3>
+        <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">Generate an authorized, verifiable course completion credential.</p>
+      </div>
+
+      <form id="certForm" style="margin-top: 16px;">
+        <input type="hidden" id="certFormInternalId">
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Student Full Name *</label>
+          <input type="text" id="certFormName" placeholder="e.g. Rahul V. Sharma" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Email Address</label>
+            <input type="email" id="certFormEmail" placeholder="e.g. rahul.sharma@example.com" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Phone Number</label>
+            <input type="text" id="certFormPhone" placeholder="e.g. +91 98230 45671" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Certified Specialization Program *</label>
+          <select id="certFormProgram" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+            <option value="Industrial Automation & Robotics (PLC/SCADA)">Industrial Automation & Robotics (PLC/SCADA)</option>
+            <option value="Embedded Systems & IoT Engineering">Embedded Systems & IoT Engineering</option>
+            <option value="CAD / CAM & Mechanical Product Design">CAD / CAM & Mechanical Product Design</option>
+            <option value="Full-Stack Software Engineering">Full-Stack Software Engineering</option>
+            <option value="AI, Machine Learning & Vision Systems">AI, Machine Learning & Vision Systems</option>
+            <option value="Electric Vehicle (EV) Systems & BMS">Electric Vehicle (EV) Systems & BMS</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Issue Date *</label>
+            <input type="date" id="certFormDate" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Performance Grade *</label>
+            <input type="text" id="certFormGrade" placeholder="e.g. Distinction (Grade A+ • 96%)" value="Distinction (Grade A+)" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Certificate Tracking ID (Leave blank to auto-generate)</label>
+          <input type="text" id="certFormCustomId" placeholder="e.g. IPTI-CERT-2026-1042" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Capstone / Assessment Notes</label>
+          <textarea id="certFormNotes" rows="2" placeholder="e.g. Successfully executed 120+ hours of physical PLC bench lab work..." style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" id="cancelCertModalBtn" class="btn-refresh">Cancel</button>
+          <button type="submit" id="saveCertSubmitBtn" class="btn-csv-export" style="padding: 10px 24px;">
+            <span>Save & Issue Credential</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       06. DIGITAL CERTIFICATE PREVIEW MODAL
+       ========================================================================= -->
+  <div id="certPreviewModal">
+    <div class="detail-modal-card" style="max-width: 820px; padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <span style="font-weight: 800; color: var(--primary); font-size: 1.1rem;"><i class="fa-solid fa-award" style="color: var(--accent-gold);"></i> Digital Certificate Verification</span>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" id="printCertBtn" class="btn-csv-export" style="padding: 6px 16px; font-size: 0.82rem;"><i class="fa-solid fa-print"></i> Print / PDF</button>
+          <button class="detail-modal-close" id="closeCertPreviewBtn" style="position: static; font-size: 1.5rem;">&times;</button>
+        </div>
+      </div>
+
+      <!-- Printable Diploma Sheet -->
+      <div class="diploma-sheet" id="diplomaPrintArea">
+        <div class="diploma-inner-border">
+          <div class="diploma-header">
+            <img src="assets/ipti-logo.jpg" alt="IPTI Crest" class="diploma-crest">
+            <h2 class="diploma-inst-title">INSTITUTE OF PROFESSIONAL TRAINING & INNOVATION</h2>
+            <p class="diploma-sub">Government Recognized • ISO 9001:2015 Certified Center of Excellence</p>
+          </div>
+
+          <div class="diploma-body">
+            <span class="diploma-cert-text">THIS IS TO CERTIFY THAT</span>
+            <h1 class="diploma-student-name" id="prevStudentName">Rahul V. Sharma</h1>
+            <p class="diploma-completion-text">has successfully satisfied all rigorous practical assessments and industrial capstone requirements for</p>
+            <h3 class="diploma-program-title" id="prevProgramName">Industrial Automation & Robotics (PLC/SCADA)</h3>
+            <div class="diploma-grade-badge" id="prevGradeBadge">Awarded with Distinction (Grade A+ • 96%)</div>
+          </div>
+
+          <div class="diploma-footer">
+            <div class="diploma-sign-col">
+              <span class="diploma-sign-line">Aryan Dewade</span>
+              <span class="diploma-sign-title">Academic Director</span>
+            </div>
+            <div class="diploma-seal-col">
+              <div class="diploma-gold-seal">
+                <i class="fa-solid fa-stamp"></i>
+                <span>OFFICIAL VERIFIED</span>
+              </div>
+              <span class="diploma-id-tag" id="prevCertId">IPTI-CERT-2026-1042</span>
+            </div>
+            <div class="diploma-sign-col">
+              <span class="diploma-sign-line" id="prevIssueDate">18 February 2026</span>
+              <span class="diploma-sign-title">Date of Conferral</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

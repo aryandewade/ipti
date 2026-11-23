@@ -28,6 +28,7 @@ if (!fs.existsSync(dataDir)) {
 
 const enquiriesFile = path.join(dataDir, 'enquiries.json');
 const programsFile = path.join(dataDir, 'programs.json');
+const certificatesFile = path.join(dataDir, 'certificates.json');
 
 // Initial default training programs
 const defaultPrograms = [
@@ -150,6 +151,90 @@ function writePrograms(programs) {
     return true;
   } catch (err) {
     console.error('Error saving programs to database:', err);
+    return false;
+  }
+}
+
+const defaultCertificates = [
+  {
+    id: "cert_1795427001042_a1b2",
+    certId: "IPTI-CERT-2026-1042",
+    studentName: "Rahul V. Sharma",
+    studentEmail: "rahul.sharma@example.com",
+    studentPhone: "+91 98230 45671",
+    program: "Industrial Automation & Robotics (PLC/SCADA)",
+    grade: "Distinction (Grade A+ • 96%)",
+    issueDate: "2026-02-18",
+    standard: "ISO 9001:2015 Accredited",
+    status: "Verified",
+    notes: "Completed 120+ hours of physical PLC/SCADA benchwork and Automated Sorting Line capstone.",
+    createdAt: "2026-02-18T10:00:00.000Z"
+  },
+  {
+    id: "cert_1795427001088_c3d4",
+    certId: "IPTI-CERT-2026-1088",
+    studentName: "Pooja Deshmukh",
+    studentEmail: "pooja.d@example.com",
+    studentPhone: "+91 99750 12894",
+    program: "Embedded Systems & IoT Engineering",
+    grade: "Grade A (89%)",
+    issueDate: "2026-01-25",
+    standard: "ISO 9001:2015 Accredited",
+    status: "Verified",
+    notes: "Built FreeRTOS sensor telemetry rig with CAN 2.0B bus integration.",
+    createdAt: "2026-01-25T11:30:00.000Z"
+  },
+  {
+    id: "cert_1795427001120_e5f6",
+    certId: "IPTI-CERT-2026-1120",
+    studentName: "Amitesh Kulkarni",
+    studentEmail: "amitesh.k@example.com",
+    studentPhone: "+91 97640 88219",
+    program: "CAD / CAM & Mechanical Product Design",
+    grade: "Distinction (Grade A+ • 94%)",
+    issueDate: "2026-03-02",
+    standard: "ISO 9001:2015 Accredited",
+    status: "Verified",
+    notes: "Completed Automotive Transmission casing parametric design with GD&T and 5-axis CAM.",
+    createdAt: "2026-03-02T09:15:00.000Z"
+  },
+  {
+    id: "cert_1795427001205_g7h8",
+    certId: "IPTI-CERT-2026-1205",
+    studentName: "Neha S. Patil",
+    studentEmail: "neha.patil@example.com",
+    studentPhone: "+91 98901 23456",
+    program: "AI, Machine Learning & Vision Systems",
+    grade: "Distinction (Grade A+ • 97%)",
+    issueDate: "2026-03-10",
+    standard: "ISO 9001:2015 Accredited",
+    status: "Verified",
+    notes: "Delivered production-grade defect detection vision pipeline using TensorRT.",
+    createdAt: "2026-03-10T14:20:00.000Z"
+  }
+];
+
+function readCertificates() {
+  try {
+    if (!fs.existsSync(certificatesFile)) {
+      writeCertificates(defaultCertificates);
+      return defaultCertificates;
+    }
+    const raw = fs.readFileSync(certificatesFile, 'utf-8');
+    const parsed = JSON.parse(raw || '[]');
+    return parsed.length > 0 ? parsed : defaultCertificates;
+  } catch (err) {
+    console.error('Error reading certificates database:', err);
+    return defaultCertificates;
+  }
+}
+
+function writeCertificates(certificates) {
+  try {
+    fs.writeFileSync(certificatesFile, JSON.stringify(certificates, null, 2), 'utf-8');
+    return true;
+  } catch (err) {
+    console.error('Error writing certificates database:', err);
     return false;
   }
 }
@@ -403,6 +488,7 @@ app.post('/api/enquiries', (req, res) => {
       message: message ? message.trim() : '',
       status: 'New',
       priority: 'High',
+      interest: 'Pending',
       source: source || 'Website Enquiry Form',
       notes: [
         {
@@ -433,12 +519,17 @@ app.post('/api/enquiries', (req, res) => {
 // 5. Get Enquiries (Protected Admin)
 app.get('/api/enquiries', requireAdmin, (req, res) => {
   try {
-    const { status, course, search, sortBy = 'createdAt', order = 'desc' } = req.query;
+    const { status, interest, course, search, sortBy = 'createdAt', order = 'desc' } = req.query;
     let list = readEnquiries();
 
     // Filter by status
     if (status && status !== 'All') {
       list = list.filter(item => item.status && item.status.toLowerCase() === status.toLowerCase());
+    }
+
+    // Filter by interest
+    if (interest && interest !== 'All') {
+      list = list.filter(item => (item.interest || 'Pending').toLowerCase() === interest.toLowerCase());
     }
 
     // Filter by course
@@ -520,7 +611,7 @@ app.get('/api/enquiries/:id', requireAdmin, (req, res) => {
 app.patch('/api/enquiries/:id', requireAdmin, (req, res) => {
   try {
     const { id } = req.params;
-    const { status, priority, newNote } = req.body;
+    const { status, priority, interest, newNote } = req.body;
 
     const list = readEnquiries();
     const index = list.findIndex(item => item.id === id || item.trackingId === id);
@@ -534,6 +625,7 @@ app.patch('/api/enquiries/:id', requireAdmin, (req, res) => {
 
     if (status) item.status = status;
     if (priority) item.priority = priority;
+    if (interest) item.interest = interest;
 
     if (newNote && newNote.trim()) {
       if (!Array.isArray(item.notes)) item.notes = [];
@@ -877,6 +969,176 @@ app.delete('/api/programs/:id', requireAdmin, (req, res) => {
 
     writePrograms(programs);
     res.json({ success: true, message: 'Program deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// =========================================================================
+// CERTIFICATES REST API
+// =========================================================================
+
+// 1. Get All Certificates (Admin protected)
+app.get('/api/certificates', requireAdmin, (req, res) => {
+  try {
+    const { program, search, status } = req.query;
+    let list = readCertificates();
+
+    if (program && program !== 'All') {
+      list = list.filter(c => (c.program || '').toLowerCase().includes(program.toLowerCase()));
+    }
+
+    if (status && status !== 'All') {
+      list = list.filter(c => (c.status || '').toLowerCase() === status.toLowerCase());
+    }
+
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(c => 
+        (c.studentName && c.studentName.toLowerCase().includes(q)) ||
+        (c.certId && c.certId.toLowerCase().includes(q)) ||
+        (c.studentEmail && c.studentEmail.toLowerCase().includes(q)) ||
+        (c.program && c.program.toLowerCase().includes(q))
+      );
+    }
+
+    // Sort by issue date descending
+    list.sort((a, b) => new Date(b.issueDate || b.createdAt) - new Date(a.issueDate || a.createdAt));
+
+    res.json({ success: true, count: list.length, data: list });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 2. Get Certificate Stats (Admin protected)
+app.get('/api/certificates/stats', requireAdmin, (req, res) => {
+  try {
+    const list = readCertificates();
+    const verified = list.filter(c => (c.status || '').toLowerCase() === 'verified').length;
+    
+    // Top program
+    const programCounts = {};
+    list.forEach(c => {
+      programCounts[c.program] = (programCounts[c.program] || 0) + 1;
+    });
+    let topProg = 'Industrial Automation & Robotics';
+    let max = 0;
+    for (const [k, v] of Object.entries(programCounts)) {
+      if (v > max) { max = v; topProg = k; }
+    }
+
+    res.json({
+      success: true,
+      stats: {
+        total: list.length,
+        verified,
+        topProgram: topProg
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 3. Verify Certificate (Public Endpoint)
+app.get('/api/certificates/verify/:certId', (req, res) => {
+  try {
+    const list = readCertificates();
+    const cert = list.find(c => c.certId.toUpperCase() === req.params.certId.toUpperCase() || c.id === req.params.certId);
+    if (!cert) {
+      return res.status(404).json({ success: false, error: 'Certificate credential not found' });
+    }
+    res.json({ success: true, certificate: cert });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4. Issue New Certificate (Admin protected)
+app.post('/api/certificates', requireAdmin, (req, res) => {
+  try {
+    const { studentName, studentEmail, studentPhone, program, grade, issueDate, standard, notes, certId } = req.body;
+    if (!studentName || !program) {
+      return res.status(400).json({ success: false, error: 'Student name and program are required' });
+    }
+
+    const list = readCertificates();
+    const timestamp = new Date().toISOString();
+    const generatedCertId = certId && certId.trim() ? certId.trim() : `IPTI-CERT-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newCert = {
+      id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      certId: generatedCertId,
+      studentName: studentName.trim(),
+      studentEmail: studentEmail ? studentEmail.trim() : '',
+      studentPhone: studentPhone ? studentPhone.trim() : '',
+      program: program.trim(),
+      grade: grade ? grade.trim() : 'Distinction (Grade A+)',
+      issueDate: issueDate || timestamp.slice(0, 10),
+      standard: standard ? standard.trim() : 'ISO 9001:2015 Accredited',
+      status: 'Verified',
+      notes: notes ? notes.trim() : '',
+      createdAt: timestamp
+    };
+
+    list.unshift(newCert);
+    writeCertificates(list);
+
+    res.status(201).json({ success: true, message: 'Certificate issued successfully', data: newCert });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 5. Update Certificate (Admin protected)
+app.put('/api/certificates/:id', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const list = readCertificates();
+    const index = list.findIndex(c => c.id === id || c.certId === id);
+
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Certificate not found' });
+    }
+
+    const { studentName, studentEmail, studentPhone, program, grade, issueDate, standard, status, notes } = req.body;
+    const cert = list[index];
+
+    if (studentName) cert.studentName = studentName.trim();
+    if (studentEmail !== undefined) cert.studentEmail = studentEmail.trim();
+    if (studentPhone !== undefined) cert.studentPhone = studentPhone.trim();
+    if (program) cert.program = program.trim();
+    if (grade) cert.grade = grade.trim();
+    if (issueDate) cert.issueDate = issueDate;
+    if (standard) cert.standard = standard.trim();
+    if (status) cert.status = status.trim();
+    if (notes !== undefined) cert.notes = notes.trim();
+
+    cert.updatedAt = new Date().toISOString();
+    list[index] = cert;
+    writeCertificates(list);
+
+    res.json({ success: true, message: 'Certificate updated successfully', data: cert });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6. Delete / Revoke Certificate (Admin protected)
+app.delete('/api/certificates/:id', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    let list = readCertificates();
+    const originalLen = list.length;
+    list = list.filter(c => c.id !== id && c.certId !== id);
+
+    if (list.length === originalLen) {
+      return res.status(404).json({ success: false, error: 'Certificate not found' });
+    }
+
+    writeCertificates(list);
+    res.json({ success: true, message: 'Certificate revoked and deleted successfully' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

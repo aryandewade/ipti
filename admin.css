@@ -88,7 +88,8 @@ body {
 #loginOverlay.hidden,
 #adminApp.hidden,
 #viewEnquiries.hidden,
-#viewPrograms.hidden {
+#viewPrograms.hidden,
+#viewCertificates.hidden {
   display: none !important;
 }
 
@@ -1175,4 +1176,207 @@ td {
   .admin-programs-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   LEAD INTEREST SELECTOR PILLS
+   ========================================================================== */
+.interest-pill-select {
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 750;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.interest-pill-select.interested {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.interest-pill-select.not-interested {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.interest-pill-select.pending {
+  background: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+/* ==========================================================================
+   CERTIFICATES MODAL & DIPLOMA PREVIEW STYLES
+   ========================================================================== */
+#certModal, #certPreviewModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 26, 20, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#certModal.open, #certPreviewModal.open {
+  display: flex !important;
+}
+
+/* Printable Academic Diploma Sheet */
+.diploma-sheet {
+  background: #fffdfa;
+  border: 4px solid var(--accent-gold);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.diploma-inner-border {
+  border: 1.5px solid rgba(197, 160, 89, 0.5);
+  padding: 36px 32px;
+  text-align: center;
+  position: relative;
+  background: radial-gradient(circle at center, #ffffff 40%, #fdfbf7 100%);
+}
+
+.diploma-crest {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-gold);
+  margin: 0 auto 12px auto;
+  display: block;
+}
+
+.diploma-inst-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 850;
+  color: var(--primary);
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.diploma-sub {
+  font-size: 0.74rem;
+  color: var(--accent-gold-dark);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.diploma-cert-text {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.diploma-student-name {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.diploma-completion-text {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  max-width: 540px;
+  margin: 0 auto 12px auto;
+  line-height: 1.5;
+}
+
+.diploma-program-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.diploma-grade-badge {
+  display: inline-block;
+  background: var(--primary-subtle);
+  color: var(--primary);
+  border: 1px solid rgba(15, 67, 50, 0.2);
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.82rem;
+  margin-bottom: 30px;
+}
+
+.diploma-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-top: 1px solid rgba(197, 160, 89, 0.3);
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.diploma-sign-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 140px;
+}
+
+.diploma-sign-line {
+  font-family: var(--font-serif, Georgia, serif);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--primary);
+  border-bottom: 1px solid rgba(15, 67, 50, 0.4);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  width: 100%;
+}
+
+.diploma-sign-title {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.diploma-seal-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.diploma-gold-seal {
+  background: linear-gradient(135deg, #c5a059 0%, #997835 100%);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.74rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
+  margin-bottom: 6px;
+}
+
+.diploma-id-tag {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-dim);
 }

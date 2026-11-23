@@ -7,12 +7,14 @@ let currentToken = localStorage.getItem('ipti_admin_token') || '';
 let currentEnquiryId = null;
 let allEnquiriesCache = [];
 let allProgramsCache = [];
+let allCertificatesCache = [];
 
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initDashboardControls();
   initViewTabs();
   initProgramManagement();
+  initCertificateManagement();
 });
 
 /* --------------------------------------------------------------------------
@@ -155,7 +157,14 @@ function showApp() {
    02. DASHBOARD DATA LOADING & STATS
    -------------------------------------------------------------------------- */
 async function loadDashboardData() {
-  await Promise.all([fetchStats(), fetchEnquiries(), fetchPrograms(), fetchProgramAnalytics()]);
+  await Promise.all([
+    fetchStats(),
+    fetchEnquiries(),
+    fetchPrograms(),
+    fetchProgramAnalytics(),
+    fetchCertificates(),
+    fetchCertificateStats()
+  ]);
 }
 
 async function fetchStats() {
@@ -185,9 +194,11 @@ async function fetchEnquiries() {
   const tableBody = document.getElementById('enquiriesTableBody');
   const search = document.getElementById('searchInput').value.trim();
   const course = document.getElementById('courseFilter').value;
+  const interest = document.getElementById('interestFilter') ? document.getElementById('interestFilter').value : 'All';
 
   try {
     let url = `/api/enquiries?course=${encodeURIComponent(course)}`;
+    if (interest && interest !== 'All') url += `&interest=${encodeURIComponent(interest)}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
 
     const res = await fetch(url, {
@@ -229,6 +240,9 @@ function renderTable(list) {
     const cleanPhone = (item.phone || '').replace(/[^0-9]/g, '');
     const waUrl = `https://wa.me/${cleanPhone}?text=Hello%20${encodeURIComponent(item.fullName)},%20Greetings%20from%20IPTI%20(Institute%20of%20Professional%20Training%20%26%20Innovation).%20We%20received%20your%20enquiry%20regarding%20${encodeURIComponent(item.course)}%20(Ref:%20${encodeURIComponent(item.trackingId)}).`;
 
+    const interest = item.interest || 'Pending';
+    const interestClass = interest.toLowerCase().replace(/\s+/g, '-');
+
     return `
       <tr data-id="${item.id}">
         <td>
@@ -245,6 +259,14 @@ function renderTable(list) {
         <td class="course-cell">
           <span class="course-name">${escapeHtml(item.course || 'General Training')}</span>
           <span class="course-mode"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(item.learningMode || 'Classroom')}</span>
+        </td>
+
+        <td>
+          <select class="interest-pill-select ${interestClass}" onchange="updateLeadInterest('${item.id}', this.value, event)" title="Change candidate lead status">
+            <option value="Interested" ${interest === 'Interested' ? 'selected' : ''}>⭐ Interested</option>
+            <option value="Not Interested" ${interest === 'Not Interested' ? 'selected' : ''}>❌ Not Interested</option>
+            <option value="Pending" ${interest === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+          </select>
         </td>
 
         <td>
@@ -281,6 +303,33 @@ function renderTable(list) {
   }).join('');
 }
 
+window.updateLeadInterest = async function(id, newInterest, event) {
+  try {
+    const res = await fetch(`/api/enquiries/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentToken}`
+      },
+      body: JSON.stringify({ interest: newInterest })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      const item = allEnquiriesCache.find(e => e.id === id);
+      if (item) item.interest = newInterest;
+
+      if (event && event.target) {
+        event.target.className = `interest-pill-select ${newInterest.toLowerCase().replace(/\s+/g, '-')}`;
+      }
+    } else {
+      alert('Could not update interest status: ' + (data.error || 'Server error'));
+    }
+  } catch (err) {
+    alert('Network error updating interest: ' + err.message);
+  }
+};
+
 function renderEmptyTable(message) {
   const tableBody = document.getElementById('enquiriesTableBody');
   tableBody.innerHTML = `
@@ -310,6 +359,7 @@ function escapeHtml(str) {
 function initDashboardControls() {
   const searchInput = document.getElementById('searchInput');
   const courseFilter = document.getElementById('courseFilter');
+  const interestFilter = document.getElementById('interestFilter');
   const refreshBtn = document.getElementById('refreshBtn');
   const exportCsvBtn = document.getElementById('exportCsvBtn');
 
@@ -322,6 +372,7 @@ function initDashboardControls() {
   }
 
   if (courseFilter) courseFilter.addEventListener('change', fetchEnquiries);
+  if (interestFilter) interestFilter.addEventListener('change', fetchEnquiries);
 
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
@@ -425,6 +476,22 @@ window.openDetailModal = function(id) {
   document.getElementById('modalSource').innerText = item.source || 'Website Form';
   document.getElementById('modalMessage').innerText = item.message || 'No specific requirements submitted.';
 
+  const modalInterestSelect = document.getElementById('modalInterestSelect');
+  if (modalInterestSelect) {
+    modalInterestSelect.value = item.interest || 'Pending';
+  }
+
+  const updateInterestBtn = document.getElementById('updateModalInterestBtn');
+  if (updateInterestBtn) {
+    updateInterestBtn.onclick = async () => {
+      if (!currentEnquiryId || !modalInterestSelect) return;
+      const newInterest = modalInterestSelect.value;
+      await updateLeadInterest(currentEnquiryId, newInterest);
+      alert(`Candidate interest status updated to "${newInterest}".`);
+      fetchEnquiries();
+    };
+  }
+
   renderNotes(item.notes || []);
 
   modal.classList.add('open');
@@ -481,8 +548,10 @@ window.deleteEnquiry = async function(id, name, onSuccess) {
 function initViewTabs() {
   const tabEnquiries = document.getElementById('tabNavEnquiries');
   const tabPrograms = document.getElementById('tabNavPrograms');
+  const tabCertificates = document.getElementById('tabNavCertificates');
   const viewEnquiries = document.getElementById('viewEnquiries');
   const viewPrograms = document.getElementById('viewPrograms');
+  const viewCertificates = document.getElementById('viewCertificates');
   const statCardPrograms = document.getElementById('statCardPrograms');
 
   if (!tabEnquiries || !tabPrograms) return;
@@ -490,16 +559,23 @@ function initViewTabs() {
   function showEnquiriesView() {
     tabEnquiries.classList.add('active');
     tabPrograms.classList.remove('active');
+    if (tabCertificates) tabCertificates.classList.remove('active');
+
     viewEnquiries.classList.remove('hidden');
     viewPrograms.classList.add('hidden');
+    if (viewCertificates) viewCertificates.classList.add('hidden');
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function showProgramsView(scrollToAnalytics = true) {
     tabPrograms.classList.add('active');
     tabEnquiries.classList.remove('active');
+    if (tabCertificates) tabCertificates.classList.remove('active');
+
     viewPrograms.classList.remove('hidden');
     viewEnquiries.classList.add('hidden');
+    if (viewCertificates) viewCertificates.classList.add('hidden');
     
     // Refresh latest programs & analytics
     fetchPrograms();
@@ -516,8 +592,23 @@ function initViewTabs() {
     }, 60);
   }
 
+  function showCertificatesView() {
+    if (tabCertificates) tabCertificates.classList.add('active');
+    tabEnquiries.classList.remove('active');
+    tabPrograms.classList.remove('active');
+
+    if (viewCertificates) viewCertificates.classList.remove('hidden');
+    viewEnquiries.classList.add('hidden');
+    viewPrograms.classList.add('hidden');
+
+    fetchCertificates();
+    fetchCertificateStats();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   tabEnquiries.addEventListener('click', showEnquiriesView);
   tabPrograms.addEventListener('click', () => showProgramsView(true));
+  if (tabCertificates) tabCertificates.addEventListener('click', showCertificatesView);
 
   if (statCardPrograms) {
     statCardPrograms.addEventListener('click', () => showProgramsView(true));
@@ -526,11 +617,15 @@ function initViewTabs() {
   // Support direct hash routing
   if (window.location.hash === '#programs' || window.location.hash === '#analytics') {
     showProgramsView(true);
+  } else if (window.location.hash === '#certificates' || window.location.hash === '#certifications') {
+    showCertificatesView();
   }
 
   window.addEventListener('hashchange', () => {
     if (window.location.hash === '#programs' || window.location.hash === '#analytics') {
       showProgramsView(true);
+    } else if (window.location.hash === '#certificates' || window.location.hash === '#certifications') {
+      showCertificatesView();
     } else if (window.location.hash === '#enquiries') {
       showEnquiriesView();
     }
@@ -878,6 +973,325 @@ function initProgramManagement() {
         fetchProgramAnalytics();
       } else {
         alert('Could not delete program: ' + (data.error || 'Server error'));
+      }
+    } catch (err) {
+      alert('Delete error: ' + err.message);
+    }
+  };
+}
+
+/* ==========================================================================
+   10. STUDENT CERTIFICATES & CREDENTIAL LEDGER ENGINE
+   ========================================================================== */
+async function fetchCertificates() {
+  const tableBody = document.getElementById('certificatesTableBody');
+  const search = document.getElementById('certSearchInput') ? document.getElementById('certSearchInput').value.trim() : '';
+  const program = document.getElementById('certProgramFilter') ? document.getElementById('certProgramFilter').value : 'All';
+
+  try {
+    let url = `/api/certificates?program=${encodeURIComponent(program)}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${currentToken}` }
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      allCertificatesCache = data.data;
+      renderCertificatesTable(data.data);
+    } else {
+      renderEmptyCertTable('No student certificates found matching your criteria.');
+    }
+  } catch (err) {
+    console.error('Error fetching certificates:', err);
+    renderEmptyCertTable(`Could not load certificates: ${err.message}.`);
+  }
+}
+
+async function fetchCertificateStats() {
+  try {
+    const res = await fetch('/api/certificates/stats', {
+      headers: { 'Authorization': `Bearer ${currentToken}` }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.success && data.stats) {
+      const s = data.stats;
+      const elTotal = document.getElementById('statCertTotal');
+      const elVerified = document.getElementById('statCertVerified');
+      if (elTotal) elTotal.innerText = s.total || 0;
+      if (elVerified) elVerified.innerText = `${s.verified || 0} Active`;
+    }
+  } catch (err) {
+    console.warn('Could not fetch certificate stats:', err);
+  }
+}
+
+function renderCertificatesTable(list) {
+  const tableBody = document.getElementById('certificatesTableBody');
+  if (!tableBody) return;
+
+  if (!list || list.length === 0) {
+    renderEmptyCertTable('No certificates issued yet. Click "+ Issue New Certificate" above.');
+    return;
+  }
+
+  tableBody.innerHTML = list.map(cert => {
+    const dateFormatted = new Date(cert.issueDate || cert.createdAt).toLocaleDateString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+
+    return `
+      <tr data-id="${cert.id}">
+        <td>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-family: var(--font-mono); font-weight: 750; color: var(--primary); font-size: 0.88rem;">${escapeHtml(cert.certId)}</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);"><i class="fa-solid fa-stamp" style="color: var(--accent-gold);"></i> ISO Accredited</span>
+          </div>
+        </td>
+
+        <td>
+          <div class="candidate-cell">
+            <span class="candidate-name">${escapeHtml(cert.studentName)}</span>
+            <div class="candidate-contact">
+              <span><i class="fa-solid fa-envelope"></i> ${escapeHtml(cert.studentEmail || 'No email')}</span>
+              <span>•</span>
+              <span><i class="fa-solid fa-phone"></i> ${escapeHtml(cert.studentPhone || 'No phone')}</span>
+            </div>
+          </div>
+        </td>
+
+        <td class="course-cell">
+          <span class="course-name">${escapeHtml(cert.program)}</span>
+          <span class="course-mode"><i class="fa-solid fa-award"></i> ${escapeHtml(cert.standard || 'ISO 9001:2015')}</span>
+        </td>
+
+        <td>
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-weight: 700; color: var(--text-main); font-size: 0.88rem;">${escapeHtml(cert.grade || 'Certified')}</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">${dateFormatted}</span>
+          </div>
+        </td>
+
+        <td>
+          <span style="display: inline-flex; align-items: center; gap: 5px; background: #ecfdf5; color: #059669; font-size: 0.74rem; font-weight: 750; padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid #a7f3d0;">
+            <i class="fa-solid fa-circle-check"></i> Verified
+          </span>
+        </td>
+
+        <td>
+          <div class="table-actions">
+            <button class="action-icon-btn" onclick="previewCertificate('${cert.id}')" title="Preview Digital Certificate">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button class="action-icon-btn" onclick="editCertificate('${cert.id}')" title="Edit Certificate">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="action-icon-btn delete" onclick="deleteCertificate('${cert.id}', '${escapeHtml(cert.studentName)}')" title="Revoke Certificate">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderEmptyCertTable(msg) {
+  const tableBody = document.getElementById('certificatesTableBody');
+  if (tableBody) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <i class="fa-solid fa-award"></i>
+            <p>${escapeHtml(msg)}</p>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+}
+
+function initCertificateManagement() {
+  const openAddBtn = document.getElementById('openAddCertBtn');
+  const modal = document.getElementById('certModal');
+  const closeBtn = document.getElementById('closeCertModalBtn');
+  const cancelBtn = document.getElementById('cancelCertModalBtn');
+  const form = document.getElementById('certForm');
+
+  const previewModal = document.getElementById('certPreviewModal');
+  const closePreviewBtn = document.getElementById('closeCertPreviewBtn');
+  const printBtn = document.getElementById('printCertBtn');
+
+  const certSearchInput = document.getElementById('certSearchInput');
+  const certProgramFilter = document.getElementById('certProgramFilter');
+  const refreshCertBtn = document.getElementById('refreshCertBtn');
+
+  if (certSearchInput) certSearchInput.addEventListener('input', fetchCertificates);
+  if (certProgramFilter) certProgramFilter.addEventListener('change', fetchCertificates);
+  if (refreshCertBtn) refreshCertBtn.addEventListener('click', () => { fetchCertificates(); fetchCertificateStats(); });
+
+  function openModal(isEdit = false) {
+    if (modal) {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      if (!isEdit && form) {
+        form.reset();
+        document.getElementById('certFormInternalId').value = '';
+        document.getElementById('certModalHeading').innerText = 'Issue New Student Certificate';
+        document.getElementById('certFormDate').value = new Date().toISOString().slice(0, 10);
+      }
+    }
+  }
+
+  function closeModal() {
+    if (modal) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (openAddBtn) openAddBtn.addEventListener('click', () => openModal(false));
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  // Handle Form Submit
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('saveCertSubmitBtn');
+      const origText = submitBtn.innerHTML;
+
+      const certInternalId = document.getElementById('certFormInternalId').value;
+      const isEdit = Boolean(certInternalId);
+
+      const payload = {
+        studentName: document.getElementById('certFormName').value.trim(),
+        studentEmail: document.getElementById('certFormEmail').value.trim(),
+        studentPhone: document.getElementById('certFormPhone').value.trim(),
+        program: document.getElementById('certFormProgram').value,
+        issueDate: document.getElementById('certFormDate').value,
+        grade: document.getElementById('certFormGrade').value.trim(),
+        certId: document.getElementById('certFormCustomId').value.trim(),
+        notes: document.getElementById('certFormNotes').value.trim()
+      };
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+        const endpoint = isEdit ? `/api/certificates/${certInternalId}` : '/api/certificates';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const res = await fetch(endpoint, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert(`🎓 Certificate for "${payload.studentName}" ${isEdit ? 'updated' : 'issued'} successfully!`);
+          closeModal();
+          fetchCertificates();
+          fetchCertificateStats();
+        } else {
+          alert('Error: ' + (data.error || 'Failed to save certificate'));
+        }
+      } catch (err) {
+        alert('Server error saving certificate: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    });
+  }
+
+  // Preview & Print
+  if (closePreviewBtn && previewModal) {
+    closePreviewBtn.addEventListener('click', () => {
+      previewModal.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    previewModal.addEventListener('click', (e) => {
+      if (e.target === previewModal) {
+        previewModal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+  if (printBtn) {
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
+  window.previewCertificate = function(id) {
+    const cert = allCertificatesCache.find(c => c.id === id);
+    if (!cert || !previewModal) return;
+
+    document.getElementById('prevStudentName').innerText = cert.studentName;
+    document.getElementById('prevProgramName').innerText = cert.program;
+    document.getElementById('prevGradeBadge').innerText = `Awarded with ${cert.grade || 'Distinction'}`;
+    document.getElementById('prevCertId').innerText = cert.certId;
+    document.getElementById('prevIssueDate').innerText = new Date(cert.issueDate || cert.createdAt).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    previewModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.editCertificate = function(id) {
+    const cert = allCertificatesCache.find(c => c.id === id);
+    if (!cert) return;
+
+    document.getElementById('certFormInternalId').value = cert.id;
+    document.getElementById('certModalHeading').innerText = 'Edit Student Certificate';
+    document.getElementById('certFormName').value = cert.studentName || '';
+    document.getElementById('certFormEmail').value = cert.studentEmail || '';
+    document.getElementById('certFormPhone').value = cert.studentPhone || '';
+    document.getElementById('certFormProgram').value = cert.program || '';
+    document.getElementById('certFormDate').value = (cert.issueDate || '').slice(0, 10);
+    document.getElementById('certFormGrade').value = cert.grade || '';
+    document.getElementById('certFormCustomId').value = cert.certId || '';
+    document.getElementById('certFormNotes').value = cert.notes || '';
+
+    openModal(true);
+  };
+
+  window.deleteCertificate = async function(id, name) {
+    if (!confirm(`Are you sure you want to permanently revoke certificate for "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/certificates/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${currentToken}` }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(`Certificate revoked successfully.`);
+        fetchCertificates();
+        fetchCertificateStats();
+      } else {
+        alert('Could not revoke certificate: ' + (data.error || 'Server error'));
       }
     } catch (err) {
       alert('Delete error: ' + err.message);
