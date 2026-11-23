@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initModals();
   initForms();
+  loadDynamicPrograms();
 });
 
 /* --------------------------------------------------------------------------
@@ -501,4 +502,114 @@ function showSuccessDialog(trackingId, name) {
   } else {
     alert(`🎉 Thank you, ${name}! Your inquiry has been registered. Reference ID: ${trackingId}`);
   }
+}
+
+
+/* ==========================================================================
+   09. DYNAMIC PROGRAMS LOADER & FORM DROPDOWNS SYNC
+   ========================================================================== */
+
+async function loadDynamicPrograms() {
+  try {
+    const res = await fetch('/api/programs');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+      renderPublicPrograms(data.data);
+      populateCourseDropdowns(data.data);
+    }
+  } catch (e) {
+    console.warn('Using static programs fallback:', e);
+  }
+}
+
+function renderPublicPrograms(programs) {
+  const grid = document.querySelector('.programs-grid');
+  if (!grid) return;
+
+  grid.innerHTML = programs.map(p => {
+    const tags = Array.isArray(p.techTags) ? p.techTags : [];
+    return `
+      <div class="program-card" data-category="${escapeHtmlApp((p.category || 'automation').toLowerCase())}">
+        <div class="program-card-inner">
+          <span class="program-card-badge">
+            <i class="fa-solid ${p.icon || 'fa-graduation-cap'}"></i> ${escapeHtmlApp(p.badge || 'Specialized Track')}
+          </span>
+          <h3>${escapeHtmlApp(p.title)}</h3>
+          <p class="program-card-desc">
+            ${escapeHtmlApp(p.description)}
+          </p>
+          <div class="program-specs-grid">
+            <div class="spec-item">
+              <span class="spec-item-label">Duration</span>
+              <span class="spec-item-val">${escapeHtmlApp(p.duration || '3-4 Months')}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-item-label">Lab Hours</span>
+              <span class="spec-item-val">${escapeHtmlApp(p.labHours || '100+ Hrs')}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-item-label">Mode</span>
+              <span class="spec-item-val">${escapeHtmlApp(p.mode || 'Classroom / Hybrid')}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-item-label">Credentials</span>
+              <span class="spec-item-val">${escapeHtmlApp(p.credentials || 'ISO Certified')}</span>
+            </div>
+          </div>
+          <div class="program-tech-tags">
+            ${tags.map(t => `<span class="tech-tag">${escapeHtmlApp(t)}</span>`).join('')}
+          </div>
+          <div class="program-card-cta">
+            <button class="btn btn-secondary" data-open-modal="syllabus" data-course="${escapeHtmlApp(p.title)}">
+              <span>Syllabus</span>
+            </button>
+            <button class="btn btn-primary" data-open-modal="enquiry" data-course="${escapeHtmlApp(p.title)}">
+              <span>Enrol Now</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Re-bind modal triggers for newly created elements
+  rebindModalButtons();
+  initProgramFilter();
+}
+
+function rebindModalButtons() {
+  document.querySelectorAll('[data-open-modal]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      const type = btn.dataset.openModal;
+      const course = btn.dataset.course || '';
+      if (typeof window.openEnquiryModal === 'function') {
+        window.openEnquiryModal(course, type === 'syllabus');
+      }
+    };
+  });
+}
+
+function populateCourseDropdowns(programs) {
+  const dropdownIds = ['hq-course', 'main-course', 'modal-course'];
+  dropdownIds.forEach(id => {
+    const select = document.getElementById(id);
+    if (!select) return;
+
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">Select a training program</option>' + 
+      programs.map(p => `<option value="${escapeHtmlApp(p.title)}">${escapeHtmlApp(p.title)}</option>`).join('');
+    
+    if (currentVal) select.value = currentVal;
+  });
+}
+
+function escapeHtmlApp(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

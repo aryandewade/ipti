@@ -895,3 +895,279 @@ td {
     padding: 20px 14px;
   }
 }
+
+
+/* ==========================================================================
+   PROGRAM MANAGEMENT & ANALYTICS STYLES
+   ========================================================================== */
+
+/* Navigation Tabs Bar */
+.admin-tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 10px 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.tab-nav-btn {
+  background: none;
+  border: 1px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.tab-nav-btn:hover {
+  color: var(--primary);
+  background: var(--bg-recessed);
+}
+
+.tab-nav-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(15, 67, 50, 0.22);
+}
+
+/* Section Header for Programs */
+.programs-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.programs-view-header h2 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.programs-view-header p {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+/* Program Analytics Components */
+.program-analytics-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 26px 28px;
+  margin-bottom: 30px;
+  box-shadow: 0 6px 20px -4px rgba(15, 45, 34, 0.04);
+}
+
+.analytics-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 14px;
+}
+
+.analytics-header-row h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analytics-prog-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.analytics-prog-row:last-child {
+  margin-bottom: 0;
+}
+
+.analytics-prog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.analytics-prog-bar-track {
+  width: 100%;
+  height: 10px;
+  background: var(--bg-recessed);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.analytics-prog-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, #0F4332 0%, #1a634b 65%, #c5a059 100%);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prog-modes-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.prog-mode-pill {
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+}
+
+/* Admin Programs Management Grid */
+.admin-programs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.admin-program-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(15, 45, 34, 0.03);
+}
+
+.admin-program-card:hover {
+  border-color: rgba(197, 160, 89, 0.45);
+  box-shadow: 0 12px 30px -4px rgba(15, 45, 34, 0.08);
+}
+
+.admin-program-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.admin-prog-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--primary-subtle);
+  color: var(--primary);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-prog-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-program-card h3 {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+.admin-program-card p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  flex-grow: 1;
+}
+
+.admin-prog-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  font-size: 0.78rem;
+}
+
+.admin-prog-specs strong {
+  color: var(--primary);
+}
+
+.admin-prog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Program Modal */
+#programModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 26, 20, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#programModal.open {
+  display: flex !important;
+}
+
+.program-modal-card {
+  background: #ffffff;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  max-width: 620px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 1024px) {
+  .admin-programs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-programs-grid {
+    grid-template-columns: 1fr;
+  }
+}

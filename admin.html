@@ -83,98 +83,158 @@
       </div>
     </header>
 
+    <!-- Top Tabs Navigation -->
+    <nav class="admin-tabs-nav">
+      <button id="tabNavEnquiries" class="tab-nav-btn active">
+        <i class="fa-solid fa-users"></i>
+        <span>Enquiries CRM</span>
+      </button>
+      <button id="tabNavPrograms" class="tab-nav-btn">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>Training Programs & Analytics</span>
+      </button>
+    </nav>
+
     <!-- Main Dashboard -->
     <main class="dashboard-container">
       
-      <!-- KPI Stats Grid -->
-      <section class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-card-top">
-            <span class="stat-card-title">Total Enquiries</span>
-            <div class="stat-icon total"><i class="fa-solid fa-folder-open"></i></div>
-          </div>
-          <div class="stat-card-value" id="statTotal">--</div>
-          <span class="stat-card-sub">All-time registered leads</span>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-card-top">
-            <span class="stat-card-title">Received Today</span>
-            <div class="stat-icon today"><i class="fa-solid fa-calendar-day"></i></div>
-          </div>
-          <div class="stat-card-value" id="statToday">--</div>
-          <span class="stat-card-sub">New leads in last 24h</span>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-card-top">
-            <span class="stat-card-title">Active Programs</span>
-            <div class="stat-icon enrolled"><i class="fa-solid fa-graduation-cap"></i></div>
-          </div>
-          <div class="stat-card-value" id="statPrograms" style="color: var(--primary);">--</div>
-          <span class="stat-card-sub">Training tracks available</span>
-        </div>
-      </section>
-
-      <!-- Controls Toolbar -->
-      <section class="controls-toolbar">
-        <div class="toolbar-filters">
-          <div class="search-input-wrap">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="Search by name, phone, email, tracking ID...">
+      <!-- =====================================================================
+           VIEW 1: ENQUIRIES CRM
+           ===================================================================== -->
+      <div id="viewEnquiries">
+        <!-- KPI Stats Grid -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Total Enquiries</span>
+              <div class="stat-icon total"><i class="fa-solid fa-folder-open"></i></div>
+            </div>
+            <div class="stat-card-value" id="statTotal">--</div>
+            <span class="stat-card-sub">All-time registered leads</span>
           </div>
 
-          <select id="courseFilter" class="filter-select">
-            <option value="All">All Programs</option>
-            <option value="Industrial Automation">Industrial Automation (PLC/SCADA)</option>
-            <option value="Embedded Systems">Embedded Systems & IoT</option>
-            <option value="CAD/CAM">CAD/CAM & Mechanical</option>
-            <option value="Full-Stack">Full-Stack Software</option>
-            <option value="AI, Machine Learning">AI & Computer Vision</option>
-            <option value="Electric Vehicle">Electric Vehicle (EV) BMS</option>
-          </select>
-        </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Received Today</span>
+              <div class="stat-icon today"><i class="fa-solid fa-calendar-day"></i></div>
+            </div>
+            <div class="stat-card-value" id="statToday">--</div>
+            <span class="stat-card-sub">New leads in last 24h</span>
+          </div>
 
-        <div class="toolbar-actions">
-          <button id="exportCsvBtn" class="btn-csv-export">
-            <i class="fa-solid fa-file-excel"></i>
-            <span>Export CSV</span>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Active Programs</span>
+              <div class="stat-icon enrolled"><i class="fa-solid fa-graduation-cap"></i></div>
+            </div>
+            <div class="stat-card-value" id="statPrograms" style="color: var(--primary);">--</div>
+            <span class="stat-card-sub">Training tracks available</span>
+          </div>
+        </section>
+
+        <!-- Controls Toolbar -->
+        <section class="controls-toolbar">
+          <div class="toolbar-filters">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchInput" placeholder="Search by name, phone, email, tracking ID...">
+            </div>
+
+            <select id="courseFilter" class="filter-select">
+              <option value="All">All Programs</option>
+              <option value="Industrial Automation">Industrial Automation (PLC/SCADA)</option>
+              <option value="Embedded Systems">Embedded Systems & IoT</option>
+              <option value="CAD/CAM">CAD/CAM & Mechanical</option>
+              <option value="Full-Stack">Full-Stack Software</option>
+              <option value="AI, Machine Learning">AI & Computer Vision</option>
+              <option value="Electric Vehicle">Electric Vehicle (EV) BMS</option>
+            </select>
+          </div>
+
+          <div class="toolbar-actions">
+            <button id="exportCsvBtn" class="btn-csv-export">
+              <i class="fa-solid fa-file-excel"></i>
+              <span>Export CSV</span>
+            </button>
+
+            <button id="refreshBtn" class="btn-refresh" title="Refresh data">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Enquiries Table -->
+        <section class="table-card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Candidate Details</th>
+                  <th>Program & Mode</th>
+                  <th>Reference & Date</th>
+                  <th>Direct Outreach</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="enquiriesTableBody">
+                <!-- Dynamically rendered -->
+                <tr>
+                  <td colspan="5">
+                    <div class="empty-state">
+                      <i class="fa-solid fa-spinner fa-spin"></i>
+                      <p>Loading enquiries from database...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 2: TRAINING PROGRAMS & ANALYTICS
+           ===================================================================== -->
+      <div id="viewPrograms" class="hidden">
+        
+        <!-- Header & Action Row -->
+        <div class="programs-view-header">
+          <div>
+            <h2>Training Programs & Lead Analytics</h2>
+            <p>Add and manage programs that appear live on the website, and view student interest analytics.</p>
+          </div>
+          <button id="openAddProgramBtn" class="btn-csv-export" style="padding: 10px 20px; font-size: 0.88rem;">
+            <i class="fa-solid fa-circle-plus"></i>
+            <span>Add New Training Program</span>
           </button>
-
-          <button id="refreshBtn" class="btn-refresh" title="Refresh data">
-            <i class="fa-solid fa-rotate"></i>
-            <span>Refresh</span>
-          </button>
         </div>
-      </section>
 
-      <!-- Enquiries Table -->
-      <section class="table-card">
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Candidate Details</th>
-                <th>Program & Mode</th>
-                <th>Reference & Date</th>
-                <th>Direct Outreach</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="enquiriesTableBody">
-              <!-- Dynamically rendered -->
-              <tr>
-                <td colspan="5">
-                  <div class="empty-state">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    <p>Loading enquiries from database...</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Program-wise Analytics Card -->
+        <section class="program-analytics-card">
+          <div class="analytics-header-row">
+            <h3><i class="fa-solid fa-chart-pie" style="color: var(--accent-gold);"></i> Program Interest & Enquiry Distribution</h3>
+            <span id="analyticsSummaryTag" style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); background: var(--bg-recessed); padding: 4px 12px; border-radius: var(--radius-full);">Loading Analytics...</span>
+          </div>
+
+          <!-- Dynamic Analytics Bars Container -->
+          <div id="programAnalyticsList">
+            <p style="color: var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> Calculating program analytics...</p>
+          </div>
+        </section>
+
+        <!-- Active Programs Grid -->
+        <div style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary);">Live Programs Displayed on Website</h3>
+          <span id="activeProgramsCountBadge" style="font-size: 0.78rem; font-weight: 700; color: var(--primary); background: var(--primary-subtle); padding: 3px 10px; border-radius: var(--radius-full);">6 Active Courses</span>
         </div>
-      </section>
+
+        <div class="admin-programs-grid" id="adminProgramsGrid">
+          <!-- Dynamically populated -->
+        </div>
+
+      </div>
+
     </main>
   </div>
 
@@ -244,6 +304,83 @@
 
         <button class="btn-refresh" id="closeModalBottomBtn">Close Dossier</button>
       </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       04. ADD / EDIT TRAINING PROGRAM MODAL
+       ========================================================================= -->
+  <div id="programModal">
+    <div class="program-modal-card">
+      <button class="detail-modal-close" id="closeProgramModalBtn">&times;</button>
+      
+      <div class="detail-modal-header">
+        <div style="font-size: 0.76rem; font-weight: 700; color: var(--accent-gold); text-transform: uppercase; margin-bottom: 4px;">COURSE ARCHITECT</div>
+        <h3 id="programModalHeading">Add New Training Program</h3>
+        <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">Changes saved here reflect live on the website programs section & enquiry dropdowns.</p>
+      </div>
+
+      <form id="programForm">
+        <input type="hidden" id="progFormId">
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Program Title *</label>
+          <input type="text" id="progFormTitle" placeholder="e.g. Robotics & Autonomous Systems" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Category *</label>
+            <select id="progFormCategory" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+              <option value="automation">Automation & Robotics</option>
+              <option value="embedded">Embedded & IoT</option>
+              <option value="mechanical">Mechanical CAD/CAM</option>
+              <option value="software">Software & AI</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Badge Label</label>
+            <input type="text" id="progFormBadge" placeholder="e.g. Frontier Tech / Core" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Duration</label>
+            <input type="text" id="progFormDuration" placeholder="e.g. 4 Months" value="4 Months" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Lab Hours</label>
+            <input type="text" id="progFormLabHours" placeholder="e.g. 120+ Hrs Lab" value="120+ Hrs Lab" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Learning Mode</label>
+            <input type="text" id="progFormMode" placeholder="e.g. Classroom / Hybrid" value="Classroom / Hybrid" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Certification / Standard</label>
+          <input type="text" id="progFormCredentials" placeholder="e.g. ISO 9001:2015 / Production Portfolio" value="ISO Certification" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Program Description *</label>
+          <textarea id="progFormDesc" rows="3" placeholder="Brief outline of syllabus, target outcomes, and hands-on deliverables..." required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Key Technologies & Tools (Comma-separated)</label>
+          <input type="text" id="progFormTags" placeholder="e.g. ROS2, Python, C++, SLAM, Gazebo" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" id="cancelProgramModalBtn" class="btn-refresh">Cancel</button>
+          <button type="submit" id="saveProgramSubmitBtn" class="btn-csv-export" style="padding: 10px 24px;">
+            <span>Save & Publish Program</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

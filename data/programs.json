@@ -1,0 +1,128 @@
+[
+  {
+    "id": "prog_automation_1",
+    "title": "Industrial Automation & Robotics (PLC/SCADA)",
+    "category": "automation",
+    "badge": "Core Automation",
+    "icon": "fa-gears",
+    "description": "Comprehensive hands-on training on Siemens, Allen-Bradley, Mitsubishi PLCs, SCADA visualization, VFD drives, panel designing, and Industrial IoT integration.",
+    "duration": "4 Months",
+    "labHours": "120+ Hrs Lab",
+    "mode": "Classroom / Hybrid",
+    "credentials": "ISO Certification",
+    "techTags": [
+      "Siemens TIA Portal",
+      "Wonderware SCADA",
+      "VFD & Servo",
+      "Robotics PLC"
+    ],
+    "active": true,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
+  },
+  {
+    "id": "prog_embedded_2",
+    "title": "Embedded Systems & IoT Engineering",
+    "category": "embedded",
+    "badge": "Hardware & Firmware",
+    "icon": "fa-microchip",
+    "description": "From bare-metal C programming to FreeRTOS on 32-bit ARM Cortex-M microcontrollers, PCB design in KiCAD, communication protocols (CAN, I2C, SPI), and cloud IoT telemetry.",
+    "duration": "4 Months",
+    "labHours": "130+ Hrs Lab",
+    "mode": "Classroom / Hybrid",
+    "credentials": "4 Hardware Comps",
+    "techTags": [
+      "STM32 / ARM",
+      "FreeRTOS",
+      "Embedded C",
+      "MQTT / BLE"
+    ],
+    "active": true,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
+  },
+  {
+    "id": "prog_mechanical_3",
+    "title": "CAD / CAM & Mechanical Product Design",
+    "category": "mechanical",
+    "badge": "Product Engineering",
+    "icon": "fa-cube",
+    "description": "Master parametric 3D solid modeling, sheet metal, surface modeling, GD&T standards, plastic part design, and finite element stress analysis using Dassault & Autodesk tools.",
+    "duration": "3 Months",
+    "labHours": "100+ Hrs CAD",
+    "mode": "Studio Lab",
+    "credentials": "ASME Y14.5",
+    "techTags": [
+      "SolidWorks",
+      "CATIA V5",
+      "Ansys FEA",
+      "GD&T"
+    ],
+    "active": true,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
+  },
+  {
+    "id": "prog_software_4",
+    "title": "Full-Stack Software Engineering",
+    "category": "software",
+    "badge": "Modern Web & Cloud",
+    "icon": "fa-code",
+    "description": "Full-cycle engineering covering modern JavaScript/TypeScript, React 19, Node.js microservices, PostgreSQL relational modeling, Docker containers, and CI/CD pipelines.",
+    "duration": "4 Months",
+    "labHours": "140+ Hrs Coding",
+    "mode": "Online / Offline",
+    "credentials": "Production SaaS",
+    "techTags": [
+      "React & Next.js",
+      "Node / Express",
+      "PostgreSQL",
+      "AWS Cloud"
+    ],
+    "active": true,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
+  },
+  {
+    "id": "prog_ai_5",
+    "title": "AI, Machine Learning & Vision Systems",
+    "category": "software",
+    "badge": "Frontier Technology",
+    "icon": "fa-brain",
+    "description": "Practical deep learning, computer vision for industrial defect detection, PyTorch neural networks, edge inference on NVIDIA Jetson, and modern generative AI models.",
+    "duration": "3.5 Months",
+    "labHours": "110+ Hrs",
+    "mode": "Live Interactive",
+    "credentials": "PyTorch & OpenCV",
+    "techTags": [
+      "Python 3.11",
+      "PyTorch",
+      "OpenCV",
+      "Edge AI"
+    ],
+    "active": true,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
+  },
+  {
+    "id": "prog_ev_6",
+    "title": "Electric Vehicle (EV) Systems & BMS",
+    "category": "mechanical",
+    "badge": "Green Mobility",
+    "icon": "fa-car-battery",
+    "description": "Battery pack configuration, thermal management systems, Battery Management System (BMS) logic development, traction motor controls, and MATLAB/Simulink simulations.",
+    "duration": "3 Months",
+    "labHours": "90+ Hrs",
+    "mode": "Classroom / Hybrid",
+    "credentials": "MATLAB / Simulink",
+    "techTags": [
+      "EV Architecture",
+      "BMS Hardware",
+      "CAN Protocol",
+      "Motor Inverters"
+    ],
+    "active": true,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
+  }
+]
