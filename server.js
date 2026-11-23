@@ -19,8 +19,9 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ipti@admin2026';
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || 'ipti_secure_jwt_secret_token_2026';
 
-// Ensure data storage directory exists
-const dataDir = path.join(__dirname, 'data');
+// Ensure data storage directory exists (supports local disk or Vercel serverless /tmp)
+const isVercel = Boolean(process.env.VERCEL || process.env.NOW_REGION);
+const dataDir = isVercel ? '/tmp' : path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
@@ -508,12 +509,16 @@ app.get('/api/enquiries/export/csv', (req, res) => {
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`  IPTI Official Portal & Server Running on Port ${PORT}`);
-  console.log(`  Frontend: http://localhost:${PORT}`);
-  console.log(`  Admin Portal: http://localhost:${PORT}/admin.html`);
-  console.log(`  Health API: http://localhost:${PORT}/api/health`);
-  console.log(`=======================================================`);
-});
+// Start Server (when running locally / standalone)
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`  IPTI Official Portal & Server Running on Port ${PORT}`);
+    console.log(`  Frontend: http://localhost:${PORT}`);
+    console.log(`  Admin Portal: http://localhost:${PORT}/admin.html`);
+    console.log(`  Health API: http://localhost:${PORT}/api/health`);
+    console.log(`=======================================================`);
+  });
+}
+
+export default app;
