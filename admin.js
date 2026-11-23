@@ -583,27 +583,90 @@ async function fetchProgramAnalytics() {
   const summaryTag = document.getElementById('analyticsSummaryTag');
 
   try {
-    const res = await fetch('/api/programs/analytics', {
-      headers: { 'Authorization': `Bearer ${currentToken}` }
-    });
+    const headers = {};
+    if (currentToken) {
+      headers['Authorization'] = `Bearer ${currentToken}`;
+    }
+    const res = await fetch('/api/programs/analytics', { headers });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.analytics) {
+        const a = data.analytics;
+        if (summaryTag && a.topProgram && a.topProgram.count > 0) {
+          summaryTag.innerText = `Top Demand: ${a.topProgram.title} (${a.topProgram.count} enquiries)`;
+        } else if (summaryTag) {
+          summaryTag.innerText = `${a.totalPrograms || 6} Courses Tracked`;
+        }
 
-    const data = await res.json();
-    if (data.success && data.analytics) {
-      const a = data.analytics;
-      if (summaryTag && a.topProgram) {
-        summaryTag.innerText = `Top Demand: ${a.topProgram.title} (${a.topProgram.count} enquiries)`;
+        renderProgramAnalytics(a.programsBreakdown || [], a.totalEnquiries || 0);
+        return;
       }
-
-      renderProgramAnalytics(a.programsBreakdown || [], a.totalEnquiries || 0);
     }
   } catch (err) {
-    console.warn('Analytics fetch error:', err);
-    if (container) {
-      container.innerHTML = '<p style="color: var(--text-dim); font-size: 0.85rem;">Analytics calculated on local enquiry data.</p>';
-    }
+    console.warn('Analytics fetch error, falling back to client computation:', err);
   }
+
+  // Client-side fallback calculation from memory cache
+  computeLocalAnalytics();
+}
+
+function computeLocalAnalytics() {
+  const container = document.getElementById('programAnalyticsList');
+  const summaryTag = document.getElementById('analyticsSummaryTag');
+  if (!container) return;
+
+  const programs = allProgramsCache && allProgramsCache.length > 0 ? allProgramsCache : [
+    { title: "Industrial Automation & Robotics (PLC/SCADA)", category: "automation" },
+    { title: "Embedded Systems & IoT Engineering", category: "embedded" },
+    { title: "CAD/CAM & Mechanical Product Design", category: "mechanical" },
+    { title: "Full-Stack Software Engineering", category: "software" },
+    { title: "AI, Machine Learning & Vision Systems", category: "software" },
+    { title: "Electric Vehicle (EV) Systems & BMS", category: "mechanical" }
+  ];
+
+  const enquiries = Array.isArray(allEnquiriesCache) ? allEnquiriesCache : [];
+  const total = enquiries.length;
+
+  const breakdown = programs.map(p => {
+    const pTitle = (p.title || '').toLowerCase();
+    const matching = enquiries.filter(e => {
+      const c = (e.course || '').toLowerCase();
+      return c.includes(pTitle) || pTitle.includes(c) ||
+             (pTitle.includes('automation') && c.includes('automation')) ||
+             (pTitle.includes('embedded') && c.includes('embedded')) ||
+             (pTitle.includes('cad') && (c.includes('cad') || c.includes('mechanical'))) ||
+             (pTitle.includes('full-stack') && (c.includes('full-stack') || c.includes('software'))) ||
+             (pTitle.includes('ai') && (c.includes('ai') || c.includes('machine learning'))) ||
+             (pTitle.includes('electric vehicle') && (c.includes('electric') || c.includes('ev')));
+    });
+
+    const count = matching.length;
+    const share = total > 0 ? Math.round((count / total) * 100) : 0;
+    const modes = {
+      classroom: matching.filter(e => (e.learningMode || '').toLowerCase().includes('classroom')).length,
+      online: matching.filter(e => (e.learningMode || '').toLowerCase().includes('online')).length,
+      hybrid: matching.filter(e => (e.learningMode || '').toLowerCase().includes('hybrid') || (e.learningMode || '').toLowerCase().includes('weekend')).length
+    };
+
+    return {
+      title: p.title,
+      category: p.category,
+      enquiriesCount: count,
+      sharePercentage: share,
+      modes
+    };
+  });
+
+  breakdown.sort((a, b) => b.enquiriesCount - a.enquiriesCount);
+
+  if (summaryTag && breakdown[0] && breakdown[0].enquiriesCount > 0) {
+    summaryTag.innerText = `Top Demand: ${breakdown[0].title} (${breakdown[0].enquiriesCount} leads)`;
+  } else if (summaryTag) {
+    summaryTag.innerText = `${programs.length} Courses Tracked`;
+  }
+
+  renderProgramAnalytics(breakdown, total);
 }
 
 function renderProgramAnalytics(breakdown, total) {
@@ -630,7 +693,7 @@ function renderProgramAnalytics(breakdown, total) {
         </div>
 
         <div class="analytics-prog-bar-track">
-          <div class="analytics-prog-bar-fill" style="width: ${Math.max(percent, count > 0 ? 6 : 0)}%;"></div>
+          <div class="analytics-prog-bar-fill" style="width: ${Math.max(percent, count > 0 ? 8 : 0)}%;"></div>
         </div>
 
         <div class="prog-modes-badge-row">

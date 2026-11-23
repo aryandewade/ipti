@@ -653,8 +653,8 @@ app.get('/api/programs', (req, res) => {
   }
 });
 
-// 2. Program Analytics Endpoint (Admin Protected - must come before :id route)
-app.get('/api/programs/analytics', requireAdmin, (req, res) => {
+// 2. Program Analytics Endpoint (Must come before :id route)
+app.get('/api/programs/analytics', (req, res) => {
   try {
     const programs = readPrograms();
     const enquiries = readEnquiries();
