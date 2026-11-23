@@ -483,23 +483,57 @@ function initViewTabs() {
   const tabPrograms = document.getElementById('tabNavPrograms');
   const viewEnquiries = document.getElementById('viewEnquiries');
   const viewPrograms = document.getElementById('viewPrograms');
+  const statCardPrograms = document.getElementById('statCardPrograms');
 
   if (!tabEnquiries || !tabPrograms) return;
 
-  tabEnquiries.addEventListener('click', () => {
+  function showEnquiriesView() {
     tabEnquiries.classList.add('active');
     tabPrograms.classList.remove('active');
     viewEnquiries.classList.remove('hidden');
     viewPrograms.classList.add('hidden');
-  });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-  tabPrograms.addEventListener('click', () => {
+  function showProgramsView(scrollToAnalytics = true) {
     tabPrograms.classList.add('active');
     tabEnquiries.classList.remove('active');
     viewPrograms.classList.remove('hidden');
     viewEnquiries.classList.add('hidden');
+    
+    // Refresh latest programs & analytics
     fetchPrograms();
     fetchProgramAnalytics();
+
+    // Smooth scroll directly to the Analytics section
+    setTimeout(() => {
+      const analyticsSection = document.getElementById('programAnalyticsSection') || viewPrograms;
+      if (analyticsSection && scrollToAnalytics) {
+        analyticsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 60);
+  }
+
+  tabEnquiries.addEventListener('click', showEnquiriesView);
+  tabPrograms.addEventListener('click', () => showProgramsView(true));
+
+  if (statCardPrograms) {
+    statCardPrograms.addEventListener('click', () => showProgramsView(true));
+  }
+
+  // Support direct hash routing
+  if (window.location.hash === '#programs' || window.location.hash === '#analytics') {
+    showProgramsView(true);
+  }
+
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#programs' || window.location.hash === '#analytics') {
+      showProgramsView(true);
+    } else if (window.location.hash === '#enquiries') {
+      showEnquiriesView();
+    }
   });
 }
 
