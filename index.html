@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTI | Institute of Professional Training & Innovation</title>
+  <meta name="description" content="IPTI - Institute of Professional Training & Innovation. Leading training institute for Industrial Automation, Embedded Systems, CAD/CAM Design, Software Engineering & AI.">
+  <meta name="keywords" content="IPTI, Institute of Professional Training and Innovation, PLC training, Embedded systems, CAD CAM, Mechanical engineering course, Industrial automation, Full stack development">
+  
+  <!-- OpenGraph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="IPTI — Institute of Professional Training & Innovation">
+  <meta property="og:description" content="Master cutting-edge industry technologies with 100% hands-on lab training, live capstone projects, and guaranteed placement mentorship.">
+  <meta property="og:image" content="assets/ipti-logo.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="assets/ipti-logo.jpg">
+
+  <!-- Google Fonts Preconnect & Stylesheet -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Subtle Architectural Grid Background & Radiant Glows -->
+  <div class="bg-grid-overlay"></div>
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+  <div class="ambient-glow-3"></div>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-ticker-bar" aria-label="Announcement">
+    <span class="ticker-highlight">⭐ 2026 ADMISSIONS OPEN</span>
+    <span>Upcoming Professional Cohort starts in: <strong id="timerDays">05</strong>d <strong id="timerHours">14</strong>h <strong id="timerMins">28</strong>m <strong id="timerSecs">12</strong>s</span>
+    <span>• 100% Placement Support & Merit Scholarships Available</span>
+    <a href="#enquiry-form-section" class="ticker-link" data-open-modal="enquiry">Enquire Now ↗</a>
+  </aside>
+
+  <!-- Floating Island Navigation (Studio White-Glass) -->
+  <div class="floating-navbar-container">
+    <nav class="floating-navbar" aria-label="Main Navigation">
+      <a href="#" class="nav-brand">
+        <img src="assets/ipti-logo.jpg" alt="IPTI Crest Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <span class="brand-name">IPTI <span class="brand-name-tag">INSTITUTE</span></span>
+          <span class="brand-tagline">Training & Innovation</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#overview" class="nav-link active">Overview</a></li>
+        <li><a href="#journey" class="nav-link">Journey</a></li>
+        <li><a href="#programs" class="nav-link">Programs</a></li>
+        <li><a href="#methodology" class="nav-link">Methodology</a></li>
+        <li><a href="#placements" class="nav-link">Placements</a></li>
+        <li><a href="#faq" class="nav-link">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn btn-secondary" data-open-modal="syllabus">
+          <i class="fa-solid fa-file-arrow-down"></i>
+          <span>Brochure</span>
+        </button>
+        <button class="btn btn-primary" data-open-modal="enquiry">
+          <span>Apply Now</span>
+          <div class="btn-icon-wrapper">
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </button>
+      </div>
+
+      <button class="nav-mobile-toggle" id="mobileMenuToggle" aria-label="Toggle Menu">
+        <i class="fa-solid fa-bars fa-lg"></i>
+      </button>
+    </nav>
+  </div>
+
+  <!-- =========================================================================
+       HERO SECTION
+       ========================================================================= -->
+  <section class="section hero-section" id="overview">
+    <canvas id="heroCanvas"></canvas>
+    
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="eyebrow-pill">
+          <span class="pulse-dot"></span>
+          <span>ISO 9001:2015 CERTIFIED • INDUSTRY-ALIGNED TRAINING</span>
+        </div>
+
+        <h1 class="hero-title">
+          <span class="title-line">ELEVATING TALENT.</span>
+          <span class="title-line title-accent">ENGINEERING INNOVATION.</span>
+        </h1>
+
+        <p class="hero-description">
+          Bridging the gap between academic theory and real-world industrial demands. Master advanced Automation, Embedded Systems, Mechanical Design, and Software Engineering through immersive lab practice and corporate-grade projects.
+        </p>
+
+        <!-- Oma Mindly Interactive Training Prompt Box -->
+        <div class="hero-prompt-box">
+          <div class="prompt-box-top">
+            <span class="prompt-lead"><i class="fa-solid fa-bolt" style="color: var(--accent-gold);"></i> Master</span>
+            <span class="prompt-typing-text" id="promptTypingText">PLC, SCADA & Industrial Robotics automation...</span>
+          </div>
+          <div class="prompt-box-bottom">
+            <div class="prompt-tools-badges">
+              <span class="prompt-tool-pill">Siemens S7-1200</span>
+              <span class="prompt-tool-pill">STM32 / ARM</span>
+              <span class="prompt-tool-pill">SolidWorks</span>
+              <span class="prompt-tool-pill">Python & AI</span>
+              <span class="prompt-tool-pill">Full Stack</span>
+            </div>
+            <button class="btn btn-gold" data-open-modal="enquiry" style="padding: 6px 14px; font-size: 0.76rem;">
+              <span>Explore Course</span>
+              <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="hero-metrics-pill-row">
+          <div class="metric-badge">
+            <span class="metric-num">100%</span>
+            <span class="metric-label">Hands-on Lab Practice</span>
+          </div>
+          <div class="metric-badge">
+            <span class="metric-num">15+</span>
+            <span class="metric-label">Capstone Projects</span>
+          </div>
+          <div class="metric-badge">
+            <span class="metric-num">500+</span>
+            <span class="metric-label">Hiring Partners</span>
+          </div>
+          <div class="metric-badge">
+            <span class="metric-num">4.9/5</span>
+            <span class="metric-label">Student Rating</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Quick Enquiry Double-Bezel Card -->
+      <div class="hero-card-bezel">
+        <div class="hero-card-inner">
+          <div class="hero-card-header">
+            <div class="hero-card-badge">
+              <i class="fa-solid fa-paper-plane"></i> Quick Registration
+            </div>
+            <h3>Book Free Career Counseling</h3>
+            <p>Connect with senior technical mentors for personalized career roadmaps and fee structures.</p>
+          </div>
+
+          <form class="quick-enquiry-form" id="heroQuickForm">
+            <div class="form-group">
+              <label for="hq-name">Full Name *</label>
+              <input type="text" id="hq-name" name="fullName" placeholder="e.g. Vikram Patil" required>
+            </div>
+
+            <div class="form-group">
+              <label for="hq-email">Email Address *</label>
+              <input type="email" id="hq-email" name="email" placeholder="e.g. vikram@example.com" required>
+            </div>
+
+            <div class="form-group">
+              <label for="hq-phone">Phone / WhatsApp *</label>
+              <input type="tel" id="hq-phone" name="phone" placeholder="e.g. +91 98765 43210" required>
+            </div>
+
+            <div class="form-group">
+              <label for="hq-course">Preferred Program *</label>
+              <select id="hq-course" name="course" required>
+                <option value="">Select a training program</option>
+                <option value="Industrial Automation & Robotics (PLC/SCADA)">Industrial Automation & Robotics (PLC/SCADA)</option>
+                <option value="Embedded Systems & IoT Engineering">Embedded Systems & IoT Engineering</option>
+                <option value="CAD/CAM & Mechanical Product Design">CAD/CAM & Mechanical Product Design</option>
+                <option value="Full-Stack Software Engineering">Full-Stack Software Engineering</option>
+                <option value="AI, Machine Learning & Computer Vision">AI, Machine Learning & Computer Vision</option>
+                <option value="Electric Vehicle (EV) Systems & BMS">Electric Vehicle (EV) Systems & BMS</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary quick-enquiry-submit">
+              <span>Submit Enquiry & Get Syllabus</span>
+              <div class="btn-icon-wrapper">
+                <i class="fa-solid fa-arrow-right"></i>
+              </div>
+            </button>
+            <p class="form-footnote">🔒 Your privacy is fully secured. We respond within 24 hours.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       02. 4-STAGE LEARNING JOURNEY
+       ========================================================================= -->
+  <section class="journey-strip-section" id="journey">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">STRUCTURED ROADMAP</span>
+        <h2 class="section-title">The IPTI Learning Architecture</h2>
+        <p class="section-subtitle">A proven 4-stage pedagogical framework engineered to transform ambitious learners into industry-ready engineers.</p>
+      </div>
+
+      <div class="journey-steps-grid">
+        <div class="journey-step-card">
+          <div class="journey-step-number">01</div>
+          <h4>Core Foundations & Architecture</h4>
+          <p>Master engineering mathematics, system diagrams, hardware architectures, and fundamental protocols with zero guesswork.</p>
+        </div>
+
+        <div class="journey-step-card">
+          <div class="journey-step-number">02</div>
+          <h4>Hands-On Lab Mastery</h4>
+          <p>Work directly on industry-grade hardware benches, PLCs, microcontrollers, CAD workstations, and modern cloud deployment environments.</p>
+        </div>
+
+        <div class="journey-step-card">
+          <div class="journey-step-number">03</div>
+          <h4>Industrial Capstone Execution</h4>
+          <p>Build real-world client-spec projects with rigorous testing, GD&T standards, code reviews, and industry mentor validations.</p>
+        </div>
+
+        <div class="journey-step-card">
+          <div class="journey-step-number">04</div>
+          <h4>Placement & Career Launch</h4>
+          <p>Comprehensive resume engineering, GitHub/Portfolio staging, mock technical panels, and direct interview scheduling with hiring partners.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       03. FLAGSHIP PROFESSIONAL PROGRAMS
+       ========================================================================= -->
+  <section class="programs-section" id="programs">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">CAREER-DEFINING SPECIALIZATIONS</span>
+        <h2 class="section-title">Industry-Recognized Training Programs</h2>
+        <p class="section-subtitle">Curated by veteran engineering practitioners to match immediate hiring needs across manufacturing, tech, and automation sectors.</p>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="program-category-tabs">
+        <button class="program-tab-btn active" data-filter="all">All Programs</button>
+        <button class="program-tab-btn" data-filter="automation">Automation & Robotics</button>
+        <button class="program-tab-btn" data-filter="embedded">Embedded & IoT</button>
+        <button class="program-tab-btn" data-filter="mechanical">Mechanical CAD/CAM</button>
+        <button class="program-tab-btn" data-filter="software">Software & AI</button>
+      </div>
+
+      <!-- Programs Grid -->
+      <div class="programs-grid">
+        
+        <!-- Program 1 -->
+        <div class="program-card" data-category="automation">
+          <div class="program-card-inner">
+            <span class="program-card-badge"><i class="fa-solid fa-gears"></i> Core Automation</span>
+            <h3>Industrial Automation & Robotics (PLC/SCADA)</h3>
+            <p class="program-card-desc">
+              Comprehensive hands-on training on Siemens, Allen-Bradley, Mitsubishi PLCs, SCADA visualization, VFD drives, panel designing, and Industrial IoT integration.
+            </p>
+            <div class="program-specs-grid">
+              <div class="spec-item">
+                <span class="spec-item-label">Duration</span>
+                <span class="spec-item-val">4 Months</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Lab Hours</span>
+                <span class="spec-item-val">120+ Hrs Lab</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Mode</span>
+                <span class="spec-item-val">Classroom / Hybrid</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Credentials</span>
+                <span class="spec-item-val">ISO Certification</span>
+              </div>
+            </div>
+            <div class="program-tech-tags">
+              <span class="tech-tag">Siemens TIA Portal</span>
+              <span class="tech-tag">Wonderware SCADA</span>
+              <span class="tech-tag">VFD & Servo</span>
+              <span class="tech-tag">Robotics PLC</span>
+            </div>
+            <div class="program-card-cta">
+              <button class="btn btn-secondary" data-open-modal="syllabus" data-course="Industrial Automation & Robotics">
+                <span>Syllabus</span>
+              </button>
+              <button class="btn btn-primary" data-open-modal="enquiry" data-course="Industrial Automation & Robotics">
+                <span>Enrol Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Program 2 -->
+        <div class="program-card" data-category="embedded">
+          <div class="program-card-inner">
+            <span class="program-card-badge"><i class="fa-solid fa-microchip"></i> Hardware & Firmware</span>
+            <h3>Embedded Systems & IoT Engineering</h3>
+            <p class="program-card-desc">
+              From bare-metal C programming to FreeRTOS on 32-bit ARM Cortex-M microcontrollers, PCB design in KiCAD, communication protocols (CAN, I2C, SPI), and cloud IoT telemetry.
+            </p>
+            <div class="program-specs-grid">
+              <div class="spec-item">
+                <span class="spec-item-label">Duration</span>
+                <span class="spec-item-val">4 Months</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Lab Hours</span>
+                <span class="spec-item-val">130+ Hrs Lab</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Mode</span>
+                <span class="spec-item-val">Classroom / Hybrid</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Projects</span>
+                <span class="spec-item-val">4 Hardware Comps</span>
+              </div>
+            </div>
+            <div class="program-tech-tags">
+              <span class="tech-tag">STM32 / ARM</span>
+              <span class="tech-tag">FreeRTOS</span>
+              <span class="tech-tag">Embedded C</span>
+              <span class="tech-tag">MQTT / BLE</span>
+            </div>
+            <div class="program-card-cta">
+              <button class="btn btn-secondary" data-open-modal="syllabus" data-course="Embedded Systems & IoT Engineering">
+                <span>Syllabus</span>
+              </button>
+              <button class="btn btn-primary" data-open-modal="enquiry" data-course="Embedded Systems & IoT Engineering">
+                <span>Enrol Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Program 3 -->
+        <div class="program-card" data-category="mechanical">
+          <div class="program-card-inner">
+            <span class="program-card-badge"><i class="fa-solid fa-cube"></i> Product Engineering</span>
+            <h3>CAD / CAM & Mechanical Product Design</h3>
+            <p class="program-card-desc">
+              Master parametric 3D solid modeling, sheet metal, surface modeling, GD&T standards, plastic part design, and finite element stress analysis using Dassault & Autodesk tools.
+            </p>
+            <div class="program-specs-grid">
+              <div class="spec-item">
+                <span class="spec-item-label">Duration</span>
+                <span class="spec-item-val">3 Months</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Lab Hours</span>
+                <span class="spec-item-val">100+ Hrs CAD</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Mode</span>
+                <span class="spec-item-val">Studio Lab</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Standard</span>
+                <span class="spec-item-val">ASME Y14.5</span>
+              </div>
+            </div>
+            <div class="program-tech-tags">
+              <span class="tech-tag">SolidWorks</span>
+              <span class="tech-tag">CATIA V5</span>
+              <span class="tech-tag">Ansys FEA</span>
+              <span class="tech-tag">GD&T</span>
+            </div>
+            <div class="program-card-cta">
+              <button class="btn btn-secondary" data-open-modal="syllabus" data-course="CAD/CAM & Mechanical Product Design">
+                <span>Syllabus</span>
+              </button>
+              <button class="btn btn-primary" data-open-modal="enquiry" data-course="CAD/CAM & Mechanical Product Design">
+                <span>Enrol Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Program 4 -->
+        <div class="program-card" data-category="software">
+          <div class="program-card-inner">
+            <span class="program-card-badge"><i class="fa-solid fa-code"></i> Modern Web & Cloud</span>
+            <h3>Full-Stack Software Engineering</h3>
+            <p class="program-card-desc">
+              Full-cycle engineering covering modern JavaScript/TypeScript, React 19, Node.js microservices, PostgreSQL relational modeling, Docker containers, and CI/CD pipelines.
+            </p>
+            <div class="program-specs-grid">
+              <div class="spec-item">
+                <span class="spec-item-label">Duration</span>
+                <span class="spec-item-val">4 Months</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Lab Hours</span>
+                <span class="spec-item-val">140+ Hrs Coding</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Mode</span>
+                <span class="spec-item-val">Online / Offline</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Deliverable</span>
+                <span class="spec-item-val">Production SaaS</span>
+              </div>
+            </div>
+            <div class="program-tech-tags">
+              <span class="tech-tag">React & Next.js</span>
+              <span class="tech-tag">Node / Express</span>
+              <span class="tech-tag">PostgreSQL</span>
+              <span class="tech-tag">AWS Cloud</span>
+            </div>
+            <div class="program-card-cta">
+              <button class="btn btn-secondary" data-open-modal="syllabus" data-course="Full-Stack Software Engineering">
+                <span>Syllabus</span>
+              </button>
+              <button class="btn btn-primary" data-open-modal="enquiry" data-course="Full-Stack Software Engineering">
+                <span>Enrol Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Program 5 -->
+        <div class="program-card" data-category="software">
+          <div class="program-card-inner">
+            <span class="program-card-badge"><i class="fa-solid fa-brain"></i> Frontier Technology</span>
+            <h3>AI, Machine Learning & Vision Systems</h3>
+            <p class="program-card-desc">
+              Practical deep learning, computer vision for industrial defect detection, PyTorch neural networks, edge inference on NVIDIA Jetson, and modern generative AI models.
+            </p>
+            <div class="program-specs-grid">
+              <div class="spec-item">
+                <span class="spec-item-label">Duration</span>
+                <span class="spec-item-val">3.5 Months</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Lab Hours</span>
+                <span class="spec-item-val">110+ Hrs</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Mode</span>
+                <span class="spec-item-val">Live Interactive</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Framework</span>
+                <span class="spec-item-val">PyTorch & OpenCV</span>
+              </div>
+            </div>
+            <div class="program-tech-tags">
+              <span class="tech-tag">Python 3.11</span>
+              <span class="tech-tag">PyTorch</span>
+              <span class="tech-tag">OpenCV</span>
+              <span class="tech-tag">Edge AI</span>
+            </div>
+            <div class="program-card-cta">
+              <button class="btn btn-secondary" data-open-modal="syllabus" data-course="AI, Machine Learning & Computer Vision">
+                <span>Syllabus</span>
+              </button>
+              <button class="btn btn-primary" data-open-modal="enquiry" data-course="AI, Machine Learning & Computer Vision">
+                <span>Enrol Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Program 6 -->
+        <div class="program-card" data-category="mechanical">
+          <div class="program-card-inner">
+            <span class="program-card-badge"><i class="fa-solid fa-car-battery"></i> Green Mobility</span>
+            <h3>Electric Vehicle (EV) Systems & BMS</h3>
+            <p class="program-card-desc">
+              Battery pack configuration, thermal management systems, Battery Management System (BMS) logic development, traction motor controls, and MATLAB/Simulink simulations.
+            </p>
+            <div class="program-specs-grid">
+              <div class="spec-item">
+                <span class="spec-item-label">Duration</span>
+                <span class="spec-item-val">3 Months</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Lab Hours</span>
+                <span class="spec-item-val">90+ Hrs</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Mode</span>
+                <span class="spec-item-val">Classroom / Hybrid</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-item-label">Simulation</span>
+                <span class="spec-item-val">MATLAB / Simulink</span>
+              </div>
+            </div>
+            <div class="program-tech-tags">
+              <span class="tech-tag">EV Architecture</span>
+              <span class="tech-tag">BMS Hardware</span>
+              <span class="tech-tag">CAN Protocol</span>
+              <span class="tech-tag">Motor Inverters</span>
+            </div>
+            <div class="program-card-cta">
+              <button class="btn btn-secondary" data-open-modal="syllabus" data-course="Electric Vehicle (EV) Systems & BMS">
+                <span>Syllabus</span>
+              </button>
+              <button class="btn btn-primary" data-open-modal="enquiry" data-course="Electric Vehicle (EV) Systems & BMS">
+                <span>Enrol Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       04. METHODOLOGY & LAB INFRASTRUCTURE
+       ========================================================================= -->
+  <section class="methodology-section" id="methodology">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">EXPERIENTIAL LEARNING</span>
+        <h2 class="section-title">The IPTI Difference: Beyond Lectures</h2>
+        <p class="section-subtitle">We believe true technical competence comes from handling live hardware, running simulations, and debugging real faults.</p>
+      </div>
+
+      <div class="methodology-grid">
+        <div class="methodology-points">
+          <div class="methodology-point">
+            <div class="methodology-icon-box">
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+            </div>
+            <div class="methodology-text">
+              <h4>70% Practical Lab Immersion</h4>
+              <p>Every concept taught is immediately wired, coded, or drafted on actual industry training benches and high-performance CAD stations.</p>
+            </div>
+          </div>
+
+          <div class="methodology-point">
+            <div class="methodology-icon-box">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div class="methodology-text">
+              <h4>Industry Veteran Faculty</h4>
+              <p>Instructors are seasoned engineers with 8+ years of active field experience in automation plants, embedded design houses, and tech firms.</p>
+            </div>
+          </div>
+
+          <div class="methodology-point">
+            <div class="methodology-icon-box">
+              <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div class="methodology-text">
+              <h4>Corporate Benchmark Projects</h4>
+              <p>Complete multi-disciplinary projects that solve genuine manufacturing and digital workflows, ready for your portfolio.</p>
+            </div>
+          </div>
+
+          <div class="methodology-point">
+            <div class="methodology-icon-box">
+              <i class="fa-solid fa-certificate"></i>
+            </div>
+            <div class="methodology-text">
+              <h4>Accredited Certification</h4>
+              <p>Earn an ISO 9001:2015 recognized professional certificate with verifiable online credential IDs recognized by hiring organizations.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Lab Preview Card -->
+        <div class="lab-preview-card">
+          <span class="lab-card-badge"><i class="fa-solid fa-industry"></i> R&D & Training Facilities</span>
+          <h3>Modern Industrial Prototyping Infrastructure</h3>
+          <p>
+            Our dedicated laboratories feature multi-vendor PLC testing racks, digital storage oscilloscopes, logic analyzers, 3D printing prototyping cells, and dedicated high-speed CAD workstation networks.
+          </p>
+
+          <div class="lab-stats-row">
+            <div class="lab-stat-box">
+              <span class="num">24/7</span>
+              <span class="lbl">Lab Access</span>
+            </div>
+            <div class="lab-stat-box">
+              <span class="num">1:1</span>
+              <span class="lbl">Kit Allocation</span>
+            </div>
+            <div class="lab-stat-box">
+              <span class="num">50+</span>
+              <span class="lbl">Industry Rigs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       05. HIRING PARTNERS & PLACEMENT MARQUEE
+       ========================================================================= -->
+  <section class="placement-section" id="placements">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">PLACEMENT SUCCESS</span>
+        <h2 class="section-title">Where IPTI Alumni Excel</h2>
+        <p class="section-subtitle">Our alumni are employed across premier multinationals, innovative engineering firms, and high-growth technology ventures.</p>
+      </div>
+
+      <!-- Infinite Marquee Track -->
+      <div class="marquee-container">
+        <div class="marquee-track">
+          <div class="marquee-pill"><span class="dot"></span> TATA MOTORS</div>
+          <div class="marquee-pill"><span class="dot"></span> BOSCH AUTOMOTIVE</div>
+          <div class="marquee-pill"><span class="dot"></span> SIEMENS INDUSTRIAL</div>
+          <div class="marquee-pill"><span class="dot"></span> LARSEN & TOUBRO (L&T)</div>
+          <div class="marquee-pill"><span class="dot"></span> SCHNEIDER ELECTRIC</div>
+          <div class="marquee-pill"><span class="dot"></span> INFOSYS TECHNOLOGIES</div>
+          <div class="marquee-pill"><span class="dot"></span> TECH MAHINDRA</div>
+          <div class="marquee-pill"><span class="dot"></span> BHARAT FORGE</div>
+          <div class="marquee-pill"><span class="dot"></span> ABB AUTOMATION</div>
+          <div class="marquee-pill"><span class="dot"></span> CUMMINS INDIA</div>
+          <!-- Repeat for smooth infinite loop -->
+          <div class="marquee-pill"><span class="dot"></span> TATA MOTORS</div>
+          <div class="marquee-pill"><span class="dot"></span> BOSCH AUTOMOTIVE</div>
+          <div class="marquee-pill"><span class="dot"></span> SIEMENS INDUSTRIAL</div>
+          <div class="marquee-pill"><span class="dot"></span> LARSEN & TOUBRO (L&T)</div>
+          <div class="marquee-pill"><span class="dot"></span> SCHNEIDER ELECTRIC</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       06. DEDICATED ENQUIRY & ADMISSION SECTION
+       ========================================================================= -->
+  <section class="enquiry-section" id="enquiry-form-section">
+    <div class="container">
+      <div class="enquiry-split-grid">
+        <div class="enquiry-info-box">
+          <span class="section-tag">GET IN TOUCH</span>
+          <h2 class="section-title" style="text-align: left;">Start Your Professional Journey Today</h2>
+          <p class="section-subtitle" style="text-align: left; margin-bottom: 24px;">
+            Have questions about program eligibility, syllabus details, batch timings, or fee structures? Submit your enquiry below and our academic counseling team will assist you immediately.
+          </p>
+
+          <div class="enquiry-contact-card">
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-solid fa-building-columns"></i></div>
+              <div class="contact-details">
+                <span class="label">Institute Campus</span>
+                <p>IPTI Innovation Hub, Near Technology Park, Pune & Bangalore</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+              <div class="contact-details">
+                <span class="label">Admissions Hotline</span>
+                <a href="tel:+919876543210">+91 98765 43210 / +91 87654 32109</a>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+              <div class="contact-details">
+                <span class="label">Admissions Email</span>
+                <a href="mailto:admissions@ipti.edu.in">admissions@ipti.edu.in</a>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-brands fa-whatsapp"></i></div>
+              <div class="contact-details">
+                <span class="label">WhatsApp Career Desk</span>
+                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">Chat on WhatsApp (Instant Response)</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Box -->
+        <div class="main-enquiry-form-card">
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--primary); margin-bottom: 6px;">Program Enquiry Form</h3>
+            <p style="font-size: 0.86rem; color: var(--text-muted);">Fill in your details to receive full syllabus PDF, fee schedule, and scholarship eligibility.</p>
+          </div>
+
+          <form id="mainEnquiryForm">
+            <div class="form-grid-2">
+              <div class="enquiry-field">
+                <label for="main-fullname">Full Name *</label>
+                <input type="text" id="main-fullname" name="fullName" placeholder="e.g. Sneha Kulkarni" required>
+              </div>
+              <div class="enquiry-field">
+                <label for="main-email">Email Address *</label>
+                <input type="email" id="main-email" name="email" placeholder="e.g. sneha@example.com" required>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="enquiry-field">
+                <label for="main-phone">Phone Number *</label>
+                <input type="tel" id="main-phone" name="phone" placeholder="e.g. +91 98765 43210" required>
+              </div>
+              <div class="enquiry-field">
+                <label for="main-whatsapp">WhatsApp Number</label>
+                <input type="tel" id="main-whatsapp" name="whatsapp" placeholder="e.g. +91 98765 43210">
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="enquiry-field">
+                <label for="main-course">Interested Program *</label>
+                <select id="main-course" name="course" required>
+                  <option value="">Select a program</option>
+                  <option value="Industrial Automation & Robotics (PLC/SCADA)">Industrial Automation & Robotics (PLC/SCADA)</option>
+                  <option value="Embedded Systems & IoT Engineering">Embedded Systems & IoT Engineering</option>
+                  <option value="CAD/CAM & Mechanical Product Design">CAD/CAM & Mechanical Product Design</option>
+                  <option value="Full-Stack Software Engineering">Full-Stack Software Engineering</option>
+                  <option value="AI, Machine Learning & Computer Vision">AI, Machine Learning & Computer Vision</option>
+                  <option value="Electric Vehicle (EV) Systems & BMS">Electric Vehicle (EV) Systems & BMS</option>
+                </select>
+              </div>
+              <div class="enquiry-field">
+                <label for="main-mode">Preferred Learning Mode</label>
+                <select id="main-mode" name="learningMode">
+                  <option value="Offline Classroom Training">Offline Classroom Training (Lab Intensive)</option>
+                  <option value="Online Live Interactive">Online Live Interactive</option>
+                  <option value="Weekend Professional Hybrid">Weekend Professional Hybrid</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="enquiry-field">
+              <label for="main-experience">Current Profile / Education</label>
+              <select id="main-experience" name="experience">
+                <option value="Final Year Engineering (B.Tech/BE/Diploma)">Final Year Engineering (B.Tech / BE / Diploma)</option>
+                <option value="Fresh Engineering Graduate">Fresh Engineering Graduate</option>
+                <option value="Working Industry Professional (1-3 yrs)">Working Industry Professional (1-3 yrs)</option>
+                <option value="Career Transitioner">Career Transitioner / Other Degree</option>
+              </select>
+            </div>
+
+            <div class="enquiry-field">
+              <label for="main-message">Message / Queries (Optional)</label>
+              <textarea id="main-message" name="message" rows="3" placeholder="Tell us about your learning goals or any questions..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary enquiry-submit-btn" id="mainEnquiryBtn">
+              <span>Submit Admission Enquiry</span>
+              <div class="btn-icon-wrapper">
+                <i class="fa-solid fa-paper-plane"></i>
+              </div>
+            </button>
+            <p class="form-footnote" style="margin-top: 12px;">🔒 Your data is stored securely. No spam policy.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       07. FREQUENTLY ASKED QUESTIONS (FAQ)
+       ========================================================================= -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">COMMON QUERIES</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Everything you need to know about joining IPTI's professional programs.</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item active">
+          <div class="faq-question">
+            <span>What are the eligibility criteria for joining IPTI programs?</span>
+            <div class="faq-toggle-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Our programs are open to Diploma holders, B.E./B.Tech graduates (Mechanical, Electrical, Electronics, Computer Science, IT, Mechatronics), BCA/MCA graduates, as well as working professionals looking to upskill into core engineering domains.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How does the 100% placement assistance program work?</span>
+            <div class="faq-toggle-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>We provide full-spectrum career support: technical resume preparation, live mock interview drills with corporate hiring managers, GitHub/project portfolio reviews, and exclusive campus hiring drives through our network of 500+ engineering partners.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Are there weekend or flexible batches for working professionals?</span>
+            <div class="faq-toggle-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Yes! We offer dedicated Weekend Hybrid Batches designed specifically for working professionals, featuring Saturday-Sunday lab sessions combined with self-paced LMS theory modules.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Is the certification government / industry recognized?</span>
+            <div class="faq-toggle-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Yes. IPTI is an ISO 9001:2015 certified training institution. Upon completing your capstone project and passing practical assessments, you receive an authorized certificate with an online verifiable credential ID.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Can I pay the course fee in installments (EMI)?</span>
+            <div class="faq-toggle-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Yes, we provide 0% interest flexible monthly installment options (EMI) as well as merit scholarships for top academic achievers.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       08. FOOTER
+       ========================================================================= -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="assets/ipti-logo.jpg" alt="IPTI Crest" style="width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--accent-gold);">
+            <div>
+              <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--primary); line-height: 1;">IPTI</h3>
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Institute of Professional Training & Innovation</span>
+            </div>
+          </div>
+          <p>
+            Committed to engineering excellence, industry readiness, and high-impact technical education across core engineering and IT domains.
+          </p>
+          <div style="margin-top: 16px; display: flex; gap: 12px;">
+            <a href="https://linkedin.com" target="_blank" style="color: var(--primary); font-size: 1.1rem;"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="https://instagram.com" target="_blank" style="color: var(--primary); font-size: 1.1rem;"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://youtube.com" target="_blank" style="color: var(--primary); font-size: 1.1rem;"><i class="fa-brands fa-youtube"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Core Programs</h4>
+          <ul>
+            <li><a href="#programs">Industrial Automation & PLC</a></li>
+            <li><a href="#programs">Embedded Systems & IoT</a></li>
+            <li><a href="#programs">CAD/CAM Mechanical Design</a></li>
+            <li><a href="#programs">Full-Stack Engineering</a></li>
+            <li><a href="#programs">AI & Computer Vision</a></li>
+            <li><a href="#programs">Electric Vehicle (EV) Systems</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Navigation</h4>
+          <ul>
+            <li><a href="#overview">Home Overview</a></li>
+            <li><a href="#journey">Learning Journey</a></li>
+            <li><a href="#methodology">Lab Facilities</a></li>
+            <li><a href="#placements">Hiring Partners</a></li>
+            <li><a href="#enquiry-form-section">Admission Enquiry</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Campus & Contact</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <i class="fa-solid fa-location-dot" style="color: var(--accent-gold); margin-right: 6px;"></i>
+            IPTI Technology Campus, Pune & Bangalore
+          </p>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <i class="fa-solid fa-phone" style="color: var(--accent-gold); margin-right: 6px;"></i>
+            +91 98765 43210
+          </p>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+            <i class="fa-solid fa-envelope" style="color: var(--accent-gold); margin-right: 6px;"></i>
+            admissions@ipti.edu.in
+          </p>
+
+          <a href="admin.html" class="admin-portal-link">
+            <i class="fa-solid fa-lock"></i>
+            <span>Staff / Admin Portal</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 IPTI - Institute of Professional Training & Innovation. All Rights Reserved.</p>
+        <p>Crafted with excellence for professional engineering innovation</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       MODAL: ADMISSION & ENQUIRY POPUP
+       ========================================================================= -->
+  <div class="modal-overlay" id="enquiryModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close Modal">✕</button>
+
+      <div id="modalFormContent">
+        <div class="modal-header">
+          <div class="eyebrow-pill" style="margin-bottom: 10px;">IPTI ADMISSIONS</div>
+          <h3 id="modalTitle">Enquire for Upcoming Batch</h3>
+          <p id="modalDesc">Fill in your information to receive program syllabus, batch schedules, and fee concessions.</p>
+        </div>
+
+        <form class="modal-form" id="modalEnquiryForm">
+          <div class="form-group">
+            <label for="modal-name">Full Name *</label>
+            <input type="text" id="modal-name" name="fullName" placeholder="e.g. Aditya Kulkarni" required>
+          </div>
+
+          <div class="form-group">
+            <label for="modal-email">Email Address *</label>
+            <input type="email" id="modal-email" name="email" placeholder="e.g. aditya@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="modal-phone">Phone / WhatsApp Number *</label>
+            <input type="tel" id="modal-phone" name="phone" placeholder="e.g. +91 98765 43210" required>
+          </div>
+
+          <div class="form-group">
+            <label for="modal-course">Program of Interest *</label>
+            <select id="modal-course" name="course" required>
+              <option value="Industrial Automation & Robotics (PLC/SCADA)">Industrial Automation & Robotics (PLC/SCADA)</option>
+              <option value="Embedded Systems & IoT Engineering">Embedded Systems & IoT Engineering</option>
+              <option value="CAD/CAM & Mechanical Product Design">CAD/CAM & Mechanical Product Design</option>
+              <option value="Full-Stack Software Engineering">Full-Stack Software Engineering</option>
+              <option value="AI, Machine Learning & Computer Vision">AI, Machine Learning & Computer Vision</option>
+              <option value="Electric Vehicle (EV) Systems & BMS">Electric Vehicle (EV) Systems & BMS</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="modal-mode">Preferred Learning Mode</label>
+            <select id="modal-mode" name="learningMode">
+              <option value="Offline Classroom Training">Offline Classroom Training (Lab Intensive)</option>
+              <option value="Online Live Interactive">Online Live Interactive</option>
+              <option value="Weekend Professional Hybrid">Weekend Professional Hybrid</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="modal-notes">Specific Question / Goals</label>
+            <textarea id="modal-notes" name="message" rows="2" placeholder="Tell us if you need batch timings, syllabus, or placement details..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 0.95rem;">
+            <span>Submit Enquiry & Get Syllabus</span>
+            <div class="btn-icon-wrapper">
+              <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </button>
+
+          <p class="form-footnote" style="margin-top: 10px;">🔒 Your data is kept strictly confidential. Academic mentor contacts within 24 hours.</p>
+        </form>
+      </div>
+
+      <!-- Success State -->
+      <div class="modal-success-state" id="modalSuccessState">
+        <div class="success-icon-wrap">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h3 style="font-size: 1.5rem; color: var(--primary); margin-bottom: 8px;">Enquiry Received!</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+          Thank you for reaching out to IPTI. Your enquiry has been registered successfully.
+        </p>
+
+        <div style="background: var(--bg-recessed); border: 1px solid rgba(15, 67, 50, 0.15); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; text-align: left;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-bottom: 4px;">YOUR ENQUIRY REFERENCE ID:</div>
+          <div id="modalTrackingIdDisplay" style="font-size: 1.25rem; font-weight: 800; font-family: var(--font-mono); color: var(--accent-gold-dark);">IPTI-2026-XXXX</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Our senior counselor will contact you via WhatsApp & Call shortly.</div>
+        </div>
+
+        <button class="btn btn-primary" id="modalDoneBtn" style="width: 100%;">
+          <span>Done</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>

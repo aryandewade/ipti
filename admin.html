@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTI Admin Portal | Admissions & Enquiry CRM</title>
+  <link rel="icon" type="image/jpeg" href="assets/ipti-logo.jpg">
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       01. LOGIN OVERLAY
+       ========================================================================= -->
+  <div id="loginOverlay">
+    <div class="login-card">
+      <img src="assets/ipti-logo.jpg" alt="IPTI Crest" class="login-crest">
+      <h2>IPTI Admin Portal</h2>
+      <p>Institute of Professional Training & Innovation<br>Sign in to manage admissions & enquiries</p>
+
+      <form id="adminLoginForm" class="login-form">
+        <div class="form-group">
+          <label for="adminUsername">Admin Username</label>
+          <input type="text" id="adminUsername" placeholder="e.g. admin" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="adminPassword">Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="adminPassword" placeholder="Enter admin password" required autocomplete="current-password">
+            <button type="button" class="password-toggle-btn" id="togglePasswordBtn">
+              <i class="fa-solid fa-eye" id="passwordEyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="login-submit-btn" id="loginBtn">
+          <span>Authenticate & Access Portal</span>
+        </button>
+
+        <div class="login-demo-hint">
+          <span>Default Credentials: <strong>admin</strong> / <strong>ipti@admin2026</strong></span>
+          <button type="button" class="login-demo-btn" id="fillDemoCredsBtn">Fill Credentials</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       02. ADMIN DASHBOARD APP
+       ========================================================================= -->
+  <div id="adminApp" class="hidden">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header-brand">
+        <img src="assets/ipti-logo.jpg" alt="IPTI Logo">
+        <div class="admin-header-title">
+          <h1>IPTI Admissions CRM <span class="admin-badge">Admin Desk</span></h1>
+          <span class="sub">Institute of Professional Training & Innovation</span>
+        </div>
+      </div>
+
+      <div class="admin-header-actions">
+        <a href="index.html" target="_blank" class="admin-action-btn">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span>View Live Website</span>
+        </a>
+        <div class="admin-action-btn" style="cursor: default; background: var(--bg-canvas);">
+          <i class="fa-solid fa-circle-user" style="color: var(--primary);"></i>
+          <span id="currentAdminName">Administrator</span>
+        </div>
+        <button id="adminLogoutBtn" class="admin-action-btn admin-logout-btn">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard-container">
+      
+      <!-- KPI Stats Grid -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <span class="stat-card-title">Total Enquiries</span>
+            <div class="stat-icon total"><i class="fa-solid fa-folder-open"></i></div>
+          </div>
+          <div class="stat-card-value" id="statTotal">--</div>
+          <span class="stat-card-sub">All-time registered leads</span>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <span class="stat-card-title">Received Today</span>
+            <div class="stat-icon today"><i class="fa-solid fa-calendar-day"></i></div>
+          </div>
+          <div class="stat-card-value" id="statToday">--</div>
+          <span class="stat-card-sub">New leads in last 24h</span>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <span class="stat-card-title">Active Programs</span>
+            <div class="stat-icon enrolled"><i class="fa-solid fa-graduation-cap"></i></div>
+          </div>
+          <div class="stat-card-value" id="statPrograms" style="color: var(--primary);">--</div>
+          <span class="stat-card-sub">Training tracks available</span>
+        </div>
+      </section>
+
+      <!-- Controls Toolbar -->
+      <section class="controls-toolbar">
+        <div class="toolbar-filters">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search by name, phone, email, tracking ID...">
+          </div>
+
+          <select id="courseFilter" class="filter-select">
+            <option value="All">All Programs</option>
+            <option value="Industrial Automation">Industrial Automation (PLC/SCADA)</option>
+            <option value="Embedded Systems">Embedded Systems & IoT</option>
+            <option value="CAD/CAM">CAD/CAM & Mechanical</option>
+            <option value="Full-Stack">Full-Stack Software</option>
+            <option value="AI, Machine Learning">AI & Computer Vision</option>
+            <option value="Electric Vehicle">Electric Vehicle (EV) BMS</option>
+          </select>
+        </div>
+
+        <div class="toolbar-actions">
+          <button id="exportCsvBtn" class="btn-csv-export">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Export CSV</span>
+          </button>
+
+          <button id="refreshBtn" class="btn-refresh" title="Refresh data">
+            <i class="fa-solid fa-rotate"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Enquiries Table -->
+      <section class="table-card">
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Candidate Details</th>
+                <th>Program & Mode</th>
+                <th>Reference & Date</th>
+                <th>Direct Outreach</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="enquiriesTableBody">
+              <!-- Dynamically rendered -->
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>Loading enquiries from database...</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       03. ENQUIRY DETAILS & COUNSELOR NOTES MODAL
+       ========================================================================= -->
+  <div id="detailModal">
+    <div class="detail-modal-card">
+      <button class="detail-modal-close" id="closeDetailModalBtn">&times;</button>
+      
+      <div class="detail-modal-header">
+        <div style="font-size: 0.76rem; font-weight: 700; color: var(--accent-gold); text-transform: uppercase; margin-bottom: 4px;">ENQUIRY DOSSIER</div>
+        <h3 id="modalCandidateName">Candidate Details</h3>
+        <span id="modalTrackingId" style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted);">IPTI-2026-XXXX</span>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="label">Email Address</span>
+          <span class="value" id="modalEmail">--</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Phone / WhatsApp</span>
+          <span class="value" id="modalPhone">--</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Program of Interest</span>
+          <span class="value" id="modalCourse">--</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Learning Mode</span>
+          <span class="value" id="modalMode">--</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Current Profile</span>
+          <span class="value" id="modalExperience">--</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Lead Source</span>
+          <span class="value" id="modalSource">--</span>
+        </div>
+      </div>
+
+      <div class="detail-message-box">
+        <span class="label">Candidate Message / Query:</span>
+        <p id="modalMessage">No specific message provided.</p>
+      </div>
+
+      <!-- Counselor Follow-Up Notes Timeline -->
+      <div class="notes-timeline">
+        <h4>Counselor Notes & Activity Log</h4>
+        <div id="notesContainer">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <form id="addNoteForm" class="add-note-form">
+          <input type="text" id="newNoteInput" placeholder="Add private counseling note (e.g. Called candidate, shared brochure on WhatsApp)..." required>
+          <button type="submit">Add Note</button>
+        </form>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: 20px;">
+        <button id="deleteEnquiryFromModalBtn" style="background: none; border: none; color: #dc2626; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Delete This Lead</span>
+        </button>
+
+        <button class="btn-refresh" id="closeModalBottomBtn">Close Dossier</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

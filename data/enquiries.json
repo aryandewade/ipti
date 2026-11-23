@@ -1,0 +1,122 @@
+[
+  {
+    "id": "ipti_enq_1795424600569_y6qy8",
+    "trackingId": "IPTI-2026-3902",
+    "fullName": "Aryan Dewade",
+    "email": "aryandewade1214@gmail.com",
+    "phone": "+919272902182",
+    "whatsapp": "+919272902182",
+    "course": "AI, Machine Learning & Computer Vision",
+    "learningMode": "Offline Classroom Training",
+    "experience": "Not specified",
+    "message": "",
+    "status": "New",
+    "priority": "High",
+    "source": "Website Hero Quick Form",
+    "notes": [
+      {
+        "note": "Inquiry submitted via Website Hero Quick Form.",
+        "author": "System",
+        "timestamp": "2026-11-23T09:03:20.569Z"
+      }
+    ],
+    "createdAt": "2026-11-23T09:03:20.569Z",
+    "updatedAt": "2026-11-23T09:03:20.569Z"
+  },
+  {
+    "id": "ipti_enq_1795424172322_3qxl5",
+    "trackingId": "IPTI-2026-7152",
+    "fullName": "Ananya Sen",
+    "email": "ananya.sen@example.com",
+    "phone": "+91 98300 12345",
+    "whatsapp": "+91 98300 12345",
+    "course": "AI, Machine Learning & Computer Vision",
+    "learningMode": "Online Live Interactive",
+    "experience": "Not specified",
+    "message": "Need curriculum and placement statistics.",
+    "status": "New",
+    "priority": "High",
+    "source": "Verification Test",
+    "notes": [
+      {
+        "note": "Inquiry submitted via Verification Test.",
+        "author": "System",
+        "timestamp": "2026-11-23T08:56:12.322Z"
+      }
+    ],
+    "createdAt": "2026-11-23T08:56:12.322Z",
+    "updatedAt": "2026-11-23T08:56:12.322Z"
+  },
+  {
+    "id": "ipti_enq_sample_1",
+    "trackingId": "IPTI-2026-1042",
+    "fullName": "Rahul V. Sharma",
+    "email": "rahul.sharma@example.com",
+    "phone": "+91 98230 45671",
+    "whatsapp": "+91 98230 45671",
+    "course": "Industrial Automation & Robotics (PLC/SCADA)",
+    "learningMode": "Offline Classroom Training",
+    "experience": "Final Year B.Tech (Electrical / Mechatronics)",
+    "message": "Interested in the 4-month practical cohort. Requesting curriculum details and weekend batch timings.",
+    "status": "New",
+    "priority": "High",
+    "source": "Website Hero Quick Form",
+    "notes": [
+      {
+        "note": "Inquiry received from website. Candidate interested in upcoming batch starting next month.",
+        "author": "System",
+        "timestamp": "2026-11-23T06:56:09.257Z"
+      }
+    ],
+    "createdAt": "2026-11-23T06:56:09.258Z",
+    "updatedAt": "2026-11-23T06:56:09.258Z"
+  },
+  {
+    "id": "ipti_enq_sample_2",
+    "trackingId": "IPTI-2026-1088",
+    "fullName": "Pooja Deshmukh",
+    "email": "pooja.d@example.com",
+    "phone": "+91 99750 12894",
+    "whatsapp": "+91 99750 12894",
+    "course": "Embedded Systems & IoT Engineering",
+    "learningMode": "Weekend Professional Hybrid",
+    "experience": "Working Professional (1-2 Years)",
+    "message": "Working as a junior hardware engineer, want to upgrade firmware development and RTOS skills.",
+    "status": "Contacted",
+    "priority": "Medium",
+    "source": "Course Brochure Download",
+    "notes": [
+      {
+        "note": "Called candidate, shared complete syllabus on WhatsApp.",
+        "author": "Admin Counselor",
+        "timestamp": "2026-11-22T14:56:09.258Z"
+      }
+    ],
+    "createdAt": "2026-11-22T08:56:09.258Z",
+    "updatedAt": "2026-11-22T14:56:09.258Z"
+  },
+  {
+    "id": "ipti_enq_sample_3",
+    "trackingId": "IPTI-2026-1120",
+    "fullName": "Anand K. Kulkarni",
+    "email": "anand.kulkarni@example.com",
+    "phone": "+91 94220 89123",
+    "whatsapp": "+91 94220 89123",
+    "course": "CAD/CAM & Mechanical Product Design",
+    "learningMode": "Offline Classroom Training",
+    "experience": "Diploma in Mechanical Engineering",
+    "message": "Looking for CATIA, SolidWorks & GD&T industry certification with placement support.",
+    "status": "Enrolled",
+    "priority": "High",
+    "source": "Admissions Modal",
+    "notes": [
+      {
+        "note": "Document verification completed. Seat confirmed for upcoming batch.",
+        "author": "Admissions Team",
+        "timestamp": "2026-11-23T04:56:09.258Z"
+      }
+    ],
+    "createdAt": "2026-11-21T08:56:09.258Z",
+    "updatedAt": "2026-11-23T04:56:09.258Z"
+  }
+]
