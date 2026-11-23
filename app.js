@@ -6,6 +6,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   initHeroCanvas();
   initPromptTypewriter();
+  initHeroConsoleTabs();
+  initRollingCounters();
   initCountdownTimer();
   initProgramFilter();
   initFAQAccordion();
@@ -157,6 +159,160 @@ function initPromptTypewriter() {
   }
 
   typeStep();
+}
+
+/* --------------------------------------------------------------------------
+   02.5 HERO INNOVATION CONSOLE TABS
+   -------------------------------------------------------------------------- */
+function initHeroConsoleTabs() {
+  const tabContainer = document.getElementById('heroConsoleTabs');
+  if (!tabContainer) return;
+
+  const tabs = tabContainer.querySelectorAll('.console-track-tab');
+  const rigTitle = document.getElementById('telemetryRigTitle');
+  const protocol = document.getElementById('telemetryProtocol');
+  const mode = document.getElementById('telemetryMode');
+  const hardware = document.getElementById('telemetryHardware');
+  const capstone = document.getElementById('telemetryCapstone');
+  const codeSnippet = document.getElementById('telemetryCodeSnippet');
+
+  const trackData = {
+    automation: {
+      title: 'Siemens S7-1200 & KUKA Robotics Rig',
+      protocol: 'PROFINET / MODBUS TCP',
+      mode: '100% Physical Bench Time',
+      hardware: 'PLC, SCADA, VFD, HMI',
+      capstone: 'Automated Sorting Line',
+      code: `<span class="cmt">// Industrial Rig OB1 Cyclic Execution</span><br>
+<span class="kw">IF</span> "Safety_Interlock" = <span class="str">TRUE</span> <span class="kw">THEN</span><br>
+&nbsp;&nbsp;"Robot_Arm_1".ExecutePickCycle(PartID:=402, Speed:=100);<br>
+&nbsp;&nbsp;"SCADA_Telemetry".Broadcast(<span class="str">"BATCH_READY"</span>);<br>
+<span class="kw">END_IF</span>;`
+    },
+    embedded: {
+      title: 'STM32 ARM Cortex-M4 & FreeRTOS Station',
+      protocol: 'CAN 2.0B / I2C / SPI / MQTT',
+      mode: 'Hands-on Hardware Bench',
+      hardware: 'ARM MCU, Logic Analyzers, JTAG',
+      capstone: 'Industrial Telematics Gateway',
+      code: `<span class="cmt">// FreeRTOS Sensor Telemetry Task</span><br>
+<span class="kw">void</span> <span class="str">vSensorTask</span>(<span class="kw">void</span> *pvParameters) {<br>
+&nbsp;&nbsp;<span class="kw">for</span>(;;) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CAN_Transmit(&hcan1, &txTelemetryPacket);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;vTaskDelay(pdMS_TO_TICKS(10));<br>
+&nbsp;&nbsp;}<br>
+}`
+    },
+    cad: {
+      title: 'SolidWorks & CATIA 5-Axis CAM Workstation',
+      protocol: 'GD&T ASME Y14.5 / ISO 1101',
+      mode: 'High-Spec CAD Workstations',
+      hardware: 'NVIDIA RTX Stations, 3D Scanners',
+      capstone: 'Automotive Sub-Frame & Transmission',
+      code: `<span class="cmt">// Parametric Stress & CNC Path Telemetry</span><br>
+[FEA_SOLVER] Von-Mises Stress: <span class="str">142.4 MPa</span> (Factor of Safety: 2.8)<br>
+[G_CODE] N105 G00 X45.20 Y120.00 Z5.00<br>
+[TOLERANCE] Flatness ⏥ 0.02 | Datum A<br>
+[STATUS] <span class="kw">PRODUCTION VALIDATED</span>`
+    },
+    software: {
+      title: 'TensorFlow / PyTorch & Cloud Microservices',
+      protocol: 'gRPC / REST / WebSockets / OAuth2',
+      mode: 'Production Dev & Deploy Clusters',
+      hardware: 'Edge AI Devices (Jetson Orin)',
+      capstone: 'Automated Defect Vision Pipeline',
+      code: `<span class="cmt">// Edge Vision Inference Loop</span><br>
+<span class="kw">async def</span> <span class="str">detect_anomalies</span>(frame_stream):<br>
+&nbsp;&nbsp;model = TensorRTInference(<span class="str">"quality_yolo_v10.engine"</span>)<br>
+&nbsp;&nbsp;<span class="kw">for</span> frame <span class="kw">in</span> frame_stream:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;preds = <span class="kw">await</span> model.predict(frame, conf=0.94)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">yield</span> {<span class="str">"status"</span>: 200, <span class="str">"accuracy"</span>: 0.992}`
+    }
+  };
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const trackKey = tab.getAttribute('data-track');
+      const data = trackData[trackKey];
+      if (!data) return;
+
+      if (rigTitle) rigTitle.innerText = data.title;
+      if (protocol) protocol.innerText = data.protocol;
+      if (mode) mode.innerText = data.mode;
+      if (hardware) hardware.innerText = data.hardware;
+      if (capstone) capstone.innerText = data.capstone;
+      if (codeSnippet) codeSnippet.innerHTML = data.code;
+    });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   02.6 ROLLING COUNTER ANIMATION (Dedicated Impact Section)
+   -------------------------------------------------------------------------- */
+function initRollingCounters() {
+  const counters = document.querySelectorAll('.rolling-counter');
+  if (!counters || counters.length === 0) return;
+
+  let hasAnimated = false;
+
+  function easeOutQuart(x) {
+    return 1 - Math.pow(1 - x, 4);
+  }
+
+  function startRollingAnimation() {
+    if (hasAnimated) return;
+    hasAnimated = true;
+
+    counters.forEach(counter => {
+      const targetVal = parseFloat(counter.getAttribute('data-target')) || 0;
+      const suffix = counter.getAttribute('data-suffix') || '';
+      const decimals = parseInt(counter.getAttribute('data-decimals') || '0', 10);
+      const duration = 2200; // ms
+      let startTime = null;
+
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const easedProgress = easeOutQuart(progress);
+        const currentVal = targetVal * easedProgress;
+
+        if (decimals > 0) {
+          counter.innerText = currentVal.toFixed(decimals) + suffix;
+        } else {
+          counter.innerText = Math.floor(currentVal) + suffix;
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          counter.innerText = (decimals > 0 ? targetVal.toFixed(decimals) : targetVal) + suffix;
+        }
+      }
+
+      requestAnimationFrame(step);
+    });
+  }
+
+  // Observe section visibility
+  const section = document.getElementById('impact-metrics');
+  if ('IntersectionObserver' in window && section) {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          startRollingAnimation();
+          obs.disconnect();
+        }
+      });
+    }, { threshold: 0.15 });
+
+    observer.observe(section);
+  } else {
+    // Fallback if observer not supported
+    setTimeout(startRollingAnimation, 800);
+  }
 }
 
 /* --------------------------------------------------------------------------

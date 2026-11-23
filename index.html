@@ -123,77 +123,187 @@
           </div>
         </div>
 
-        <!-- Metrics Row -->
-        <div class="hero-metrics-pill-row">
-          <div class="metric-badge">
-            <span class="metric-num">100%</span>
-            <span class="metric-label">Hands-on Lab Practice</span>
-          </div>
-          <div class="metric-badge">
-            <span class="metric-num">15+</span>
-            <span class="metric-label">Capstone Projects</span>
-          </div>
-          <div class="metric-badge">
-            <span class="metric-num">500+</span>
-            <span class="metric-label">Hiring Partners</span>
-          </div>
-          <div class="metric-badge">
-            <span class="metric-num">4.9/5</span>
-            <span class="metric-label">Student Rating</span>
-          </div>
+        <!-- Hero Primary Action Buttons -->
+        <div class="hero-actions-row" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 24px;">
+          <a href="#programs" class="btn btn-primary" style="padding: 13px 24px; font-size: 0.92rem;">
+            <span>Explore 6 Flagship Tracks</span>
+            <div class="btn-icon-wrapper"><i class="fa-solid fa-arrow-down"></i></div>
+          </a>
+          <button class="btn btn-secondary" data-open-modal="enquiry" style="padding: 13px 20px; font-size: 0.92rem;">
+            <i class="fa-solid fa-calendar-check" style="color: var(--accent-gold);"></i>
+            <span>Book Free Lab Demo</span>
+          </button>
         </div>
       </div>
 
-      <!-- Right Column: Quick Enquiry Double-Bezel Card -->
-      <div class="hero-card-bezel">
-        <div class="hero-card-inner">
-          <div class="hero-card-header">
-            <div class="hero-card-badge">
-              <i class="fa-solid fa-paper-plane"></i> Quick Registration
+      <!-- Right Column: Interactive Innovation & Engineering Console -->
+      <div class="hero-console-bezel">
+        <div class="hero-console-inner">
+          
+          <!-- Console Top Window Bar -->
+          <div class="console-topbar">
+            <div class="console-dots">
+              <span class="console-dot red"></span>
+              <span class="console-dot amber"></span>
+              <span class="console-dot green"></span>
             </div>
-            <h3>Book Free Career Counseling</h3>
-            <p>Connect with senior technical mentors for personalized career roadmaps and fee structures.</p>
+            <div class="console-pulse-status">
+              <span class="pulse-dot"></span>
+              <span>LIVE LAB BENCHES • 2026 ADMISSIONS ACTIVE</span>
+            </div>
           </div>
 
-          <form class="quick-enquiry-form" id="heroQuickForm">
-            <div class="form-group">
-              <label for="hq-name">Full Name *</label>
-              <input type="text" id="hq-name" name="fullName" placeholder="e.g. Vikram Patil" required>
+          <!-- Official Accreditation Seal & Crest Banner -->
+          <div class="console-crest-banner">
+            <img src="assets/ipti-logo.jpg" alt="IPTI Crest" class="console-crest-img">
+            <div class="console-crest-info">
+              <h4>IPTI Engineering Innovation Center</h4>
+              <span>Govt. Recognized • ISO 9001:2015 Certified Lab Facility</span>
             </div>
+          </div>
 
-            <div class="form-group">
-              <label for="hq-email">Email Address *</label>
-              <input type="email" id="hq-email" name="email" placeholder="e.g. vikram@example.com" required>
-            </div>
-
-            <div class="form-group">
-              <label for="hq-phone">Phone / WhatsApp *</label>
-              <input type="tel" id="hq-phone" name="phone" placeholder="e.g. +91 98765 43210" required>
-            </div>
-
-            <div class="form-group">
-              <label for="hq-course">Preferred Program *</label>
-              <select id="hq-course" name="course" required>
-                <option value="">Select a training program</option>
-                <option value="Industrial Automation & Robotics (PLC/SCADA)">Industrial Automation & Robotics (PLC/SCADA)</option>
-                <option value="Embedded Systems & IoT Engineering">Embedded Systems & IoT Engineering</option>
-                <option value="CAD/CAM & Mechanical Product Design">CAD/CAM & Mechanical Product Design</option>
-                <option value="Full-Stack Software Engineering">Full-Stack Software Engineering</option>
-                <option value="AI, Machine Learning & Computer Vision">AI, Machine Learning & Computer Vision</option>
-                <option value="Electric Vehicle (EV) Systems & BMS">Electric Vehicle (EV) Systems & BMS</option>
-              </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary quick-enquiry-submit">
-              <span>Submit Enquiry & Get Syllabus</span>
-              <div class="btn-icon-wrapper">
-                <i class="fa-solid fa-arrow-right"></i>
-              </div>
+          <!-- Interactive Track Selector Tabs -->
+          <div class="console-track-tabs" id="heroConsoleTabs">
+            <button class="console-track-tab active" data-track="automation">
+              <i class="fa-solid fa-robot"></i> Automation & PLC
             </button>
-            <p class="form-footnote">🔒 Your privacy is fully secured. We respond within 24 hours.</p>
-          </form>
+            <button class="console-track-tab" data-track="embedded">
+              <i class="fa-solid fa-microchip"></i> Embedded IoT
+            </button>
+            <button class="console-track-tab" data-track="cad">
+              <i class="fa-solid fa-compass-drafting"></i> CAD / CAM
+            </button>
+            <button class="console-track-tab" data-track="software">
+              <i class="fa-solid fa-code"></i> AI & Software
+            </button>
+          </div>
+
+          <!-- Dynamic Active Telemetry Display -->
+          <div class="console-telemetry-body" id="heroConsoleTelemetry">
+            <div class="telemetry-header-line">
+              <span id="telemetryRigTitle">Siemens S7-1200 & KUKA Robotics Rig</span>
+              <span class="telemetry-status-ok"><i class="fa-solid fa-circle-check"></i> RIG OPTIMAL</span>
+            </div>
+
+            <div class="telemetry-specs-grid">
+              <div class="telemetry-stat-cell">
+                <span class="telemetry-stat-label">Training Protocol</span>
+                <span class="telemetry-stat-val" id="telemetryProtocol">PROFINET / MODBUS TCP</span>
+              </div>
+              <div class="telemetry-stat-cell">
+                <span class="telemetry-stat-label">Lab Delivery</span>
+                <span class="telemetry-stat-val" id="telemetryMode">100% Physical Bench Time</span>
+              </div>
+              <div class="telemetry-stat-cell">
+                <span class="telemetry-stat-label">Hardware Stack</span>
+                <span class="telemetry-stat-val" id="telemetryHardware">PLC, SCADA, VFD, HMI</span>
+              </div>
+              <div class="telemetry-stat-cell">
+                <span class="telemetry-stat-label">Capstone Verification</span>
+                <span class="telemetry-stat-val" id="telemetryCapstone">Automated Sorting Line</span>
+              </div>
+            </div>
+
+            <div class="telemetry-code-readout" id="telemetryCodeSnippet">
+              <span class="cmt">// Industrial Rig OB1 Cyclic Execution</span><br>
+              <span class="kw">IF</span> "Safety_Interlock" = <span class="str">TRUE</span> <span class="kw">THEN</span><br>
+              &nbsp;&nbsp;"Robot_Arm_1".ExecutePickCycle(PartID:=402, Speed:=100);<br>
+              &nbsp;&nbsp;"SCADA_Telemetry".Broadcast(<span class="str">"BATCH_READY"</span>);<br>
+              <span class="kw">END_IF</span>;
+            </div>
+          </div>
+
+          <!-- Console CTAs -->
+          <div class="console-actions-row">
+            <button class="btn btn-primary" data-open-modal="enquiry">
+              <span>Book Career Counseling</span>
+              <div class="btn-icon-wrapper"><i class="fa-solid fa-arrow-right"></i></div>
+            </button>
+            <button class="btn btn-secondary" data-open-modal="syllabus">
+              <i class="fa-solid fa-file-pdf"></i>
+              <span>Curriculum PDF</span>
+            </button>
+          </div>
+
+          <div class="console-cohort-badge">
+            <i class="fa-solid fa-shield-halved" style="color: var(--accent-gold);"></i>
+            <span>Direct Placement Assurance • 100% Industry Capstones • 25 Seats/Cohort</span>
+          </div>
+
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       01.5 DEDICATED IMPACT METRICS SECTION (Rolling Number Animation)
+       ========================================================================= -->
+  <section class="section impact-metrics-section" id="impact-metrics">
+    <div class="container">
+      <div class="impact-metrics-header text-center">
+        <div class="eyebrow-pill" style="margin: 0 auto 14px auto;">
+          <span class="pulse-dot"></span>
+          <span>MEASURABLE EXCELLENCE • VERIFIED RESULTS</span>
+        </div>
+        <h2 class="section-title">Industry Benchmarks That Define Our Standard</h2>
+        <p class="section-subtitle">We bridge academic theory with pure industrial execution. Every metric represents real engineering hours, verified client projects, and career breakthroughs.</p>
+      </div>
+
+      <div class="impact-stats-grid">
+        <!-- Metric 1: 100% Hands-on Lab Practice -->
+        <div class="stat-counter-card">
+          <div class="stat-counter-icon">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <div class="stat-counter-number">
+            <span class="rolling-counter" data-target="100" data-suffix="%">0%</span>
+          </div>
+          <h3 class="stat-counter-label">Hands-on Lab Practice</h3>
+          <p class="stat-counter-desc">100% time dedicated to physical PLC panels, real microcontrollers, CAD simulation rigs, and production codebases—zero theoretical filler.</p>
+          <div class="stat-card-badge">Industry Standard</div>
+        </div>
+
+        <!-- Metric 2: 15+ Capstone Projects -->
+        <div class="stat-counter-card">
+          <div class="stat-counter-icon gold">
+            <i class="fa-solid fa-diagram-project"></i>
+          </div>
+          <div class="stat-counter-number">
+            <span class="rolling-counter" data-target="15" data-suffix="+">0+</span>
+          </div>
+          <h3 class="stat-counter-label">Capstone Projects</h3>
+          <p class="stat-counter-desc">Build verified, multi-disciplinary industrial deliverables matching real tier-1 client specifications to build an unbeatable hiring portfolio.</p>
+          <div class="stat-card-badge">Production Grade</div>
+        </div>
+
+        <!-- Metric 3: 500+ Hiring Partners -->
+        <div class="stat-counter-card">
+          <div class="stat-counter-icon">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+          <div class="stat-counter-number">
+            <span class="rolling-counter" data-target="500" data-suffix="+">0+</span>
+          </div>
+          <h3 class="stat-counter-label">Hiring Partners</h3>
+          <p class="stat-counter-desc">Direct recruitment pipeline with leading automotive OEMs, robotics automation conglomerates, IoT innovators, and software tech leaders.</p>
+          <div class="stat-card-badge">Corporate Tie-Ups</div>
+        </div>
+
+        <!-- Metric 4: 4.9/5 Student Rating -->
+        <div class="stat-counter-card">
+          <div class="stat-counter-icon gold">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <div class="stat-counter-number">
+            <span class="rolling-counter" data-target="4.9" data-decimals="1" data-suffix="/5">0.0/5</span>
+          </div>
+          <h3 class="stat-counter-label">Student Rating</h3>
+          <p class="stat-counter-desc">Validated by over 2,400+ working engineers and alumni across Google Reviews, corporate apprentice audits, and LinkedIn testimonials.</p>
+          <div class="stat-card-badge">Verified Reviews</div>
+        </div>
+      </div>
+    </div>
+  </section>
     </div>
   </section>
 
@@ -839,7 +949,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="assets/ipti-logo.jpg" alt="IPTI Crest" style="width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--accent-gold);">
+            <img src="assets/ipti-logo.jpg" alt="IPTI Crest" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--accent-gold); box-shadow: 0 4px 12px rgba(15, 67, 50, 0.12);">
             <div>
               <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--primary); line-height: 1;">IPTI</h3>
               <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Institute of Professional Training & Innovation</span>
