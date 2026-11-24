@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initDashboardControls();
   initViewTabs();
+  initCandidateManagement();
   initProgramManagement();
   initCertificateManagement();
 });
@@ -160,6 +161,8 @@ async function loadDashboardData() {
   await Promise.all([
     fetchStats(),
     fetchEnquiries(),
+    fetchCandidates(),
+    fetchCandidateStats(),
     fetchPrograms(),
     fetchProgramAnalytics(),
     fetchCertificates(),
@@ -181,23 +184,27 @@ async function fetchStats() {
       const statTodayEl = document.getElementById('statToday');
       const statProgramsEl = document.getElementById('statPrograms');
       const statInterestedEl = document.getElementById('statInterested');
+      const statConvertedEl = document.getElementById('statConverted');
       const statNotInterestedEl = document.getElementById('statNotInterested');
 
       if (statTotalEl) statTotalEl.innerText = s.total || 0;
       if (statTodayEl) statTodayEl.innerText = s.today || 0;
       if (statProgramsEl) statProgramsEl.innerText = Object.keys(s.coursesBreakdown || {}).length || 6;
       if (statInterestedEl) statInterestedEl.innerText = s.interested || 0;
+      if (statConvertedEl) statConvertedEl.innerText = s.converted || 0;
       if (statNotInterestedEl) statNotInterestedEl.innerText = s.notInterested || 0;
 
       // Update lead status tab count badges in Enquiries CRM
       const tabCountAll = document.getElementById('tabCountAll');
       const tabCountInterested = document.getElementById('tabCountInterested');
+      const tabCountConverted = document.getElementById('tabCountConverted');
       const tabCountNotInterested = document.getElementById('tabCountNotInterested');
       const tabCountPending = document.getElementById('tabCountPending');
       const navInterestedPill = document.getElementById('navInterestedPill');
 
       if (tabCountAll) tabCountAll.innerText = s.total || 0;
       if (tabCountInterested) tabCountInterested.innerText = s.interested || 0;
+      if (tabCountConverted) tabCountConverted.innerText = s.converted || 0;
       if (tabCountNotInterested) tabCountNotInterested.innerText = s.notInterested || 0;
       if (tabCountPending) tabCountPending.innerText = s.pending || 0;
       if (navInterestedPill) navInterestedPill.innerText = s.interested || 0;
@@ -281,6 +288,7 @@ function renderTable(list) {
         <td>
           <select class="interest-pill-select ${interestClass}" onchange="updateLeadInterest('${item.id}', this.value, event)" title="Change candidate lead status">
             <option value="Interested" ${interest === 'Interested' ? 'selected' : ''}>⭐ Interested</option>
+            <option value="Converted" ${interest === 'Converted' ? 'selected' : ''}>🎓 Converted</option>
             <option value="Not Interested" ${interest === 'Not Interested' ? 'selected' : ''}>❌ Not Interested</option>
             <option value="Pending" ${interest === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
           </select>
@@ -309,6 +317,9 @@ function renderTable(list) {
           <div class="table-actions">
             <button class="action-icon-btn" onclick="openDetailModal('${item.id}')" title="View Full Dossier & Notes">
               <i class="fa-solid fa-file-pen"></i>
+            </button>
+            <button class="action-icon-btn" style="color: #0d9488;" onclick="openConvertLeadModal('${item.id}')" title="Convert Lead to Enrolled Candidate">
+              <i class="fa-solid fa-user-plus"></i>
             </button>
             <button class="action-icon-btn delete" onclick="deleteEnquiry('${item.id}', '${escapeHtml(item.fullName)}')" title="Delete Record">
               <i class="fa-solid fa-trash-can"></i>
@@ -592,34 +603,57 @@ window.deleteEnquiry = async function(id, name, onSuccess) {
 
 function initViewTabs() {
   const tabEnquiries = document.getElementById('tabNavEnquiries');
+  const tabCandidates = document.getElementById('tabNavCandidates');
   const tabPrograms = document.getElementById('tabNavPrograms');
   const tabCertificates = document.getElementById('tabNavCertificates');
   const viewEnquiries = document.getElementById('viewEnquiries');
+  const viewCandidates = document.getElementById('viewCandidates');
   const viewPrograms = document.getElementById('viewPrograms');
   const viewCertificates = document.getElementById('viewCertificates');
   const statCardPrograms = document.getElementById('statCardPrograms');
+  const statCardConverted = document.getElementById('statCardConverted');
 
   if (!tabEnquiries || !tabPrograms) return;
 
   function showEnquiriesView() {
     tabEnquiries.classList.add('active');
+    if (tabCandidates) tabCandidates.classList.remove('active');
     tabPrograms.classList.remove('active');
     if (tabCertificates) tabCertificates.classList.remove('active');
 
     viewEnquiries.classList.remove('hidden');
+    if (viewCandidates) viewCandidates.classList.add('hidden');
     viewPrograms.classList.add('hidden');
     if (viewCertificates) viewCertificates.classList.add('hidden');
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function showCandidatesView() {
+    if (tabCandidates) tabCandidates.classList.add('active');
+    tabEnquiries.classList.remove('active');
+    tabPrograms.classList.remove('active');
+    if (tabCertificates) tabCertificates.classList.remove('active');
+
+    if (viewCandidates) viewCandidates.classList.remove('hidden');
+    viewEnquiries.classList.add('hidden');
+    viewPrograms.classList.add('hidden');
+    if (viewCertificates) viewCertificates.classList.add('hidden');
+
+    fetchCandidates();
+    fetchCandidateStats();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function showProgramsView(scrollToAnalytics = true) {
     tabPrograms.classList.add('active');
     tabEnquiries.classList.remove('active');
+    if (tabCandidates) tabCandidates.classList.remove('active');
     if (tabCertificates) tabCertificates.classList.remove('active');
 
     viewPrograms.classList.remove('hidden');
     viewEnquiries.classList.add('hidden');
+    if (viewCandidates) viewCandidates.classList.add('hidden');
     if (viewCertificates) viewCertificates.classList.add('hidden');
     
     // Refresh latest programs & analytics
@@ -640,10 +674,12 @@ function initViewTabs() {
   function showCertificatesView() {
     if (tabCertificates) tabCertificates.classList.add('active');
     tabEnquiries.classList.remove('active');
+    if (tabCandidates) tabCandidates.classList.remove('active');
     tabPrograms.classList.remove('active');
 
     if (viewCertificates) viewCertificates.classList.remove('hidden');
     viewEnquiries.classList.add('hidden');
+    if (viewCandidates) viewCandidates.classList.add('hidden');
     viewPrograms.classList.add('hidden');
 
     fetchCertificates();
@@ -652,22 +688,30 @@ function initViewTabs() {
   }
 
   tabEnquiries.addEventListener('click', showEnquiriesView);
+  if (tabCandidates) tabCandidates.addEventListener('click', showCandidatesView);
   tabPrograms.addEventListener('click', () => showProgramsView(true));
   if (tabCertificates) tabCertificates.addEventListener('click', showCertificatesView);
 
   if (statCardPrograms) {
     statCardPrograms.addEventListener('click', () => showProgramsView(true));
   }
+  if (statCardConverted) {
+    statCardConverted.addEventListener('click', showCandidatesView);
+  }
 
   // Support direct hash routing
-  if (window.location.hash === '#programs' || window.location.hash === '#analytics') {
+  if (window.location.hash === '#candidates' || window.location.hash === '#students') {
+    showCandidatesView();
+  } else if (window.location.hash === '#programs' || window.location.hash === '#analytics') {
     showProgramsView(true);
   } else if (window.location.hash === '#certificates' || window.location.hash === '#certifications') {
     showCertificatesView();
   }
 
   window.addEventListener('hashchange', () => {
-    if (window.location.hash === '#programs' || window.location.hash === '#analytics') {
+    if (window.location.hash === '#candidates' || window.location.hash === '#students') {
+      showCandidatesView();
+    } else if (window.location.hash === '#programs' || window.location.hash === '#analytics') {
       showProgramsView(true);
     } else if (window.location.hash === '#certificates' || window.location.hash === '#certifications') {
       showCertificatesView();
@@ -1344,4 +1388,618 @@ function initCertificateManagement() {
       alert('Delete error: ' + err.message);
     }
   };
+}
+
+/* ==========================================================================
+   08. CONVERTED CANDIDATES & LMS DATABASE ENGINE
+   ========================================================================== */
+let allCandidatesCache = [];
+
+function initCandidateManagement() {
+  const searchInput = document.getElementById('candSearchInput');
+  const courseFilter = document.getElementById('candCourseFilter');
+  const paymentFilter = document.getElementById('candPaymentFilter');
+  const eligibleFilter = document.getElementById('candEligibleFilter');
+  const refreshBtn = document.getElementById('refreshCandBtn');
+  const exportCsvBtn = document.getElementById('exportCandCsvBtn');
+
+  const openAddBtn = document.getElementById('openAddCandidateBtn');
+  const candModal = document.getElementById('candidateModal');
+  const closeCandBtn = document.getElementById('closeCandidateModalBtn');
+  const cancelCandBtn = document.getElementById('cancelCandidateModalBtn');
+  const candForm = document.getElementById('candidateForm');
+
+  const payModal = document.getElementById('paymentRecordModal');
+  const closePayBtn = document.getElementById('closePaymentModalBtn');
+  const cancelPayBtn = document.getElementById('cancelPaymentModalBtn');
+  const payForm = document.getElementById('paymentRecordForm');
+
+  const convertModal = document.getElementById('convertLeadModal');
+  const closeConvertBtn = document.getElementById('closeConvertLeadModalBtn');
+  const cancelConvertBtn = document.getElementById('cancelConvertLeadModalBtn');
+  const convertForm = document.getElementById('convertLeadForm');
+  const modalConvertLeadBtn = document.getElementById('modalConvertLeadBtn');
+
+  // Search input with debounce
+  let candDebounceTimer;
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(candDebounceTimer);
+      candDebounceTimer = setTimeout(fetchCandidates, 300);
+    });
+  }
+
+  if (courseFilter) courseFilter.addEventListener('change', fetchCandidates);
+  if (paymentFilter) paymentFilter.addEventListener('change', fetchCandidates);
+  if (eligibleFilter) eligibleFilter.addEventListener('change', fetchCandidates);
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      refreshBtn.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i> Loading...';
+      Promise.all([fetchCandidates(), fetchCandidateStats()]).finally(() => {
+        refreshBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> <span>Refresh</span>';
+      });
+    });
+  }
+
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', () => {
+      const downloadUrl = `/api/candidates/export/csv?token=${encodeURIComponent(currentToken)}`;
+      window.open(downloadUrl, '_blank');
+    });
+  }
+
+  // Candidate Modal Controls
+  if (openAddBtn) openAddBtn.addEventListener('click', () => openAddCandidateModal());
+  if (closeCandBtn) closeCandBtn.addEventListener('click', closeCandidateModal);
+  if (cancelCandBtn) cancelCandBtn.addEventListener('click', closeCandidateModal);
+
+  function openCandidateModal() {
+    if (candModal) {
+      candModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeCandidateModal() {
+    if (candModal) {
+      candModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Save / Update Candidate Form
+  if (candForm) {
+    candForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('saveCandidateSubmitBtn');
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+      const id = document.getElementById('candFormId').value;
+      const isEdit = Boolean(id);
+
+      const payload = {
+        fullName: document.getElementById('candFormFullName').value.trim(),
+        email: document.getElementById('candFormEmail').value.trim(),
+        phone: document.getElementById('candFormPhone').value.trim(),
+        whatsapp: document.getElementById('candFormWhatsapp').value.trim(),
+        program: document.getElementById('candFormProgram').value,
+        batch: document.getElementById('candFormBatch').value,
+        admissionDate: document.getElementById('candFormAdmissionDate').value,
+        totalFees: Number(document.getElementById('candFormTotalFees').value) || 0,
+        paidFees: Number(document.getElementById('candFormPaidFees').value) || 0,
+        learningMode: document.getElementById('candFormMode').value,
+        attendance: Number(document.getElementById('candFormAttendance').value) || 90,
+        projectTitle: document.getElementById('candFormProject').value.trim(),
+        eligibleForCertificate: document.getElementById('candFormEligibleCert').checked,
+        notes: document.getElementById('candFormNotes').value.trim()
+      };
+
+      try {
+        const url = isEdit ? `/api/candidates/${id}` : '/api/candidates';
+        const method = isEdit ? 'PATCH' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          closeCandidateModal();
+          fetchCandidates();
+          fetchCandidateStats();
+        } else {
+          alert('Error saving candidate: ' + (data.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Server error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    });
+  }
+
+  // Payment Modal Controls
+  if (closePayBtn) closePayBtn.addEventListener('click', closePaymentModal);
+  if (cancelPayBtn) cancelPayBtn.addEventListener('click', closePaymentModal);
+
+  function openPaymentModal() {
+    if (payModal) {
+      payModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closePaymentModal() {
+    if (payModal) {
+      payModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (payForm) {
+    payForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('savePaymentSubmitBtn');
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Recording...';
+
+      const candId = document.getElementById('payCandidateId').value;
+      const payload = {
+        amount: Number(document.getElementById('payAmount').value) || 0,
+        method: document.getElementById('payMethod').value,
+        date: document.getElementById('payDate').value,
+        receiptNo: document.getElementById('payReceiptNo').value.trim(),
+        notes: document.getElementById('payNotes').value.trim()
+      };
+
+      try {
+        const res = await fetch(`/api/candidates/${candId}/payments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          closePaymentModal();
+          fetchCandidates();
+          fetchCandidateStats();
+        } else {
+          alert('Error recording payment: ' + (data.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Server error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    });
+  }
+
+  // Convert Lead Modal Controls
+  if (closeConvertBtn) closeConvertBtn.addEventListener('click', closeConvertModal);
+  if (cancelConvertBtn) cancelConvertBtn.addEventListener('click', closeConvertModal);
+
+  function openConvertModal() {
+    if (convertModal) {
+      convertModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeConvertModal() {
+    if (convertModal) {
+      convertModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (modalConvertLeadBtn) {
+    modalConvertLeadBtn.addEventListener('click', () => {
+      const activeEnquiryId = document.getElementById('deleteEnquiryFromModalBtn').dataset.enquiryId;
+      if (activeEnquiryId) {
+        window.openConvertLeadModal(activeEnquiryId);
+      }
+    });
+  }
+
+  if (convertForm) {
+    convertForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('saveConvertLeadSubmitBtn');
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Converting...';
+
+      const enqId = document.getElementById('convertEnquiryId').value;
+      const payload = {
+        totalFees: Number(document.getElementById('convertTotalFees').value) || 35000,
+        paidFees: Number(document.getElementById('convertPaidFees').value) || 0,
+        batch: document.getElementById('convertBatch').value,
+        notes: document.getElementById('convertNotes').value.trim()
+      };
+
+      try {
+        const res = await fetch(`/api/enquiries/${enqId}/convert`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          closeConvertModal();
+          // Close detail modal if open
+          const detailModal = document.getElementById('detailModal');
+          if (detailModal) detailModal.classList.remove('open');
+
+          alert(data.message || 'Lead converted successfully to registered student candidate!');
+          fetchEnquiries();
+          fetchStats();
+          fetchCandidates();
+          fetchCandidateStats();
+        } else {
+          alert('Error converting lead: ' + (data.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Server error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    });
+  }
+
+  // Expose global window actions
+  window.openAddCandidateModal = function() {
+    if (candForm) {
+      candForm.reset();
+      document.getElementById('candFormId').value = '';
+      document.getElementById('candidateModalHeading').innerText = 'Enroll Converted Candidate';
+      document.getElementById('candFormAdmissionDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('candFormEligibleCert').checked = false;
+    }
+    openCandidateModal();
+  };
+
+  window.openEditCandidateModal = function(id) {
+    const cand = allCandidatesCache.find(c => c.id === id || c.studentId === id);
+    if (!cand) return;
+
+    document.getElementById('candFormId').value = cand.id;
+    document.getElementById('candidateModalHeading').innerText = `Edit Candidate: ${cand.fullName}`;
+    document.getElementById('candFormFullName').value = cand.fullName || '';
+    document.getElementById('candFormEmail').value = cand.email || '';
+    document.getElementById('candFormPhone').value = cand.phone || '';
+    document.getElementById('candFormWhatsapp').value = cand.whatsapp || '';
+    document.getElementById('candFormProgram').value = cand.program || '';
+    document.getElementById('candFormBatch').value = cand.batch || '';
+    document.getElementById('candFormAdmissionDate').value = (cand.admissionDate || '').slice(0, 10);
+    document.getElementById('candFormTotalFees').value = cand.totalFees || 0;
+    document.getElementById('candFormPaidFees').value = cand.paidFees || 0;
+    document.getElementById('candFormMode').value = cand.learningMode || 'Classroom Training';
+    document.getElementById('candFormAttendance').value = cand.attendance || 90;
+    document.getElementById('candFormProject').value = cand.projectTitle || '';
+    document.getElementById('candFormEligibleCert').checked = Boolean(cand.eligibleForCertificate);
+    document.getElementById('candFormNotes').value = cand.notes || '';
+
+    openCandidateModal();
+  };
+
+  window.openRecordPaymentModal = function(id) {
+    const cand = allCandidatesCache.find(c => c.id === id || c.studentId === id);
+    if (!cand) return;
+
+    document.getElementById('payCandidateId').value = cand.id;
+    const balance = Math.max(0, (Number(cand.totalFees) || 0) - (Number(cand.paidFees) || 0));
+    document.getElementById('paymentModalSub').innerText = `Student: ${cand.fullName} (${cand.studentId}) • Total: ₹${Number(cand.totalFees).toLocaleString('en-IN')} | Remaining Due: ₹${balance.toLocaleString('en-IN')}`;
+    document.getElementById('payAmount').value = balance > 0 ? balance : '';
+    document.getElementById('payDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('payReceiptNo').value = `REC-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
+    document.getElementById('payNotes').value = '';
+
+    openPaymentModal();
+  };
+
+  window.openConvertLeadModal = function(id) {
+    const enq = allEnquiriesCache.find(e => e.id === id || e.trackingId === id);
+    if (!enq) return;
+
+    document.getElementById('convertEnquiryId').value = enq.id;
+    document.getElementById('convertLeadName').innerText = enq.fullName;
+    document.getElementById('convertLeadMeta').innerText = `${enq.email} • ${enq.phone} • ${enq.course || 'Training Program'}`;
+    document.getElementById('convertTotalFees').value = 35000;
+    document.getElementById('convertPaidFees').value = 15000;
+    document.getElementById('convertNotes').value = `Converted from enquiry (${enq.trackingId}).`;
+
+    openConvertModal();
+  };
+
+  // Toggle Certificate Eligibility
+  window.toggleCandidateEligibility = async function(id) {
+    try {
+      const res = await fetch(`/api/candidates/${id}/toggle-eligibility`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}`
+        }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const item = allCandidatesCache.find(c => c.id === id || c.studentId === id);
+        if (item) {
+          item.eligibleForCertificate = data.eligible;
+        }
+        renderCandidatesTable(allCandidatesCache);
+        fetchCandidateStats();
+      } else {
+        alert('Could not toggle eligibility: ' + (data.error || 'Server error'));
+      }
+    } catch (err) {
+      alert('Network error: ' + err.message);
+    }
+  };
+
+  // Direct bridge from Candidate to Certificate Issuer
+  window.directIssueCertificate = function(candidateId) {
+    const cand = allCandidatesCache.find(c => c.id === candidateId || c.studentId === candidateId);
+    if (!cand) return;
+
+    // Switch to certificates tab or open cert modal
+    const certModal = document.getElementById('certModal');
+    if (certModal) {
+      document.getElementById('certFormInternalId').value = '';
+      document.getElementById('certModalHeading').innerText = `Issue Certificate for: ${cand.fullName}`;
+      document.getElementById('certFormName').value = cand.fullName;
+      document.getElementById('certFormEmail').value = cand.email;
+      document.getElementById('certFormPhone').value = cand.phone;
+      document.getElementById('certFormProgram').value = cand.program;
+      document.getElementById('certFormDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('certFormGrade').value = 'Distinction (Grade A+ • 95%)';
+      document.getElementById('certFormCustomId').value = '';
+      document.getElementById('certFormNotes').value = `Successfully completed ${cand.program}. Capstone: ${cand.projectTitle || 'Industrial Project'}.`;
+
+      certModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  };
+
+  window.previewCertificateById = function(certId) {
+    const cert = allCertificatesCache.find(c => c.certId === certId || c.id === certId);
+    if (cert && typeof window.openPreviewModal === 'function') {
+      window.openPreviewModal(cert);
+    } else {
+      alert(`Certificate ID: ${certId}`);
+    }
+  };
+
+  window.deleteCandidate = async function(id, name) {
+    if (!confirm(`Are you sure you want to permanently remove candidate record for "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/candidates/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${currentToken}` }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        fetchCandidates();
+        fetchCandidateStats();
+      } else {
+        alert('Delete failed: ' + (data.error || 'Server error'));
+      }
+    } catch (err) {
+      alert('Error deleting candidate: ' + err.message);
+    }
+  };
+}
+
+// Fetch Candidates
+async function fetchCandidates() {
+  const tableBody = document.getElementById('candidatesTableBody');
+  const search = document.getElementById('candSearchInput') ? document.getElementById('candSearchInput').value.trim() : '';
+  const course = document.getElementById('candCourseFilter') ? document.getElementById('candCourseFilter').value : 'All';
+  const paymentStatus = document.getElementById('candPaymentFilter') ? document.getElementById('candPaymentFilter').value : 'All';
+  const eligible = document.getElementById('candEligibleFilter') ? document.getElementById('candEligibleFilter').value : 'All';
+
+  try {
+    let url = `/api/candidates?program=${encodeURIComponent(course)}&paymentStatus=${encodeURIComponent(paymentStatus)}&eligible=${encodeURIComponent(eligible)}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${currentToken}` }
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      allCandidatesCache = data.data;
+      renderCandidatesTable(data.data);
+    } else {
+      renderEmptyCandidatesTable('No candidate records found matching filters.');
+    }
+  } catch (err) {
+    console.error('Error fetching candidates:', err);
+    renderEmptyCandidatesTable(`Could not load candidates: ${err.message}.`);
+  }
+}
+
+// Fetch Candidate Stats & Financial Overview
+async function fetchCandidateStats() {
+  try {
+    const res = await fetch('/api/candidates/stats', {
+      headers: { 'Authorization': `Bearer ${currentToken}` }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    if (data.success && data.stats) {
+      const s = data.stats;
+      const elTotal = document.getElementById('statCandTotal');
+      const elCollected = document.getElementById('statCandFeesCollected');
+      const elPending = document.getElementById('statCandFeesPending');
+      const elEligible = document.getElementById('statCandEligible');
+      const elPill = document.getElementById('navCandidatesPill');
+
+      if (elTotal) elTotal.innerText = s.total || 0;
+      if (elCollected) elCollected.innerText = `₹${(s.feesCollected || 0).toLocaleString('en-IN')}`;
+      if (elPending) elPending.innerText = `₹${(s.feesPending || 0).toLocaleString('en-IN')}`;
+      if (elEligible) elEligible.innerText = `${s.eligibleForCertificate || 0} / ${s.total || 0}`;
+      if (elPill) elPill.innerText = s.total || 0;
+    }
+  } catch (err) {
+    console.warn('Could not fetch candidate stats:', err);
+  }
+}
+
+// Render Candidates Table
+function renderCandidatesTable(list) {
+  const tableBody = document.getElementById('candidatesTableBody');
+  if (!tableBody) return;
+
+  if (!list || list.length === 0) {
+    renderEmptyCandidatesTable('No candidate records enrolled yet. Click "+ Enroll New Candidate" above.');
+    return;
+  }
+
+  tableBody.innerHTML = list.map(item => {
+    const dateFormatted = new Date(item.admissionDate || item.createdAt).toLocaleDateString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+
+    const cleanPhone = (item.phone || '').replace(/[^0-9]/g, '');
+    const waUrl = `https://wa.me/${cleanPhone}?text=Hello%20${encodeURIComponent(item.fullName)},%20Greetings%20from%20IPTI%20Academic%20Desk%20(Ref:%20${encodeURIComponent(item.studentId)}).`;
+
+    const totalF = Number(item.totalFees) || 0;
+    const paidF = Number(item.paidFees) || 0;
+    const balanceF = Math.max(0, totalF - paidF);
+    const pStatus = (item.paymentStatus || 'Pending').toLowerCase();
+
+    return `
+      <tr data-cand-id="${item.id}">
+        <td>
+          <div class="candidate-cell">
+            <span class="candidate-name">${escapeHtml(item.fullName)}</span>
+            <span class="candidate-id-badge"><i class="fa-solid fa-id-card"></i> ${escapeHtml(item.studentId)}</span>
+            <div class="candidate-contact" style="margin-top: 4px;">
+              <span><i class="fa-solid fa-envelope"></i> ${escapeHtml(item.email)}</span>
+              <span>•</span>
+              <span><i class="fa-solid fa-phone"></i> ${escapeHtml(item.phone)}</span>
+            </div>
+          </div>
+        </td>
+
+        <td class="course-cell">
+          <span class="course-name">${escapeHtml(item.program || 'Industrial Automation')}</span>
+          <span class="course-mode"><i class="fa-solid fa-clock"></i> ${escapeHtml(item.batch || 'Morning Cohort')}</span>
+          <span style="font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 3px;">
+            <i class="fa-solid fa-calendar-check"></i> Admitted: ${dateFormatted}
+          </span>
+        </td>
+
+        <td>
+          <div class="fee-breakdown-cell">
+            <div class="fee-figures">
+              <span>₹${paidF.toLocaleString('en-IN')}</span>
+              <span style="color: var(--text-dim); font-weight: 500;"> / ₹${totalF.toLocaleString('en-IN')}</span>
+            </div>
+            ${balanceF > 0 ? `<span class="fee-figures due">Due: ₹${balanceF.toLocaleString('en-IN')}</span>` : ''}
+            <span class="fee-pill ${pStatus}">
+              <i class="fa-solid ${pStatus === 'paid' ? 'fa-circle-check' : pStatus === 'partial' ? 'fa-hourglass-half' : 'fa-circle-exclamation'}"></i>
+              ${pStatus === 'paid' ? 'Fully Paid' : pStatus === 'partial' ? 'Partial Due' : 'Payment Due'}
+            </span>
+            <button class="btn-add-payment" onclick="openRecordPaymentModal('${item.id}')">
+              <i class="fa-solid fa-plus-circle"></i> Record Installment
+            </button>
+          </div>
+        </td>
+
+        <td>
+          <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+            <button class="btn-eligibility-toggle ${item.eligibleForCertificate ? 'eligible' : 'not-eligible'}" onclick="toggleCandidateEligibility('${item.id}')" title="Click to toggle certificate qualification">
+              <i class="fa-solid ${item.eligibleForCertificate ? 'fa-circle-check' : 'fa-clock'}"></i>
+              <span>${item.eligibleForCertificate ? 'Eligible for Certificate' : 'Make Eligible'}</span>
+            </button>
+
+            ${item.eligibleForCertificate && !item.certificateIssued ? `
+              <button class="btn-action-small" onclick="directIssueCertificate('${item.id}')" style="color: var(--accent-gold); border-color: var(--accent-gold-border);">
+                <i class="fa-solid fa-award"></i> Issue Credential
+              </button>
+            ` : ''}
+
+            ${item.certificateIssued && item.certificateId ? `
+              <span class="badge-cert-issued" onclick="previewCertificateById('${item.certificateId}')" title="View Digital Diploma">
+                <i class="fa-solid fa-diploma"></i> ${escapeHtml(item.certificateId)} ↗
+              </span>
+            ` : ''}
+          </div>
+        </td>
+
+        <td>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 0.82rem; font-weight: 750; color: ${item.attendance >= 90 ? '#059669' : '#d97706'};">
+                <i class="fa-solid fa-user-check"></i> ${item.attendance || 90}% Lab Attendance
+              </span>
+            </div>
+            <span style="font-size: 0.74rem; color: var(--text-secondary); line-height: 1.3;" title="${escapeHtml(item.projectTitle || 'Capstone Project')}">
+              <i class="fa-solid fa-diagram-project"></i> ${escapeHtml(item.projectTitle || 'Industrial Capstone Rig')}
+            </span>
+          </div>
+        </td>
+
+        <td>
+          <div class="table-actions">
+            <a href="${waUrl}" target="_blank" class="action-icon-btn whatsapp" title="Chat on WhatsApp">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+            <button class="action-icon-btn" onclick="openEditCandidateModal('${item.id}')" title="Edit Candidate & Fees">
+              <i class="fa-solid fa-user-pen"></i>
+            </button>
+            <button class="action-icon-btn delete" onclick="deleteCandidate('${item.id}', '${escapeHtml(item.fullName)}')" title="Delete Student Record">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderEmptyCandidatesTable(message) {
+  const tableBody = document.getElementById('candidatesTableBody');
+  if (tableBody) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <i class="fa-solid fa-user-graduate"></i>
+            <p>${message}</p>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
 }

@@ -88,6 +88,7 @@ body {
 #loginOverlay.hidden,
 #adminApp.hidden,
 #viewEnquiries.hidden,
+#viewCandidates.hidden,
 #viewPrograms.hidden,
 #viewCertificates.hidden {
   display: none !important;
@@ -246,10 +247,14 @@ body {
 }
 
 .admin-header-brand img {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  border: 1.5px solid var(--accent-gold);
+  border: 2px solid var(--accent-gold);
+  background: #ffffff;
+  padding: 2px;
+  box-shadow: 0 2px 8px rgba(15, 67, 50, 0.12);
+  object-fit: contain;
 }
 
 .admin-header-title {
@@ -1056,6 +1061,12 @@ td {
   border-color: rgba(217, 119, 6, 0.3);
 }
 
+.lead-count-badge.teal {
+  background: #f0fdfa;
+  color: #0d9488;
+  border-color: rgba(13, 148, 136, 0.35);
+}
+
 /* Section Header for Programs */
 .programs-view-header {
   display: flex;
@@ -1310,6 +1321,12 @@ td {
   border-color: #a7f3d0;
 }
 
+.interest-pill-select.converted {
+  background: #f0fdfa;
+  color: #0f766e;
+  border-color: #99f6e4;
+}
+
 .interest-pill-select.not-interested {
   background: #fef2f2;
   color: #b91c1c;
@@ -1323,14 +1340,160 @@ td {
 }
 
 /* ==========================================================================
-   CERTIFICATES MODAL & DIPLOMA PREVIEW STYLES
+   CONVERTED CANDIDATES LEDGER & LMS STYLES
    ========================================================================== */
+.candidate-id-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 750;
+  background: var(--bg-recessed);
+  color: var(--primary);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.fee-breakdown-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fee-figures {
+  font-size: 0.86rem;
+  font-weight: 750;
+  color: var(--text-main);
+}
+
+.fee-figures .due {
+  color: #d97706;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.fee-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.fee-pill.paid {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.25);
+}
+
+.fee-pill.partial {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid rgba(217, 119, 6, 0.25);
+}
+
+.fee-pill.pending {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.btn-add-payment {
+  background: none;
+  border: none;
+  color: #059669;
+  font-size: 0.74rem;
+  font-weight: 750;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 3px;
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-add-payment:hover {
+  color: #047857;
+}
+
+/* Certificate Eligibility Interactive Button */
+.btn-eligibility-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-eligibility-toggle.eligible {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1.5px solid #059669;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.15);
+}
+
+.btn-eligibility-toggle.eligible:hover {
+  background: #d1fae5;
+}
+
+.btn-eligibility-toggle.not-eligible {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+}
+
+.btn-eligibility-toggle.not-eligible:hover {
+  background: #f1f5f9;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.badge-cert-issued {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-gold-bg);
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold-border);
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.badge-cert-issued:hover {
+  background: #fef3c7;
+}
+
+#candidateModal, #paymentRecordModal, #convertLeadModal,
 #certModal, #certPreviewModal {
   position: fixed;
   inset: 0;
   background: rgba(12, 26, 20, 0.65);
   backdrop-filter: blur(8px);
   z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#candidateModal.open, #paymentRecordModal.open, #convertLeadModal.open,
+#certModal.open, #certPreviewModal.open {
+  display: flex !important;
+}
   display: none;
   align-items: center;
   justify-content: center;

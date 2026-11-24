@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTI Learner Portal • Student Desk & Fees Ledger</title>
+  <meta name="description" content="IPTI Student Portal: Login with your unique student ID to view enrolled programs, fee receipts, payment status, and certificate qualification.">
+  <link rel="icon" type="image/jpeg" href="assets/ipti-logo.jpg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <link rel="stylesheet" href="learner.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       01. LOGIN OVERLAY (STUDENT / CANDIDATE)
+       ========================================================================= -->
+  <div id="learnerLoginOverlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-logo-ring">
+          <img src="assets/ipti-logo.jpg" alt="IPTI Crest">
+        </div>
+        <h2>IPTI Learner Portal</h2>
+        <span class="sub">Institute of Professional Training & Innovation</span>
+      </div>
+
+      <div class="login-info-banner">
+        <i class="fa-solid fa-shield-halved" style="color: #059669;"></i>
+        <span>Sign in with your assigned <strong>Student ID</strong> or registered email address.</span>
+      </div>
+
+      <form id="learnerLoginForm" class="login-form">
+        <div class="form-group">
+          <label for="learnerInputId">Student ID or Email Address</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-id-card"></i>
+            <input type="text" id="learnerInputId" placeholder="e.g. IPTI-2026-STU-01 or student@example.com" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label for="learnerInputPass" style="margin-bottom: 0;">Password</label>
+            <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">Default: ipti@123</span>
+          </div>
+          <div class="input-with-icon password-wrap">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="learnerInputPass" placeholder="Enter password (default: ipti@123)" required autocomplete="current-password">
+            <button type="button" class="btn-toggle-pass" id="togglePassBtn" title="Show/Hide password">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="loginErrorMsg" class="login-error-msg hidden"></div>
+
+        <button type="submit" id="learnerLoginSubmitBtn" class="login-submit-btn">
+          <span>Sign In to Student Desk</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <!-- One-Click Demo Logins for Testing -->
+      <div class="demo-logins-section">
+        <span class="demo-title"><i class="fa-solid fa-bolt" style="color: var(--accent-gold);"></i> Quick Demo Student Accounts:</span>
+        <div class="demo-chips">
+          <button type="button" class="demo-chip" onclick="fillLearnerDemo('IPTI-2026-STU-01', 'ipti@123')">
+            <strong>Rahul V. Sharma</strong>
+            <span>Automation • Paid • Certified</span>
+          </button>
+          <button type="button" class="demo-chip" onclick="fillLearnerDemo('IPTI-2026-STU-02', 'ipti@123')">
+            <strong>Pooja Deshmukh</strong>
+            <span>Embedded • Partial Fee Due</span>
+          </button>
+          <button type="button" class="demo-chip" onclick="fillLearnerDemo('IPTI-2026-STU-05', 'ipti@123')">
+            <strong>Aryan Dewade</strong>
+            <span>AI Systems • Eligible for Cert</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="login-footer-links">
+        <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Return to Website</a>
+        <span>•</span>
+        <a href="admin.html"><i class="fa-solid fa-user-shield"></i> Admin Portal</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       02. LEARNER DASHBOARD APPLICATION
+       ========================================================================= -->
+  <div id="learnerApp" class="learner-app hidden">
+
+    <!-- Top Navigation -->
+    <header class="learner-header">
+      <div class="header-brand-wrap">
+        <a href="index.html" class="learner-brand-link">
+          <div class="logo-circle-badge">
+            <img src="assets/ipti-logo.jpg" alt="IPTI Crest">
+          </div>
+          <div class="brand-titles">
+            <h1>IPTI <span class="badge-desk">Student Desk</span></h1>
+            <span class="sub">Institute of Professional Training & Innovation</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="header-actions">
+        <div class="student-pill">
+          <div class="student-avatar" id="headerAvatar">RV</div>
+          <div class="student-info">
+            <span class="student-name" id="headerStudentName">Student Name</span>
+            <span class="student-id-tag" id="headerStudentId">IPTI-2026-STU-01</span>
+          </div>
+        </div>
+
+        <button id="openChangePassBtn" class="btn-header-action" title="Change Account Password">
+          <i class="fa-solid fa-key"></i>
+          <span>Change Password</span>
+        </button>
+
+        <button id="learnerLogoutBtn" class="btn-header-action logout" title="Sign out from portal">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Default Password Security Warning Banner -->
+    <div id="defaultPasswordBanner" class="security-warning-banner hidden">
+      <div class="security-banner-content">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div>
+          <strong>Initial Default Password in Use (ipti@123)</strong>
+          <p>For your account security and to protect your academic records, please change your password just like on corporate portals.</p>
+        </div>
+      </div>
+      <button id="bannerChangePassBtn" class="btn-security-action">
+        <i class="fa-solid fa-lock"></i> Set Personal Password
+      </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="learner-container">
+
+      <!-- Hero Welcome Card -->
+      <section class="welcome-card">
+        <div class="welcome-grid">
+          <div class="welcome-main">
+            <div class="welcome-eyebrow">
+              <span class="pulse-dot"></span>
+              <span>2026 ADMITTED COHORT • ACTIVE CANDIDATE</span>
+            </div>
+            <h2 id="welcomeGreeting">Welcome back, Rahul!</h2>
+            <p id="welcomeSub">Enrolled in <strong>Industrial Automation & Robotics (PLC/SCADA)</strong> at IPTI Engineering Innovation Center.</p>
+
+            <div class="cohort-tags-row">
+              <span class="cohort-tag" id="profileBatchTag"><i class="fa-solid fa-clock"></i> Morning Cohort (09:00 AM - 01:00 PM)</span>
+              <span class="cohort-tag" id="profileModeTag"><i class="fa-solid fa-location-dot"></i> Classroom Training</span>
+              <span class="cohort-tag gold" id="profileAdmitDate"><i class="fa-solid fa-calendar-check"></i> Admitted: 10 Jan 2026</span>
+            </div>
+          </div>
+
+          <div class="welcome-stats-box">
+            <div class="welcome-stat-col">
+              <span class="stat-number" id="quickAttendance">96%</span>
+              <span class="stat-label">Lab Attendance</span>
+            </div>
+            <div class="welcome-stat-divider"></div>
+            <div class="welcome-stat-col">
+              <span class="stat-number" id="quickFeeStatus" style="color: #059669;">PAID</span>
+              <span class="stat-label">Fee Status</span>
+            </div>
+            <div class="welcome-stat-divider"></div>
+            <div class="welcome-stat-col">
+              <span class="stat-number" id="quickCertStatus" style="color: var(--accent-gold);">ELIGIBLE</span>
+              <span class="stat-label">Certificate</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Grid: 2 Columns (Fees Ledger & Certificate Status) -->
+      <div class="dashboard-columns-grid">
+
+        <!-- Column 1: Fees & Accounts Ledger -->
+        <section class="portal-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon fee"><i class="fa-solid fa-receipt"></i></div>
+              <div>
+                <h3>Fees & Accounts Ledger</h3>
+                <span class="card-sub">Program fee summary, installment records, and payment receipts</span>
+              </div>
+            </div>
+            <span class="status-pill-badge" id="feeStatusPill">Fully Paid</span>
+          </div>
+
+          <!-- Fee KPI Cards Row -->
+          <div class="fee-kpi-grid">
+            <div class="fee-kpi-box">
+              <span class="kpi-label">Total Course Fee</span>
+              <span class="kpi-value" id="kpiTotalFees">₹35,000</span>
+              <span class="kpi-sub">Accredited tuition</span>
+            </div>
+            <div class="fee-kpi-box paid">
+              <span class="kpi-label">Total Paid Fees</span>
+              <span class="kpi-value" id="kpiPaidFees">₹35,000</span>
+              <span class="kpi-sub">Received to date</span>
+            </div>
+            <div class="fee-kpi-box due">
+              <span class="kpi-label">Remaining Balance</span>
+              <span class="kpi-value" id="kpiBalanceFees">₹0</span>
+              <span class="kpi-sub" id="kpiDueSub">Clearance complete</span>
+            </div>
+          </div>
+
+          <!-- Payment History Ledger -->
+          <div class="payment-ledger-wrap">
+            <div class="ledger-header-row">
+              <h4>Official Payment Receipts</h4>
+              <span class="receipt-count-tag" id="receiptCountTag">2 Transactions</span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="portal-table">
+                <thead>
+                  <tr>
+                    <th>Receipt No</th>
+                    <th>Payment Date</th>
+                    <th>Method</th>
+                    <th>Amount Paid</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentHistoryBody">
+                  <!-- Dynamically rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Column 2: Certificate & Academic Qualification -->
+        <section class="portal-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <div class="card-icon cert"><i class="fa-solid fa-award"></i></div>
+              <div>
+                <h3>Accreditation & Certificate Status</h3>
+                <span class="card-sub">ISO 9001:2015 credential qualification & digital diploma verification</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Certificate Showcase Area -->
+          <div id="certificateShowcaseArea">
+            <!-- Rendered dynamically depending on eligibility & issuance -->
+          </div>
+
+          <!-- Academic Progress Checklist -->
+          <div class="academic-checklist-card">
+            <h4><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Academic Standing & Qualification Criteria</h4>
+            <div class="criteria-list" id="criteriaList">
+              <div class="criteria-item met">
+                <i class="fa-solid fa-circle-check"></i>
+                <div>
+                  <strong>Official Cohort Enrollment Confirmed</strong>
+                  <span>Seat locked and student dossier registered with IPTI Academic Registry.</span>
+                </div>
+              </div>
+              <div class="criteria-item" id="critFeeItem">
+                <i class="fa-solid fa-circle-check" id="critFeeIcon"></i>
+                <div>
+                  <strong id="critFeeTitle">100% Course Fee Clearance</strong>
+                  <span id="critFeeDesc">All program tuition installments cleared with receipt generation.</span>
+                </div>
+              </div>
+              <div class="criteria-item met">
+                <i class="fa-solid fa-circle-check"></i>
+                <div>
+                  <strong id="critAttendanceTitle">Minimum 85% Hands-on Lab Bench Attendance</strong>
+                  <span id="critAttendanceDesc">Physical bench testing and live equipment hours fulfilled.</span>
+                </div>
+              </div>
+              <div class="criteria-item met">
+                <i class="fa-solid fa-circle-check"></i>
+                <div>
+                  <strong>Capstone Project & Practical Evaluation</strong>
+                  <span id="critProjectDesc">Project review approved by lead industry instructor.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- Section: Course Curriculum & Lab Schedule -->
+      <section class="portal-card" style="margin-top: 24px;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon curriculum"><i class="fa-solid fa-chalkboard-user"></i></div>
+            <div>
+              <h3>Enrolled Curriculum & Lab Facilities</h3>
+              <span class="card-sub">Core training modules, practical bench schedule, and capstone briefs</span>
+            </div>
+          </div>
+          <span class="cohort-tag" style="background: var(--bg-canvas);"><i class="fa-solid fa-flask"></i> 120+ Dedicated Lab Bench Hours</span>
+        </div>
+
+        <div class="curriculum-modules-grid" id="curriculumModulesGrid">
+          <!-- Dynamically populated according to student's program -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="learner-footer">
+      <div class="footer-inner">
+        <p>© 2026 Institute of Professional Training & Innovation (IPTI). ISO 9001:2015 Accredited Center of Excellence.</p>
+        <div class="footer-links">
+          <a href="index.html">Website Home</a>
+          <span>•</span>
+          <a href="admin.html">Admin Portal</a>
+          <span>•</span>
+          <a href="mailto:support@ipti.edu.in">Academic Support</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- =========================================================================
+       03. CHANGE PASSWORD MODAL (JUST LIKE EMPORA)
+       ========================================================================= -->
+  <div id="changePasswordModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" id="closePassModalBtn">&times;</button>
+      
+      <div class="modal-header">
+        <div class="modal-icon-badge">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3>Update Account Password</h3>
+        <p>Set a secure personal password for your IPTI student account.</p>
+      </div>
+
+      <form id="changePasswordForm">
+        <div class="form-group">
+          <label for="currentPasswordInput">Current Password *</label>
+          <div class="input-with-icon password-wrap">
+            <i class="fa-solid fa-key"></i>
+            <input type="password" id="currentPasswordInput" placeholder="Enter current password (default: ipti@123)" required>
+          </div>
+          <span class="field-hint">Initial default password is <code>ipti@123</code></span>
+        </div>
+
+        <div class="form-group">
+          <label for="newPasswordInput">New Password *</label>
+          <div class="input-with-icon password-wrap">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="newPasswordInput" placeholder="Minimum 6 characters" minlength="6" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPasswordInput">Confirm New Password *</label>
+          <div class="input-with-icon password-wrap">
+            <i class="fa-solid fa-check-double"></i>
+            <input type="password" id="confirmPasswordInput" placeholder="Re-enter new password" minlength="6" required>
+          </div>
+        </div>
+
+        <div id="passChangeError" class="login-error-msg hidden"></div>
+        <div id="passChangeSuccess" class="login-success-msg hidden"></div>
+
+        <div class="modal-actions">
+          <button type="button" id="cancelPassModalBtn" class="btn-cancel">Cancel</button>
+          <button type="submit" id="savePassSubmitBtn" class="btn-submit">
+            <span>Update Password</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       04. DIGITAL CERTIFICATE DIPLOMA PREVIEW MODAL
+       ========================================================================= -->
+  <div id="learnerDiplomaModal" class="modal-overlay">
+    <div class="modal-card diploma-modal-card">
+      <div class="diploma-modal-top">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-award" style="color: var(--accent-gold); font-size: 1.2rem;"></i>
+          <h3 style="margin: 0; font-size: 1.1rem; color: var(--primary);">Official Digital Credential</h3>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" id="printDiplomaBtn" class="btn-print"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+          <button class="modal-close static" id="closeDiplomaModalBtn">&times;</button>
+        </div>
+      </div>
+
+      <!-- Printable Diploma Sheet -->
+      <div class="diploma-sheet" id="diplomaPrintArea">
+        <div class="diploma-inner-border">
+          <div class="diploma-header">
+            <img src="assets/ipti-logo.jpg" alt="IPTI Crest" class="diploma-crest">
+            <h2 class="diploma-inst-title">INSTITUTE OF PROFESSIONAL TRAINING & INNOVATION</h2>
+            <p class="diploma-sub">Government Recognized • ISO 9001:2015 Certified Center of Excellence</p>
+          </div>
+
+          <div class="diploma-body">
+            <span class="diploma-cert-text">THIS IS TO CERTIFY THAT</span>
+            <h1 class="diploma-student-name" id="modalStudentName">Rahul V. Sharma</h1>
+            <p class="diploma-completion-text">has successfully satisfied all rigorous practical assessments and industrial capstone requirements for</p>
+            <h3 class="diploma-program-title" id="modalProgramName">Industrial Automation & Robotics (PLC/SCADA)</h3>
+            <div class="diploma-grade-badge" id="modalGradeBadge">Awarded with Distinction (Grade A+ • 96%)</div>
+          </div>
+
+          <div class="diploma-footer">
+            <div class="diploma-sign-col">
+              <span class="diploma-sign-line">Aryan Dewade</span>
+              <span class="diploma-sign-title">Academic Director</span>
+            </div>
+            <div class="diploma-seal-col">
+              <img src="assets/ipti-luxury-gold.svg" alt="Official Seal" style="width: 72px; height: 72px; filter: drop-shadow(0 4px 10px rgba(197, 160, 89, 0.4));">
+              <span class="diploma-id-tag" id="modalCertId">IPTI-CERT-2026-1042</span>
+            </div>
+            <div class="diploma-sign-col">
+              <span class="diploma-sign-line" id="modalIssueDate">18 February 2026</span>
+              <span class="diploma-sign-title">Date of Conferral</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="learner.js"></script>
+</body>
+</html>

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initModals();
   initForms();
   loadDynamicPrograms();
+  initBrandmarkSwitcher();
 });
 
 /* --------------------------------------------------------------------------
@@ -768,4 +769,102 @@ function escapeHtmlApp(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/* --------------------------------------------------------------------------
+   10. BRANDMARK & DESIGN VARIATIONS SWITCHER
+   -------------------------------------------------------------------------- */
+function initBrandmarkSwitcher() {
+  const mainLogo = document.getElementById('mainBrandLogo');
+  const consoleLogo = document.getElementById('consoleBrandLogo');
+  const footerLogo = document.getElementById('footerBrandLogo');
+  const pills = document.querySelectorAll('#brandSwitcherPills .switcher-pill');
+  const applyBtns = document.querySelectorAll('[data-apply-logo]');
+
+  function updateLogoVisuals(src, label) {
+    [mainLogo, consoleLogo, footerLogo].forEach(img => {
+      if (!img) return;
+      img.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      img.style.opacity = '0.4';
+      img.style.transform = 'scale(0.85)';
+      setTimeout(() => {
+        img.src = src;
+        img.style.opacity = '1';
+        img.style.transform = 'scale(1)';
+      }, 150);
+    });
+
+    // Update active pill state
+    pills.forEach(pill => {
+      if (pill.dataset.logoSrc === src) {
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+
+    // Show toast confirmation
+    showBrandToast(`Applied ${label} across site`);
+
+    // Persist choice
+    try {
+      localStorage.setItem('ipti_preferred_brandmark', JSON.stringify({ src, label }));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // Pill click listeners
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const src = pill.dataset.logoSrc;
+      const name = pill.dataset.logoName || pill.textContent.trim();
+      updateLogoVisuals(src, name);
+    });
+  });
+
+  // Card action buttons click listeners
+  applyBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const src = btn.dataset.applyLogo;
+      const label = btn.dataset.logoLabel || 'Emblem';
+      updateLogoVisuals(src, label);
+
+      // Smooth scroll back to navbar preview if desired
+      if (window.innerWidth <= 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Restore saved brandmark if exists
+  try {
+    const saved = localStorage.getItem('ipti_preferred_brandmark');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.src) {
+        updateLogoVisuals(parsed.src, parsed.label || 'Saved Emblem');
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+function showBrandToast(message) {
+  let toast = document.getElementById('brandToastNotice');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'brandToastNotice';
+    toast.className = 'brand-toast';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--accent-gold);"></i> <span>${escapeHtmlApp(message)}</span>`;
+  toast.classList.add('show');
+
+  clearTimeout(window.__brandToastTimer);
+  window.__brandToastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2600);
 }

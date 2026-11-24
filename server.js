@@ -29,6 +29,9 @@ if (!fs.existsSync(dataDir)) {
 const enquiriesFile = path.join(dataDir, 'enquiries.json');
 const programsFile = path.join(dataDir, 'programs.json');
 const certificatesFile = path.join(dataDir, 'certificates.json');
+const candidatesFile = path.join(dataDir, 'candidates.json');
+
+const LEARNER_SECRET_KEY = process.env.LEARNER_SECRET_KEY || 'ipti_learner_secret_jwt_key_2026';
 
 // Initial default training programs
 const defaultPrograms = [
@@ -239,6 +242,181 @@ function writeCertificates(certificates) {
   }
 }
 
+// Initial default converted candidates
+const defaultCandidates = [
+  {
+    id: "cand_2026_stu_01",
+    studentId: "IPTI-2026-STU-01",
+    fullName: "Rahul V. Sharma",
+    email: "rahul.sharma@example.com",
+    phone: "+91 98230 45671",
+    whatsapp: "+91 98230 45671",
+    program: "Industrial Automation & Robotics (PLC/SCADA)",
+    batch: "Morning Cohort (09:00 AM - 01:00 PM)",
+    admissionDate: "2026-01-10",
+    learningMode: "Classroom Training",
+    totalFees: 35000,
+    paidFees: 35000,
+    balanceFees: 0,
+    paymentStatus: "Paid",
+    paymentHistory: [
+      { id: "pay_101", date: "2026-01-10", amount: 20000, method: "UPI / Net Banking", receiptNo: "REC-2026-101", notes: "Admission seat booking & 1st installment" },
+      { id: "pay_102", date: "2026-01-25", amount: 15000, method: "Bank Transfer", receiptNo: "REC-2026-145", notes: "Final fee clearance (100% paid)" }
+    ],
+    eligibleForCertificate: true,
+    certificateIssued: true,
+    certificateId: "IPTI-CERT-2026-1042",
+    attendance: 96,
+    projectTitle: "Automated Sorting Line & SCADA Telemetry Rig",
+    password: "ipti@123",
+    hasChangedPassword: false,
+    notes: "Distinction student. All lab benchmarks and capstone project completed.",
+    createdAt: "2026-01-10T10:00:00.000Z",
+    updatedAt: "2026-01-25T14:00:00.000Z"
+  },
+  {
+    id: "cand_2026_stu_02",
+    studentId: "IPTI-2026-STU-02",
+    fullName: "Pooja Deshmukh",
+    email: "pooja.d@example.com",
+    phone: "+91 99750 12894",
+    whatsapp: "+91 99750 12894",
+    program: "Embedded Systems & IoT Engineering",
+    batch: "Weekend Executive Batch (10:00 AM - 04:00 PM)",
+    admissionDate: "2026-01-15",
+    learningMode: "Weekend Professional Hybrid",
+    totalFees: 38000,
+    paidFees: 25000,
+    balanceFees: 13000,
+    paymentStatus: "Partial",
+    paymentHistory: [
+      { id: "pay_201", date: "2026-01-15", amount: 25000, method: "Credit Card", receiptNo: "REC-2026-118", notes: "Registration & 1st installment" }
+    ],
+    eligibleForCertificate: false,
+    certificateIssued: false,
+    certificateId: "",
+    attendance: 88,
+    projectTitle: "STM32 FreeRTOS CAN 2.0B Telemetry Node",
+    password: "ipti@123",
+    hasChangedPassword: false,
+    notes: "Second installment of ₹13,000 pending before certificate eligibility.",
+    createdAt: "2026-01-15T09:30:00.000Z",
+    updatedAt: "2026-01-15T09:30:00.000Z"
+  },
+  {
+    id: "cand_2026_stu_03",
+    studentId: "IPTI-2026-STU-03",
+    fullName: "Amitesh Kulkarni",
+    email: "amitesh.k@example.com",
+    phone: "+91 97640 88219",
+    whatsapp: "+91 97640 88219",
+    program: "CAD / CAM & Mechanical Product Design",
+    batch: "Daily Fast-Track Cohort",
+    admissionDate: "2026-01-20",
+    learningMode: "Classroom Training",
+    totalFees: 32000,
+    paidFees: 32000,
+    balanceFees: 0,
+    paymentStatus: "Paid",
+    paymentHistory: [
+      { id: "pay_301", date: "2026-01-20", amount: 32000, method: "NEFT Transfer", receiptNo: "REC-2026-130", notes: "Full upfront fee payment" }
+    ],
+    eligibleForCertificate: true,
+    certificateIssued: true,
+    certificateId: "IPTI-CERT-2026-1120",
+    attendance: 94,
+    projectTitle: "Automotive Transmission Casing Parametric Design (GD&T)",
+    password: "ipti@123",
+    hasChangedPassword: false,
+    notes: "ISO Certificate issued. 100% attendance in SolidWorks module.",
+    createdAt: "2026-01-20T11:00:00.000Z",
+    updatedAt: "2026-03-02T09:15:00.000Z"
+  },
+  {
+    id: "cand_2026_stu_04",
+    studentId: "IPTI-2026-STU-04",
+    fullName: "Neha S. Patil",
+    email: "neha.patil@example.com",
+    phone: "+91 98901 23456",
+    whatsapp: "+91 98901 23456",
+    program: "AI, Machine Learning & Vision Systems",
+    batch: "Evening Cohort (06:00 PM - 09:00 PM)",
+    admissionDate: "2026-02-01",
+    learningMode: "Online Live Interactive",
+    totalFees: 42000,
+    paidFees: 42000,
+    balanceFees: 0,
+    paymentStatus: "Paid",
+    paymentHistory: [
+      { id: "pay_401", date: "2026-02-01", amount: 42000, method: "Razorpay / UPI", receiptNo: "REC-2026-172", notes: "Full program fee paid" }
+    ],
+    eligibleForCertificate: true,
+    certificateIssued: true,
+    certificateId: "IPTI-CERT-2026-1205",
+    attendance: 97,
+    projectTitle: "Edge AI Industrial Defect Detection with TensorRT",
+    password: "ipti@123",
+    hasChangedPassword: false,
+    notes: "Top scorer in cohort. Successfully verified diploma.",
+    createdAt: "2026-02-01T14:20:00.000Z",
+    updatedAt: "2026-03-10T14:20:00.000Z"
+  },
+  {
+    id: "cand_2026_stu_05",
+    studentId: "IPTI-2026-STU-05",
+    fullName: "Aryan Dewade",
+    email: "aryandewade1214@gmail.com",
+    phone: "+91 92729 02182",
+    whatsapp: "+91 92729 02182",
+    program: "AI, Machine Learning & Vision Systems",
+    batch: "Morning Cohort (09:00 AM - 01:00 PM)",
+    admissionDate: "2026-11-20",
+    learningMode: "Classroom Training",
+    totalFees: 40000,
+    paidFees: 40000,
+    balanceFees: 0,
+    paymentStatus: "Paid",
+    paymentHistory: [
+      { id: "pay_501", date: "2026-11-20", amount: 40000, method: "UPI Transfer", receiptNo: "REC-2026-210", notes: "Full upfront cohort registration" }
+    ],
+    eligibleForCertificate: true,
+    certificateIssued: false,
+    certificateId: "",
+    attendance: 95,
+    projectTitle: "Computer Vision Automated Quality Inspection",
+    password: "ipti@123",
+    hasChangedPassword: false,
+    notes: "Ready for certificate issuance. Capstone reviewed by industry lead.",
+    createdAt: "2026-11-20T09:00:00.000Z",
+    updatedAt: "2026-11-20T09:00:00.000Z"
+  }
+];
+
+function readCandidates() {
+  try {
+    if (!fs.existsSync(candidatesFile)) {
+      writeCandidates(defaultCandidates);
+      return defaultCandidates;
+    }
+    const raw = fs.readFileSync(candidatesFile, 'utf-8');
+    const parsed = JSON.parse(raw || '[]');
+    return parsed.length > 0 ? parsed : defaultCandidates;
+  } catch (err) {
+    console.error('Error reading candidates database:', err);
+    return defaultCandidates;
+  }
+}
+
+function writeCandidates(candidates) {
+  try {
+    fs.writeFileSync(candidatesFile, JSON.stringify(candidates, null, 2), 'utf-8');
+    return true;
+  } catch (err) {
+    console.error('Error writing candidates database:', err);
+    return false;
+  }
+}
+
 // Initialize database with sample entries if empty
 if (!fs.existsSync(enquiriesFile)) {
   const initialData = [
@@ -389,6 +567,49 @@ function requireAdmin(req, res, next) {
   }
 
   req.admin = user;
+  next();
+}
+
+// Learner Token Generator & Validator
+function generateLearnerToken(studentId) {
+  const payload = `${studentId}:${Date.now()}`;
+  const signature = crypto.createHmac('sha256', LEARNER_SECRET_KEY).update(payload).digest('hex');
+  return Buffer.from(`${payload}:${signature}`).toString('base64');
+}
+
+function verifyLearnerToken(token) {
+  try {
+    if (!token) return false;
+    const decoded = Buffer.from(token, 'base64').toString('utf-8');
+    const [studentId, timestamp, signature] = decoded.split(':');
+    const expectedSig = crypto.createHmac('sha256', LEARNER_SECRET_KEY).update(`${studentId}:${timestamp}`).digest('hex');
+    
+    if (signature !== expectedSig) return false;
+    
+    // Check expiration (7 days for learner portal)
+    const age = Date.now() - parseInt(timestamp, 10);
+    if (age > 7 * 24 * 60 * 60 * 1000) return false;
+    
+    return { studentId };
+  } catch (e) {
+    return false;
+  }
+}
+
+// Auth Middleware for protected learner routes
+function requireLearner(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, error: 'Unauthorized: Learner authentication token required' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  const learner = verifyLearnerToken(token);
+  if (!learner) {
+    return res.status(401).json({ success: false, error: 'Unauthorized: Invalid or expired learner session' });
+  }
+
+  req.learner = learner;
   next();
 }
 
@@ -579,6 +800,7 @@ app.get('/api/enquiries/stats', requireAdmin, (req, res) => {
       total: list.length,
       today: list.filter(i => (i.createdAt || '').slice(0, 10) === today).length,
       interested: list.filter(i => (i.interest || '').toLowerCase() === 'interested').length,
+      converted: list.filter(i => (i.interest || '').toLowerCase() === 'converted').length,
       notInterested: list.filter(i => (i.interest || '').toLowerCase() === 'not interested').length,
       pending: list.filter(i => (i.interest || 'pending').toLowerCase() === 'pending').length,
       new: list.filter(i => (i.status || '').toLowerCase() === 'new').length,
@@ -1142,6 +1364,664 @@ app.delete('/api/certificates/:id', requireAdmin, (req, res) => {
 
     writeCertificates(list);
     res.json({ success: true, message: 'Certificate revoked and deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// =========================================================================
+// CONVERTED CANDIDATES (LMS DATABASE) API ROUTES
+// =========================================================================
+
+// 1. Get All Converted Candidates (Admin protected)
+app.get('/api/candidates', requireAdmin, (req, res) => {
+  try {
+    const { search, program, paymentStatus, eligible } = req.query;
+    let list = readCandidates();
+
+    // Filter by program
+    if (program && program !== 'All') {
+      list = list.filter(c => c.program && c.program.toLowerCase().includes(program.toLowerCase()));
+    }
+
+    // Filter by payment status
+    if (paymentStatus && paymentStatus !== 'All') {
+      list = list.filter(c => (c.paymentStatus || '').toLowerCase() === paymentStatus.toLowerCase());
+    }
+
+    // Filter by certificate eligibility
+    if (eligible && eligible !== 'All') {
+      if (eligible === 'true' || eligible === 'eligible') {
+        list = list.filter(c => Boolean(c.eligibleForCertificate));
+      } else if (eligible === 'false' || eligible === 'ineligible') {
+        list = list.filter(c => !c.eligibleForCertificate);
+      }
+    }
+
+    // Search query (name, email, phone, studentId, project)
+    if (search && search.trim() !== '') {
+      const q = search.trim().toLowerCase();
+      list = list.filter(c =>
+        (c.fullName && c.fullName.toLowerCase().includes(q)) ||
+        (c.studentId && c.studentId.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
+        (c.phone && c.phone.toLowerCase().includes(q)) ||
+        (c.program && c.program.toLowerCase().includes(q)) ||
+        (c.projectTitle && c.projectTitle.toLowerCase().includes(q))
+      );
+    }
+
+    // Sort descending by admission / creation date
+    list.sort((a, b) => new Date(b.admissionDate || b.createdAt || 0) - new Date(a.admissionDate || a.createdAt || 0));
+
+    res.json({ success: true, count: list.length, data: list });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 2. Get Candidate Database Stats & Financial Overview (Admin protected)
+app.get('/api/candidates/stats', requireAdmin, (req, res) => {
+  try {
+    const list = readCandidates();
+
+    const totalFees = list.reduce((sum, c) => sum + (Number(c.totalFees) || 0), 0);
+    const feesCollected = list.reduce((sum, c) => sum + (Number(c.paidFees) || 0), 0);
+    const feesPending = list.reduce((sum, c) => sum + (Math.max(0, (Number(c.totalFees) || 0) - (Number(c.paidFees) || 0))), 0);
+
+    const stats = {
+      total: list.length,
+      totalFees,
+      feesCollected,
+      feesPending,
+      fullyPaid: list.filter(c => (c.paymentStatus || '').toLowerCase() === 'paid').length,
+      partialPaid: list.filter(c => (c.paymentStatus || '').toLowerCase() === 'partial').length,
+      pendingPaid: list.filter(c => (c.paymentStatus || '').toLowerCase() === 'pending').length,
+      eligibleForCertificate: list.filter(c => Boolean(c.eligibleForCertificate)).length,
+      certificateIssued: list.filter(c => Boolean(c.certificateIssued)).length
+    };
+
+    res.json({ success: true, stats });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 3. Get Single Candidate by ID (Admin protected)
+app.get('/api/candidates/:id', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const list = readCandidates();
+    const candidate = list.find(c => c.id === id || c.studentId.toUpperCase() === id.toUpperCase());
+    if (!candidate) {
+      return res.status(404).json({ success: false, error: 'Candidate record not found' });
+    }
+    res.json({ success: true, data: candidate });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4. Create New Converted Candidate (Admin protected)
+app.post('/api/candidates', requireAdmin, (req, res) => {
+  try {
+    const {
+      fullName,
+      email,
+      phone,
+      whatsapp,
+      program,
+      batch,
+      admissionDate,
+      learningMode,
+      totalFees,
+      paidFees,
+      eligibleForCertificate,
+      projectTitle,
+      attendance,
+      notes
+    } = req.body;
+
+    if (!fullName || !email || !program) {
+      return res.status(400).json({ success: false, error: 'Candidate Full Name, Email, and Program are required' });
+    }
+
+    const list = readCandidates();
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Check duplicate email
+    if (list.some(c => c.email.toLowerCase() === cleanEmail)) {
+      return res.status(400).json({ success: false, error: 'A student candidate with this email address already exists.' });
+    }
+
+    const year = new Date().getFullYear();
+    const stuNum = String(list.length + 1).padStart(2, '0');
+    const studentId = `IPTI-${year}-STU-${stuNum}`;
+    const timestamp = new Date().toISOString();
+
+    const tFees = Number(totalFees) || 0;
+    const pFees = Number(paidFees) || 0;
+    const bFees = Math.max(0, tFees - pFees);
+
+    let paymentStatus = 'Pending';
+    if (bFees === 0 && tFees > 0) paymentStatus = 'Paid';
+    else if (pFees > 0) paymentStatus = 'Partial';
+
+    const paymentHistory = [];
+    if (pFees > 0) {
+      paymentHistory.push({
+        id: `pay_${Date.now()}`,
+        date: admissionDate || timestamp.slice(0, 10),
+        amount: pFees,
+        method: 'Initial Payment / Net Banking',
+        receiptNo: `REC-${year}-${Math.floor(100 + Math.random() * 900)}`,
+        notes: 'Initial admission fee payment'
+      });
+    }
+
+    const newCandidate = {
+      id: `cand_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      studentId,
+      fullName: fullName.trim(),
+      email: cleanEmail,
+      phone: (phone || '').trim(),
+      whatsapp: (whatsapp || phone || '').trim(),
+      program: program.trim(),
+      batch: batch || 'Morning Cohort (09:00 AM - 01:00 PM)',
+      admissionDate: admissionDate || timestamp.slice(0, 10),
+      learningMode: learningMode || 'Classroom Training',
+      totalFees: tFees,
+      paidFees: pFees,
+      balanceFees: bFees,
+      paymentStatus,
+      paymentHistory,
+      eligibleForCertificate: Boolean(eligibleForCertificate),
+      certificateIssued: false,
+      certificateId: '',
+      attendance: Number(attendance) || 90,
+      projectTitle: projectTitle ? projectTitle.trim() : 'Industrial Capstone Benchmark',
+      password: 'ipti@123',
+      hasChangedPassword: false,
+      notes: notes ? notes.trim() : 'Newly enrolled candidate.',
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+
+    list.unshift(newCandidate);
+    writeCandidates(list);
+
+    res.status(201).json({ success: true, message: 'Candidate enrolled successfully', data: newCandidate });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 5. Update Candidate Details (Admin protected)
+app.patch('/api/candidates/:id', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const list = readCandidates();
+    const index = list.findIndex(c => c.id === id || c.studentId.toUpperCase() === id.toUpperCase());
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Candidate not found' });
+    }
+
+    const cand = list[index];
+    const {
+      fullName,
+      email,
+      phone,
+      whatsapp,
+      program,
+      batch,
+      admissionDate,
+      learningMode,
+      totalFees,
+      paidFees,
+      eligibleForCertificate,
+      certificateIssued,
+      certificateId,
+      attendance,
+      projectTitle,
+      notes
+    } = req.body;
+
+    if (fullName) cand.fullName = fullName.trim();
+    if (email) cand.email = email.trim().toLowerCase();
+    if (phone) cand.phone = phone.trim();
+    if (whatsapp) cand.whatsapp = whatsapp.trim();
+    if (program) cand.program = program.trim();
+    if (batch) cand.batch = batch.trim();
+    if (admissionDate) cand.admissionDate = admissionDate;
+    if (learningMode) cand.learningMode = learningMode;
+    if (notes !== undefined) cand.notes = notes.trim();
+    if (projectTitle !== undefined) cand.projectTitle = projectTitle.trim();
+    if (attendance !== undefined) cand.attendance = Number(attendance);
+
+    if (eligibleForCertificate !== undefined) {
+      cand.eligibleForCertificate = Boolean(eligibleForCertificate);
+    }
+    if (certificateIssued !== undefined) {
+      cand.certificateIssued = Boolean(certificateIssued);
+    }
+    if (certificateId !== undefined) {
+      cand.certificateId = certificateId.trim();
+    }
+
+    if (totalFees !== undefined || paidFees !== undefined) {
+      const tFees = totalFees !== undefined ? Number(totalFees) : cand.totalFees;
+      const pFees = paidFees !== undefined ? Number(paidFees) : cand.paidFees;
+      cand.totalFees = tFees;
+      cand.paidFees = pFees;
+      cand.balanceFees = Math.max(0, tFees - pFees);
+
+      if (cand.balanceFees === 0 && tFees > 0) cand.paymentStatus = 'Paid';
+      else if (pFees > 0) cand.paymentStatus = 'Partial';
+      else cand.paymentStatus = 'Pending';
+    }
+
+    cand.updatedAt = new Date().toISOString();
+    list[index] = cand;
+    writeCandidates(list);
+
+    res.json({ success: true, message: 'Candidate details updated successfully', data: cand });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6. Toggle Certificate Eligibility for Candidate (Admin protected)
+app.patch('/api/candidates/:id/toggle-eligibility', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const list = readCandidates();
+    const index = list.findIndex(c => c.id === id || c.studentId.toUpperCase() === id.toUpperCase());
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Candidate not found' });
+    }
+
+    const cand = list[index];
+    cand.eligibleForCertificate = !cand.eligibleForCertificate;
+    cand.updatedAt = new Date().toISOString();
+
+    list[index] = cand;
+    writeCandidates(list);
+
+    res.json({
+      success: true,
+      eligible: cand.eligibleForCertificate,
+      message: cand.eligibleForCertificate
+        ? `Candidate marked as ELIGIBLE for Certificate.`
+        : `Certificate eligibility revoked for candidate.`,
+      data: cand
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 7. Record Fee Payment Installment (Admin protected)
+app.post('/api/candidates/:id/payments', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount, method, receiptNo, date, notes } = req.body;
+
+    const numAmount = Number(amount);
+    if (!numAmount || numAmount <= 0) {
+      return res.status(400).json({ success: false, error: 'Valid payment amount is required' });
+    }
+
+    const list = readCandidates();
+    const index = list.findIndex(c => c.id === id || c.studentId.toUpperCase() === id.toUpperCase());
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Candidate not found' });
+    }
+
+    const cand = list[index];
+    if (!Array.isArray(cand.paymentHistory)) cand.paymentHistory = [];
+
+    const newPayment = {
+      id: `pay_${Date.now()}`,
+      date: date || new Date().toISOString().slice(0, 10),
+      amount: numAmount,
+      method: method || 'UPI / Net Banking',
+      receiptNo: receiptNo || `REC-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+      notes: notes ? notes.trim() : 'Course fee installment'
+    };
+
+    cand.paymentHistory.push(newPayment);
+    cand.paidFees = (Number(cand.paidFees) || 0) + numAmount;
+    cand.balanceFees = Math.max(0, (Number(cand.totalFees) || 0) - cand.paidFees);
+
+    if (cand.balanceFees === 0 && cand.totalFees > 0) cand.paymentStatus = 'Paid';
+    else if (cand.paidFees > 0) cand.paymentStatus = 'Partial';
+    else cand.paymentStatus = 'Pending';
+
+    cand.updatedAt = new Date().toISOString();
+    list[index] = cand;
+    writeCandidates(list);
+
+    res.json({ success: true, message: `Payment of ₹${numAmount.toLocaleString('en-IN')} recorded successfully`, data: cand, payment: newPayment });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 8. Convert Enquiry Lead to Candidate (Admin protected)
+app.post('/api/enquiries/:id/convert', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { totalFees, paidFees, batch, learningMode, notes } = req.body;
+
+    const enquiries = readEnquiries();
+    const enqIndex = enquiries.findIndex(e => e.id === id || e.trackingId === id);
+    if (enqIndex === -1) {
+      return res.status(404).json({ success: false, error: 'Enquiry lead not found' });
+    }
+
+    const enq = enquiries[enqIndex];
+    const candidates = readCandidates();
+
+    // Check if already converted
+    const existingCand = candidates.find(c => c.email.toLowerCase() === enq.email.toLowerCase());
+    if (existingCand) {
+      // Mark enquiry as converted
+      enq.interest = 'Converted';
+      enq.status = 'Enrolled';
+      enquiries[enqIndex] = enq;
+      writeEnquiries(enquiries);
+      return res.json({ success: true, message: 'Lead already enrolled as student candidate', data: existingCand });
+    }
+
+    const year = new Date().getFullYear();
+    const stuNum = String(candidates.length + 1).padStart(2, '0');
+    const studentId = `IPTI-${year}-STU-${stuNum}`;
+    const timestamp = new Date().toISOString();
+
+    const tFees = Number(totalFees) || 35000;
+    const pFees = Number(paidFees) || 0;
+    const bFees = Math.max(0, tFees - pFees);
+
+    let paymentStatus = 'Pending';
+    if (bFees === 0 && tFees > 0) paymentStatus = 'Paid';
+    else if (pFees > 0) paymentStatus = 'Partial';
+
+    const paymentHistory = [];
+    if (pFees > 0) {
+      paymentHistory.push({
+        id: `pay_${Date.now()}`,
+        date: timestamp.slice(0, 10),
+        amount: pFees,
+        method: 'Admission Booking Payment',
+        receiptNo: `REC-${year}-${Math.floor(100 + Math.random() * 900)}`,
+        notes: 'Initial fee token on conversion from Enquiry CRM'
+      });
+    }
+
+    const newCandidate = {
+      id: `cand_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      studentId,
+      fullName: enq.fullName,
+      email: enq.email.toLowerCase(),
+      phone: enq.phone,
+      whatsapp: enq.whatsapp || enq.phone,
+      program: enq.course || 'Industrial Automation & Robotics (PLC/SCADA)',
+      batch: batch || 'Morning Cohort (09:00 AM - 01:00 PM)',
+      admissionDate: timestamp.slice(0, 10),
+      learningMode: learningMode || enq.learningMode || 'Classroom Training',
+      totalFees: tFees,
+      paidFees: pFees,
+      balanceFees: bFees,
+      paymentStatus,
+      paymentHistory,
+      eligibleForCertificate: false,
+      certificateIssued: false,
+      certificateId: '',
+      attendance: 90,
+      projectTitle: 'Industrial Capstone Project',
+      password: 'ipti@123',
+      hasChangedPassword: false,
+      notes: notes ? notes.trim() : `Converted from enquiry (${enq.trackingId}).`,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+
+    candidates.unshift(newCandidate);
+    writeCandidates(candidates);
+
+    // Update enquiry record
+    enq.interest = 'Converted';
+    enq.status = 'Enrolled';
+    if (!Array.isArray(enq.notes)) enq.notes = [];
+    enq.notes.unshift({
+      note: `Lead successfully CONVERTED to Enrolled Student. Student ID: ${studentId}`,
+      author: req.admin.username || 'Admin',
+      timestamp
+    });
+    enquiries[enqIndex] = enq;
+    writeEnquiries(enquiries);
+
+    res.status(201).json({
+      success: true,
+      message: `Lead converted successfully! Assigned Student ID: ${studentId}`,
+      data: newCandidate
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 9. Delete Candidate Record (Admin protected)
+app.delete('/api/candidates/:id', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    let list = readCandidates();
+    const originalLen = list.length;
+    list = list.filter(c => c.id !== id && c.studentId !== id);
+
+    if (list.length === originalLen) {
+      return res.status(404).json({ success: false, error: 'Candidate record not found' });
+    }
+
+    writeCandidates(list);
+    res.json({ success: true, message: 'Candidate record removed successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 10. Export Candidates as CSV (Admin protected or token in query)
+app.get('/api/candidates/export/csv', (req, res) => {
+  try {
+    const token = req.query.token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+    const valid = verifyToken(token);
+    if (!valid) {
+      return res.status(401).send('Unauthorized: Valid token required for CSV download');
+    }
+
+    const list = readCandidates();
+
+    const headers = [
+      'Student ID',
+      'Full Name',
+      'Email Address',
+      'Phone Number',
+      'Enrolled Program',
+      'Batch Timing',
+      'Admission Date',
+      'Learning Mode',
+      'Total Fees (INR)',
+      'Paid Fees (INR)',
+      'Balance Due (INR)',
+      'Payment Status',
+      'Eligible For Certificate',
+      'Certificate Issued',
+      'Certificate ID',
+      'Attendance (%)',
+      'Capstone Project'
+    ];
+
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const rows = list.map(c => [
+      escapeCsv(c.studentId),
+      escapeCsv(c.fullName),
+      escapeCsv(c.email),
+      escapeCsv(c.phone),
+      escapeCsv(c.program),
+      escapeCsv(c.batch),
+      escapeCsv(c.admissionDate),
+      escapeCsv(c.learningMode),
+      escapeCsv(c.totalFees),
+      escapeCsv(c.paidFees),
+      escapeCsv(c.balanceFees),
+      escapeCsv(c.paymentStatus),
+      escapeCsv(c.eligibleForCertificate ? 'Yes' : 'No'),
+      escapeCsv(c.certificateIssued ? 'Yes' : 'No'),
+      escapeCsv(c.certificateId || 'N/A'),
+      escapeCsv(`${c.attendance || 0}%`),
+      escapeCsv(c.projectTitle)
+    ].join(','));
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const fileName = `IPTI_Converted_Candidates_${new Date().toISOString().slice(0, 10)}.csv`;
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.status(200).send(csvContent);
+  } catch (err) {
+    res.status(500).send('Error generating CSV export: ' + err.message);
+  }
+});
+
+// =========================================================================
+// LEARNER CANDIDATE PORTAL API ROUTES (STUDENT LOGIN & PROFILE)
+// =========================================================================
+
+// 1. Learner Login (Public)
+app.post('/api/learner/login', (req, res) => {
+  try {
+    const studentId = req.body.studentId || req.body.loginId || req.body.username || req.body.email;
+    const password = req.body.password;
+
+    if (!studentId || !password) {
+      return res.status(400).json({ success: false, error: 'Student ID / Email and password are required' });
+    }
+
+    const list = readCandidates();
+    const cleanId = studentId.trim();
+
+    const candidate = list.find(c =>
+      (c.studentId && c.studentId.toUpperCase() === cleanId.toUpperCase()) ||
+      (c.email && c.email.toLowerCase() === cleanId.toLowerCase())
+    );
+
+    if (!candidate) {
+      return res.status(401).json({ success: false, error: 'No enrolled student record found for this Student ID or Email.' });
+    }
+
+    const currentPass = candidate.password || 'ipti@123';
+    if (password.trim() !== currentPass) {
+      return res.status(401).json({ success: false, error: 'Incorrect password. Default initial password is ipti@123' });
+    }
+
+    const token = generateLearnerToken(candidate.studentId);
+
+    res.json({
+      success: true,
+      message: 'Login successful. Welcome to IPTI Learner Portal!',
+      token,
+      student: {
+        id: candidate.id,
+        studentId: candidate.studentId,
+        fullName: candidate.fullName,
+        email: candidate.email,
+        phone: candidate.phone,
+        program: candidate.program,
+        batch: candidate.batch,
+        admissionDate: candidate.admissionDate,
+        learningMode: candidate.learningMode,
+        hasChangedPassword: Boolean(candidate.hasChangedPassword)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 2. Get Logged-In Learner Profile, Fees, & Certificate Status (Learner protected)
+app.get('/api/learner/profile', requireLearner, (req, res) => {
+  try {
+    const { studentId } = req.learner;
+    const candidates = readCandidates();
+    const cand = candidates.find(c => c.studentId.toUpperCase() === studentId.toUpperCase());
+
+    if (!cand) {
+      return res.status(404).json({ success: false, error: 'Student profile not found' });
+    }
+
+    // Look for matching certificate in certificates database
+    const certificates = readCertificates();
+    const matchingCert = certificates.find(cert =>
+      (cand.certificateId && cert.certId.toUpperCase() === cand.certificateId.toUpperCase()) ||
+      cert.studentEmail.toLowerCase() === cand.email.toLowerCase() ||
+      cert.studentName.toLowerCase() === cand.fullName.toLowerCase()
+    );
+
+    // Sanitize password out of response
+    const { password, ...safeStudent } = cand;
+
+    res.json({
+      success: true,
+      student: safeStudent,
+      certificate: matchingCert || null
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 3. Learner Change Password (Learner protected)
+app.post('/api/learner/change-password', requireLearner, (req, res) => {
+  try {
+    const { studentId } = req.learner;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: 'Both current password and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, error: 'New password must be at least 6 characters long' });
+    }
+
+    const list = readCandidates();
+    const index = list.findIndex(c => c.studentId.toUpperCase() === studentId.toUpperCase());
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Student record not found' });
+    }
+
+    const cand = list[index];
+    const actualCurrent = cand.password || 'ipti@123';
+
+    if (currentPassword !== actualCurrent) {
+      return res.status(400).json({ success: false, error: 'Current password does not match.' });
+    }
+
+    cand.password = newPassword.trim();
+    cand.hasChangedPassword = true;
+    cand.updatedAt = new Date().toISOString();
+
+    list[index] = cand;
+    writeCandidates(list);
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully! Please use your new password for all future logins.'
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

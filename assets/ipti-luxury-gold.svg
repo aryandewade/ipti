@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Radiant Multi-stop Metallic Gold Gradients -->
+    <radialGradient id="luxGoldBase" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FFF8E0"/>
+      <stop offset="20%" stop-color="#F2DE9C"/>
+      <stop offset="45%" stop-color="#D4AF37"/>
+      <stop offset="70%" stop-color="#AA8329"/>
+      <stop offset="95%" stop-color="#684A12"/>
+      <stop offset="100%" stop-color="#46310B"/>
+    </radialGradient>
+
+    <linearGradient id="luxGoldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2CA"/>
+      <stop offset="35%" stop-color="#D4AF37"/>
+      <stop offset="70%" stop-color="#8E6A1B"/>
+      <stop offset="100%" stop-color="#F9E6A8"/>
+    </linearGradient>
+
+    <radialGradient id="luxInnerSunburst" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFDF5"/>
+      <stop offset="40%" stop-color="#F7EAC4"/>
+      <stop offset="80%" stop-color="#E2C275"/>
+      <stop offset="100%" stop-color="#B88E30"/>
+    </radialGradient>
+
+    <filter id="luxShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#322206" flood-opacity="0.35"/>
+    </filter>
+
+    <path id="luxTextTop" d="M 80 256 A 176 176 0 1 1 432 256" fill="none"/>
+    <path id="luxTextBottom" d="M 432 256 A 176 176 0 0 1 80 256" fill="none"/>
+  </defs>
+
+  <g filter="url(#luxShadow)">
+    <!-- Hanging Diploma Ribbons at Bottom -->
+    <g>
+      <!-- Left Ribbon Tail -->
+      <polygon points="186,390 148,495 195,472 232,495 214,390" fill="#8C6A1E" stroke="#5C420D" stroke-width="1.5"/>
+      <polygon points="186,390 156,485 195,465 224,485 214,390" fill="url(#luxGoldRim)"/>
+
+      <!-- Right Ribbon Tail -->
+      <polygon points="326,390 288,495 317,472 364,495 326,390" fill="#8C6A1E" stroke="#5C420D" stroke-width="1.5"/>
+      <polygon points="326,390 298,485 317,465 354,485 326,390" fill="url(#luxGoldRim)"/>
+    </g>
+
+    <!-- Outer 36-Point Medallion Sunburst / Scalloped Coin Rim -->
+    <circle cx="256" cy="240" r="222" fill="url(#luxGoldBase)" stroke="#684A12" stroke-width="3"/>
+
+    <!-- Perimeter Beaded Rim (Pearls) -->
+    <circle cx="256" cy="240" r="210" fill="none" stroke="#FFF7DB" stroke-width="3" stroke-dasharray="2, 6"/>
+    <circle cx="256" cy="240" r="202" fill="none" stroke="#684A12" stroke-width="2"/>
+
+    <!-- Concentric Deep Gold Channel -->
+    <circle cx="256" cy="240" r="192" fill="#5A4010" stroke="#E5C778" stroke-width="2.5"/>
+
+    <!-- Arc Text: Top -->
+    <text font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="16.5" font-weight="900" fill="#FFF4D0" letter-spacing="3.2">
+      <textPath href="#luxTextTop" startOffset="50%" text-anchor="middle">
+        INSTITUTE OF PROFESSIONAL TRAINING &amp; INNOVATION
+      </textPath>
+    </text>
+
+    <!-- Arc Text: Bottom -->
+    <text font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="15" font-weight="800" fill="#F4DE9B" letter-spacing="4">
+      <textPath href="#luxTextBottom" startOffset="50%" text-anchor="middle">
+        ★ OFFICIAL ACADEMIC DIPLOMA SEAL ★
+      </textPath>
+    </text>
+
+    <!-- Inner Golden Disc with Sunburst Gradient -->
+    <circle cx="256" cy="240" r="138" fill="url(#luxInnerSunburst)" stroke="#5A4010" stroke-width="4"/>
+    <circle cx="256" cy="240" r="130" fill="none" stroke="#FFF8E0" stroke-width="2" stroke-dasharray="4, 4"/>
+
+    <!-- Embossed Luxury Laurel Wreath -->
+    <g stroke="#7D5B18" fill="#AA8329" stroke-width="1.5">
+      <ellipse cx="175" cy="235" rx="8" ry="4" transform="rotate(-30 175 235)" fill="url(#luxGoldRim)"/>
+      <ellipse cx="170" cy="210" rx="8" ry="4" transform="rotate(-15 170 210)" fill="url(#luxGoldRim)"/>
+      <ellipse cx="178" cy="185" rx="8" ry="4" transform="rotate(5 178 185)" fill="url(#luxGoldRim)"/>
+      <ellipse cx="195" cy="165" rx="8" ry="4" transform="rotate(25 195 165)" fill="url(#luxGoldRim)"/>
+
+      <ellipse cx="337" cy="235" rx="8" ry="4" transform="rotate(30 337 235)" fill="url(#luxGoldRim)"/>
+      <ellipse cx="342" cy="210" rx="8" ry="4" transform="rotate(15 342 210)" fill="url(#luxGoldRim)"/>
+      <ellipse cx="334" cy="185" rx="8" ry="4" transform="rotate(-5 334 185)" fill="url(#luxGoldRim)"/>
+      <ellipse cx="317" cy="165" rx="8" ry="4" transform="rotate(-25 317 165)" fill="url(#luxGoldRim)"/>
+    </g>
+
+    <!-- Mortarboard Academic Cap in Center with Metallic Shading -->
+    <g transform="translate(256, 198)">
+      <polygon points="0,-32 58,-10 0,12 -58,-10" fill="#4B340B" stroke="#F4DE9B" stroke-width="1.5"/>
+      <polygon points="0,-27 48,-10 0,7 -48,-10" fill="url(#luxGoldRim)"/>
+      <path d="M -28 -2 Q -28 20 0 22 Q 28 20 28 -2 Z" fill="#3D2906"/>
+      <circle cx="0" cy="-10" r="4.5" fill="#FFF2CA"/>
+      <path d="M 0 -10 Q 28 -6 36 12 Q 42 26 40 34" fill="none" stroke="#FFF2CA" stroke-width="2.5"/>
+      <polygon points="36,32 44,34 40,46 34,42" fill="#FDF4D4"/>
+    </g>
+
+    <!-- Center IPTI Monogram Text with Dimensional Emboss -->
+    <text x="256" y="274" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="36" font-weight="900" fill="#432D06" letter-spacing="3">
+      IPTI
+    </text>
+    <text x="256" y="272" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="36" font-weight="900" fill="#FFFFFF" opacity="0.25" letter-spacing="3">
+      IPTI
+    </text>
+
+    <!-- Subtext -->
+    <text x="256" y="294" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9.5" font-weight="800" fill="#6A4E12" letter-spacing="2">
+      VERIFIED CREDENTIAL
+    </text>
+
+    <!-- Five Golden Stars of Distinction -->
+    <g transform="translate(256, 314)" fill="url(#luxGoldRim)" stroke="#684A12" stroke-width="0.8">
+      <!-- Star Center -->
+      <polygon points="0,-8 2.5,-2.5 8,-2.5 3.8,1 5.5,6.5 0,3.2 -5.5,6.5 -3.8,1 -8,-2.5 -2.5,-2.5" />
+      <!-- Star -1 -->
+      <g transform="translate(-22, -1) scale(0.85)">
+        <polygon points="0,-8 2.5,-2.5 8,-2.5 3.8,1 5.5,6.5 0,3.2 -5.5,6.5 -3.8,1 -8,-2.5 -2.5,-2.5" />
+      </g>
+      <!-- Star -2 -->
+      <g transform="translate(-42, -4) scale(0.7)">
+        <polygon points="0,-8 2.5,-2.5 8,-2.5 3.8,1 5.5,6.5 0,3.2 -5.5,6.5 -3.8,1 -8,-2.5 -2.5,-2.5" />
+      </g>
+      <!-- Star +1 -->
+      <g transform="translate(22, -1) scale(0.85)">
+        <polygon points="0,-8 2.5,-2.5 8,-2.5 3.8,1 5.5,6.5 0,3.2 -5.5,6.5 -3.8,1 -8,-2.5 -2.5,-2.5" />
+      </g>
+      <!-- Star +2 -->
+      <g transform="translate(42, -4) scale(0.7)">
+        <polygon points="0,-8 2.5,-2.5 8,-2.5 3.8,1 5.5,6.5 0,3.2 -5.5,6.5 -3.8,1 -8,-2.5 -2.5,-2.5" />
+      </g>
+    </g>
+
+    <!-- Bottom Motto Ribbon -->
+    <g transform="translate(256, 348)">
+      <rect x="-80" y="-12" width="160" height="24" rx="12" fill="url(#luxGoldBase)" stroke="#583E0A" stroke-width="1.5"/>
+      <text x="0" y="4" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="9.5" font-weight="900" fill="#3D2906" letter-spacing="1.2">
+        EXCELLENCE &amp; MERIT
+      </text>
+    </g>
+  </g>
+</svg>

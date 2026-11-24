@@ -68,6 +68,10 @@
       </div>
 
       <div class="admin-header-actions">
+        <a href="learner.html" target="_blank" class="admin-action-btn">
+          <i class="fa-solid fa-graduation-cap" style="color: var(--accent-gold-dark);"></i>
+          <span>Learner Portal</span>
+        </a>
         <a href="index.html" target="_blank" class="admin-action-btn">
           <i class="fa-solid fa-arrow-up-right-from-square"></i>
           <span>View Live Website</span>
@@ -89,6 +93,11 @@
         <i class="fa-solid fa-users"></i>
         <span>Enquiries CRM</span>
         <span class="tab-count-badge green" id="navInterestedPill" title="Interested leads">0</span>
+      </button>
+      <button id="tabNavCandidates" class="tab-nav-btn">
+        <i class="fa-solid fa-user-graduate"></i>
+        <span>Converted Candidates (LMS)</span>
+        <span class="tab-count-badge green" id="navCandidatesPill" title="Enrolled paying candidates">0</span>
       </button>
       <button id="tabNavPrograms" class="tab-nav-btn">
         <i class="fa-solid fa-graduation-cap"></i>
@@ -126,6 +135,15 @@
             </div>
             <div class="stat-card-value" id="statInterested" style="color: #059669;">--</div>
             <span class="stat-card-sub">High-intent prospective students</span>
+          </div>
+
+          <div class="stat-card" id="statCardConverted" style="border-top: 3px solid #0d9488; cursor: pointer;" title="Click to view Converted Candidates Database">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Converted Students</span>
+              <div class="stat-icon" style="background: rgba(13,148,136,0.12); color: #0d9488;"><i class="fa-solid fa-graduation-cap"></i></div>
+            </div>
+            <div class="stat-card-value" id="statConverted" style="color: #0d9488;">--</div>
+            <span class="stat-card-sub">Enrolled paying candidates ↗</span>
           </div>
 
           <div class="stat-card" style="border-top: 3px solid #dc2626;">
@@ -168,6 +186,11 @@
             <span>Interested</span>
             <span class="lead-count-badge green" id="tabCountInterested">0</span>
           </button>
+          <button class="lead-tab-btn" data-interest="Converted">
+            <i class="fa-solid fa-graduation-cap" style="color: #0d9488;"></i>
+            <span>Converted</span>
+            <span class="lead-count-badge teal" id="tabCountConverted">0</span>
+          </button>
           <button class="lead-tab-btn" data-interest="Not Interested">
             <i class="fa-solid fa-circle-xmark" style="color: #dc2626;"></i>
             <span>Not Interested</span>
@@ -201,6 +224,7 @@
             <select id="interestFilter" class="filter-select">
               <option value="All">All Interest Status</option>
               <option value="Interested">⭐ Interested Leads</option>
+              <option value="Converted">🎓 Converted (Enrolled)</option>
               <option value="Not Interested">❌ Not Interested</option>
               <option value="Pending">⏳ Pending Review</option>
             </select>
@@ -247,6 +271,139 @@
             </table>
           </div>
         </section>
+      </div>
+
+      <!-- =====================================================================
+           VIEW 2: CONVERTED CANDIDATES DATABASE (LMS)
+           ===================================================================== -->
+      <div id="viewCandidates" class="hidden">
+        
+        <!-- Header & Action Row -->
+        <div class="programs-view-header">
+          <div>
+            <h2>Converted Candidates & Fees Ledger</h2>
+            <p>Comprehensive student candidate database with fee installments, balance tracking, and certificate eligibility.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button id="exportCandCsvBtn" class="admin-action-btn">
+              <i class="fa-solid fa-file-excel" style="color: #059669;"></i>
+              <span>Export CSV</span>
+            </button>
+            <button id="openAddCandidateBtn" class="btn-csv-export" style="padding: 10px 20px; font-size: 0.88rem;">
+              <i class="fa-solid fa-user-plus"></i>
+              <span>+ Enroll New Candidate</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Candidate KPI Stats Grid -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Enrolled Candidates</span>
+              <div class="stat-icon enrolled"><i class="fa-solid fa-user-graduate"></i></div>
+            </div>
+            <div class="stat-card-value" id="statCandTotal">--</div>
+            <span class="stat-card-sub">Active admitted students</span>
+          </div>
+
+          <div class="stat-card" style="border-top: 3px solid #059669;">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Total Fees Collected</span>
+              <div class="stat-icon" style="background: rgba(5,150,105,0.12); color: #059669;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            </div>
+            <div class="stat-card-value" id="statCandFeesCollected" style="color: #059669;">--</div>
+            <span class="stat-card-sub" id="statCandCollectedSub">Paid admission revenue</span>
+          </div>
+
+          <div class="stat-card" style="border-top: 3px solid #d97706;">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Pending Fees Due</span>
+              <div class="stat-icon" style="background: rgba(217,119,6,0.12); color: #d97706;"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            </div>
+            <div class="stat-card-value" id="statCandFeesPending" style="color: #d97706;">--</div>
+            <span class="stat-card-sub">Installments outstanding</span>
+          </div>
+
+          <div class="stat-card" style="border-top: 3px solid var(--accent-gold);">
+            <div class="stat-card-top">
+              <span class="stat-card-title">Eligible for Certificate</span>
+              <div class="stat-icon" style="background: rgba(197,160,89,0.12); color: var(--accent-gold);"><i class="fa-solid fa-award"></i></div>
+            </div>
+            <div class="stat-card-value" id="statCandEligible" style="color: var(--accent-gold);">--</div>
+            <span class="stat-card-sub" id="statCandEligibleSub">Qualified for credentials</span>
+          </div>
+        </section>
+
+        <!-- Candidate Controls Toolbar -->
+        <section class="controls-toolbar">
+          <div class="toolbar-filters">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="candSearchInput" placeholder="Search by name, student ID, email, phone, project...">
+            </div>
+
+            <select id="candCourseFilter" class="filter-select">
+              <option value="All">All Programs</option>
+              <option value="Industrial Automation">Industrial Automation (PLC/SCADA)</option>
+              <option value="Embedded Systems">Embedded Systems & IoT</option>
+              <option value="CAD / CAM">CAD / CAM & Mechanical</option>
+              <option value="Full-Stack">Full-Stack Software</option>
+              <option value="AI, Machine Learning">AI & Vision Systems</option>
+              <option value="Electric Vehicle">Electric Vehicle (EV) BMS</option>
+            </select>
+
+            <select id="candPaymentFilter" class="filter-select">
+              <option value="All">All Payment Statuses</option>
+              <option value="Paid">✓ Fully Paid (₹0 Due)</option>
+              <option value="Partial">⏳ Partial Installment Due</option>
+              <option value="Pending">❌ Payment Pending</option>
+            </select>
+
+            <select id="candEligibleFilter" class="filter-select">
+              <option value="All">All Certificate Statuses</option>
+              <option value="true">⭐ Eligible for Certificate</option>
+              <option value="false">⏳ Not Yet Eligible</option>
+            </select>
+          </div>
+
+          <div class="toolbar-actions">
+            <button id="refreshCandBtn" class="btn-refresh" title="Refresh candidate data">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Candidates Table Card -->
+        <section class="table-card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student Candidate</th>
+                  <th>Program & Batch</th>
+                  <th>Fee Accounts & Dues</th>
+                  <th>Certificate Eligibility</th>
+                  <th>Academic Progress</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="candidatesTableBody">
+                <!-- Dynamically rendered -->
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="fa-solid fa-spinner fa-spin"></i>
+                      <p>Loading candidate database...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
       </div>
 
       <!-- =====================================================================
@@ -442,11 +599,24 @@
           <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
             <select id="modalInterestSelect" style="padding: 6px 10px; font-family: var(--font-sans); font-size: 0.85rem; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); outline: none;">
               <option value="Interested">⭐ Interested</option>
+              <option value="Converted">🎓 Converted (Enrolled)</option>
               <option value="Not Interested">❌ Not Interested</option>
               <option value="Pending">⏳ Pending Review</option>
             </select>
             <button type="button" id="updateModalInterestBtn" class="btn-refresh" style="padding: 6px 12px; font-size: 0.78rem;">Save</button>
           </div>
+        </div>
+
+        <div style="grid-column: 1 / -1; margin-top: 10px; padding: 12px 16px; background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <strong style="color: #0f766e; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-graduation-cap"></i> Convert Lead to Student Candidate
+            </strong>
+            <p style="font-size: 0.78rem; color: #115e59; margin: 2px 0 0 0;">Enroll candidate into the Converted Candidate database with fee installment ledger & certificate eligibility.</p>
+          </div>
+          <button type="button" id="modalConvertLeadBtn" class="btn-csv-export" style="background: #0d9488; border-color: #0f766e; font-size: 0.82rem; padding: 8px 16px;">
+            <i class="fa-solid fa-user-plus"></i> Convert to Candidate
+          </button>
         </div>
       </div>
 
@@ -680,6 +850,242 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       07. ADD / EDIT CONVERTED CANDIDATE MODAL
+       ========================================================================= -->
+  <div id="candidateModal">
+    <div class="program-modal-card" style="max-width: 680px;">
+      <button class="detail-modal-close" id="closeCandidateModalBtn">&times;</button>
+      
+      <div class="detail-modal-header">
+        <div style="font-size: 0.76rem; font-weight: 700; color: #0d9488; text-transform: uppercase; margin-bottom: 4px;">STUDENT ADMISSIONS & LMS</div>
+        <h3 id="candidateModalHeading">Enroll Converted Candidate</h3>
+        <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">Manage student admission, fee balance, and academic certificate qualification.</p>
+      </div>
+
+      <form id="candidateForm">
+        <input type="hidden" id="candFormId">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Student Full Name *</label>
+            <input type="text" id="candFormFullName" placeholder="e.g. Rahul V. Sharma" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Email Address *</label>
+            <input type="email" id="candFormEmail" placeholder="e.g. student@example.com" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Phone Number *</label>
+            <input type="tel" id="candFormPhone" placeholder="e.g. +91 98230 45671" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">WhatsApp Number</label>
+            <input type="tel" id="candFormWhatsapp" placeholder="e.g. +91 98230 45671" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Enrolled Training Track *</label>
+            <select id="candFormProgram" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none; background: #fff;">
+              <option value="Industrial Automation & Robotics (PLC/SCADA)">Industrial Automation & Robotics (PLC/SCADA)</option>
+              <option value="Embedded Systems & IoT Engineering">Embedded Systems & IoT Engineering</option>
+              <option value="CAD / CAM & Mechanical Product Design">CAD / CAM & Mechanical Product Design</option>
+              <option value="Full-Stack Software Engineering">Full-Stack Software Engineering</option>
+              <option value="AI, Machine Learning & Vision Systems">AI, Machine Learning & Vision Systems</option>
+              <option value="Electric Vehicle (EV) Systems & BMS">Electric Vehicle (EV) Systems & BMS</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Batch Timing *</label>
+            <select id="candFormBatch" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none; background: #fff;">
+              <option value="Morning Cohort (09:00 AM - 01:00 PM)">Morning Cohort (09:00 AM - 01:00 PM)</option>
+              <option value="Evening Cohort (06:00 PM - 09:00 PM)">Evening Cohort (06:00 PM - 09:00 PM)</option>
+              <option value="Weekend Executive Batch (10:00 AM - 04:00 PM)">Weekend Executive Batch (10:00 AM - 04:00 PM)</option>
+              <option value="Daily Fast-Track Cohort">Daily Fast-Track Cohort</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Admission Date *</label>
+            <input type="date" id="candFormAdmissionDate" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Total Fees (₹) *</label>
+            <input type="number" id="candFormTotalFees" placeholder="35000" min="0" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Paid Fees (₹) *</label>
+            <input type="number" id="candFormPaidFees" placeholder="35000" min="0" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Learning Mode</label>
+            <select id="candFormMode" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none; background: #fff;">
+              <option value="Classroom Training">Offline Classroom Training</option>
+              <option value="Online Live Interactive">Online Live Interactive</option>
+              <option value="Weekend Professional Hybrid">Weekend Professional Hybrid</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Attendance Record (%)</label>
+            <input type="number" id="candFormAttendance" placeholder="92" min="0" max="100" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Capstone Project / Assignment Title</label>
+          <input type="text" id="candFormProject" placeholder="e.g. SCADA Automated Line Telemetry Rig" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <!-- Certificate Eligibility Toggle Checkbox -->
+        <div style="margin-bottom: 18px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: var(--radius-md);">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <input type="checkbox" id="candFormEligibleCert" style="width: 18px; height: 18px; accent-color: var(--primary);">
+            <div>
+              <strong style="color: #92400e; font-size: 0.88rem; display: block;">Eligible for Certificate</strong>
+              <span style="font-size: 0.76rem; color: #b45309;">Check this box if candidate has met fee clearance and lab assessment criteria for certificate issuance.</span>
+            </div>
+          </label>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Counselor / Admission Notes</label>
+          <textarea id="candFormNotes" rows="2" placeholder="Private internal notes regarding fee milestones, progress..." style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" id="cancelCandidateModalBtn" class="btn-refresh">Cancel</button>
+          <button type="submit" id="saveCandidateSubmitBtn" class="btn-csv-export" style="padding: 10px 24px;">
+            <span>Save Candidate Details</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       08. RECORD PAYMENT INSTALLMENT MODAL
+       ========================================================================= -->
+  <div id="paymentRecordModal">
+    <div class="program-modal-card" style="max-width: 480px;">
+      <button class="detail-modal-close" id="closePaymentModalBtn">&times;</button>
+      
+      <div class="detail-modal-header">
+        <div style="font-size: 0.76rem; font-weight: 700; color: #059669; text-transform: uppercase; margin-bottom: 4px;">FEES ACCOUNTING</div>
+        <h3>Record Fee Installment</h3>
+        <p id="paymentModalSub" style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">Record received payment for student.</p>
+      </div>
+
+      <form id="paymentRecordForm">
+        <input type="hidden" id="payCandidateId">
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Payment Amount (₹) *</label>
+          <input type="number" id="payAmount" placeholder="10000" min="1" required style="width: 100%; padding: 11px 14px; font-size: 1.05rem; font-weight: 700; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Payment Method *</label>
+          <select id="payMethod" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none; background: #fff;">
+            <option value="UPI / GPay / PhonePe">UPI / GPay / PhonePe</option>
+            <option value="Bank Net Banking / NEFT">Bank Net Banking / NEFT</option>
+            <option value="Credit / Debit Card">Credit / Debit Card</option>
+            <option value="Cheque Transfer">Cheque Transfer</option>
+            <option value="Cash Deposit">Cash Deposit</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Payment Date *</label>
+            <input type="date" id="payDate" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Receipt / Txn No.</label>
+            <input type="text" id="payReceiptNo" placeholder="Auto-generated if empty" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Notes</label>
+          <input type="text" id="payNotes" placeholder="e.g. Second installment paid via UPI" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" id="cancelPaymentModalBtn" class="btn-refresh">Cancel</button>
+          <button type="submit" id="savePaymentSubmitBtn" class="btn-csv-export" style="background: #059669; border-color: #047857; padding: 10px 24px;">
+            <span>Record Payment</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       09. CONVERT LEAD TO CANDIDATE MODAL
+       ========================================================================= -->
+  <div id="convertLeadModal">
+    <div class="program-modal-card" style="max-width: 520px;">
+      <button class="detail-modal-close" id="closeConvertLeadModalBtn">&times;</button>
+      
+      <div class="detail-modal-header">
+        <div style="font-size: 0.76rem; font-weight: 700; color: #0d9488; text-transform: uppercase; margin-bottom: 4px;">CONVERT LEAD TO STUDENT</div>
+        <h3 id="convertLeadModalHeading">Confirm Student Admission</h3>
+        <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">Transfer candidate from Enquiry CRM into the Converted Candidates LMS Database.</p>
+      </div>
+
+      <form id="convertLeadForm">
+        <input type="hidden" id="convertEnquiryId">
+
+        <div style="padding: 12px 14px; background: var(--bg-recessed); border-radius: var(--radius-sm); margin-bottom: 14px;">
+          <div style="font-weight: 800; color: var(--primary); font-size: 0.95rem;" id="convertLeadName">Candidate Name</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;" id="convertLeadMeta">email • phone • course</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Total Course Fee (₹) *</label>
+            <input type="number" id="convertTotalFees" value="35000" min="0" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Initial Paid Fee (₹) *</label>
+            <input type="number" id="convertPaidFees" value="15000" min="0" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Batch Timing</label>
+          <select id="convertBatch" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none; background: #fff;">
+            <option value="Morning Cohort (09:00 AM - 01:00 PM)">Morning Cohort (09:00 AM - 01:00 PM)</option>
+            <option value="Evening Cohort (06:00 PM - 09:00 PM)">Evening Cohort (06:00 PM - 09:00 PM)</option>
+            <option value="Weekend Executive Batch (10:00 AM - 04:00 PM)">Weekend Executive Batch (10:00 AM - 04:00 PM)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Admission Remarks</label>
+          <input type="text" id="convertNotes" placeholder="e.g. Converted after counseling demo session" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" id="cancelConvertLeadModalBtn" class="btn-refresh">Cancel</button>
+          <button type="submit" id="saveConvertLeadSubmitBtn" class="btn-csv-export" style="background: #0d9488; border-color: #0f766e; padding: 10px 24px;">
+            <span>Confirm & Convert</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
