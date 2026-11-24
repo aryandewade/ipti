@@ -44,11 +44,6 @@
         <button type="submit" class="login-submit-btn" id="loginBtn">
           <span>Authenticate & Access Portal</span>
         </button>
-
-        <div class="login-demo-hint">
-          <span>Default Credentials: <strong>admin</strong> / <strong>ipti@admin2026</strong></span>
-          <button type="button" class="login-demo-btn" id="fillDemoCredsBtn">Fill Credentials</button>
-        </div>
       </form>
     </div>
   </div>
@@ -606,18 +601,6 @@
             <button type="button" id="updateModalInterestBtn" class="btn-refresh" style="padding: 6px 12px; font-size: 0.78rem;">Save</button>
           </div>
         </div>
-
-        <div style="grid-column: 1 / -1; margin-top: 10px; padding: 12px 16px; background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-          <div>
-            <strong style="color: #0f766e; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-graduation-cap"></i> Convert Lead to Student Candidate
-            </strong>
-            <p style="font-size: 0.78rem; color: #115e59; margin: 2px 0 0 0;">Enroll candidate into the Converted Candidate database with fee installment ledger & certificate eligibility.</p>
-          </div>
-          <button type="button" id="modalConvertLeadBtn" class="btn-csv-export" style="background: #0d9488; border-color: #0f766e; font-size: 0.82rem; padding: 8px 16px;">
-            <i class="fa-solid fa-user-plus"></i> Convert to Candidate
-          </button>
-        </div>
       </div>
 
       <div class="detail-message-box">
@@ -711,9 +694,36 @@
           <textarea id="progFormDesc" rows="3" placeholder="Brief outline of syllabus, target outcomes, and hands-on deliverables..." required style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;"></textarea>
         </div>
 
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 14px;">
           <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Key Technologies & Tools (Comma-separated)</label>
           <input type="text" id="progFormTags" placeholder="e.g. ROS2, Python, C++, SLAM, Gazebo" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+        </div>
+
+        <!-- Program Syllabus File Upload -->
+        <div style="margin-bottom: 20px; background: var(--bg-canvas); border: 1.5px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 14px 16px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700; color: var(--primary);">
+              <i class="fa-solid fa-file-pdf" style="color: #dc2626; font-size: 1rem;"></i>
+              <span>Upload Program Syllabus (PDF / Doc)</span>
+            </label>
+            <span id="progFormSyllabusBadge" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); background: #ffffff; padding: 2px 8px; border-radius: var(--radius-full); border: 1px solid var(--border-light);">Optional</span>
+          </div>
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0 0 10px 0;">Learners and website visitors can download this syllabus file directly from the live website.</p>
+          
+          <input type="file" id="progFormSyllabusFile" accept=".pdf,.doc,.docx" style="display: none;">
+          <input type="hidden" id="progFormSyllabusUrl">
+          <input type="hidden" id="progFormSyllabusFilename">
+
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <button type="button" id="triggerSyllabusUploadBtn" class="btn-refresh" style="background: #ffffff; border: 1px solid var(--border-medium); padding: 7px 14px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+              <i class="fa-solid fa-upload"></i>
+              <span>Choose Syllabus File...</span>
+            </button>
+            <span id="progFormSyllabusNameDisplay" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">No file selected</span>
+            <a id="progFormSyllabusPreviewLink" href="#" target="_blank" style="display: none; font-size: 0.78rem; font-weight: 700; color: var(--primary); text-decoration: underline;">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> View Current File
+            </a>
+          </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 12px;">

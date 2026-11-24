@@ -1,0 +1,67 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Length 1160 >>
+stream
+BT
+/F1 18 Tf
+50 780 Td
+(INSTITUTE OF PROFESSIONAL TRAINING & INNOVATION (IPTI)) Tj
+/F1 10 Tf
+0 -18 Td
+(Government Recognized * ISO 9001:2015 Accredited Center of Excellence) Tj
+0 -30 Td
+/F1 16 Tf
+(Embedded Systems and IoT Engineering - OFFICIAL SYLLABUS) Tj
+/F1 10 Tf
+0 -20 Td
+(Duration: 4 Months | Practical Bench: 120+ Dedicated Lab Hours) Tj
+0 -25 Td
+/F1 12 Tf
+(PROGRAM CURRICULUM & LAB MODULES:) Tj
+/F1 10 Tf
+0 -18 Td
+(Module 1: Embedded C, Memory Architecture & Peripheral Interfacing GPIO, Timers, ADC) Tj
+0 -18 Td
+(Module 2: ARM Cortex-M4 / STM32 Bare-Metal & Register-Level Development) Tj
+0 -18 Td
+(Module 3: FreeRTOS Real-Time Operating System, Task Scheduling, Semaphores & Queues) Tj
+0 -18 Td
+(Module 4: Communication Protocols - CAN 2.0B, I2C, SPI, UART, BLE & WiFi MQTT) Tj
+0 -18 Td
+(Module 5: Capstone Project - Production Telemetry Node with Cloud Dashboard) Tj
+0 -30 Td
+/F1 11 Tf
+(ACCREDITATION & INDUSTRY PLACEMENT:) Tj
+/F1 9 Tf
+0 -16 Td
+(Upon capstone approval, learners receive ISO 9001:2015 certificate with verifiable digital ID.) Tj
+0 -14 Td
+(Recruitment partners include Tata Motors, Siemens, Bosch, Honeywell, and Tech Mahindra.) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000228 00000 n 
+0000000305 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1520
+%%EOF

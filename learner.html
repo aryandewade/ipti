@@ -68,25 +68,6 @@
         </button>
       </form>
 
-      <!-- One-Click Demo Logins for Testing -->
-      <div class="demo-logins-section">
-        <span class="demo-title"><i class="fa-solid fa-bolt" style="color: var(--accent-gold);"></i> Quick Demo Student Accounts:</span>
-        <div class="demo-chips">
-          <button type="button" class="demo-chip" onclick="fillLearnerDemo('IPTI-2026-STU-01', 'ipti@123')">
-            <strong>Rahul V. Sharma</strong>
-            <span>Automation • Paid • Certified</span>
-          </button>
-          <button type="button" class="demo-chip" onclick="fillLearnerDemo('IPTI-2026-STU-02', 'ipti@123')">
-            <strong>Pooja Deshmukh</strong>
-            <span>Embedded • Partial Fee Due</span>
-          </button>
-          <button type="button" class="demo-chip" onclick="fillLearnerDemo('IPTI-2026-STU-05', 'ipti@123')">
-            <strong>Aryan Dewade</strong>
-            <span>AI Systems • Eligible for Cert</span>
-          </button>
-        </div>
-      </div>
-
       <div class="login-footer-links">
         <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Return to Website</a>
         <span>•</span>
@@ -115,13 +96,18 @@
       </div>
 
       <div class="header-actions">
-        <div class="student-pill">
+        <div class="student-pill" id="studentPillProfileTrigger" style="cursor: pointer;" title="Click to manage profile photo">
           <div class="student-avatar" id="headerAvatar">RV</div>
           <div class="student-info">
             <span class="student-name" id="headerStudentName">Student Name</span>
             <span class="student-id-tag" id="headerStudentId">IPTI-2026-STU-01</span>
           </div>
         </div>
+
+        <button id="openManageProfileBtn" class="btn-header-action" title="Manage Profile & Photo">
+          <i class="fa-solid fa-user-gear"></i>
+          <span>Manage Profile</span>
+        </button>
 
         <button id="openChangePassBtn" class="btn-header-action" title="Change Account Password">
           <i class="fa-solid fa-key"></i>
@@ -307,24 +293,6 @@
 
       </div>
 
-      <!-- Section: Course Curriculum & Lab Schedule -->
-      <section class="portal-card" style="margin-top: 24px;">
-        <div class="card-header">
-          <div class="card-title-group">
-            <div class="card-icon curriculum"><i class="fa-solid fa-chalkboard-user"></i></div>
-            <div>
-              <h3>Enrolled Curriculum & Lab Facilities</h3>
-              <span class="card-sub">Core training modules, practical bench schedule, and capstone briefs</span>
-            </div>
-          </div>
-          <span class="cohort-tag" style="background: var(--bg-canvas);"><i class="fa-solid fa-flask"></i> 120+ Dedicated Lab Bench Hours</span>
-        </div>
-
-        <div class="curriculum-modules-grid" id="curriculumModulesGrid">
-          <!-- Dynamically populated according to student's program -->
-        </div>
-      </section>
-
     </main>
 
     <!-- Footer -->
@@ -446,6 +414,75 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       05. MANAGE LEARNER PROFILE & PHOTO MODAL
+       ========================================================================= -->
+  <div id="learnerProfileModal" class="modal-overlay">
+    <div class="detail-modal-card" style="max-width: 500px; padding: 28px;">
+      <button class="modal-close" id="closeProfileModalBtn">&times;</button>
+      
+      <div style="margin-bottom: 20px; text-align: left;">
+        <div style="font-size: 0.74rem; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">STUDENT PROFILE SETTINGS</div>
+        <h3 style="font-size: 1.35rem; color: var(--primary); font-weight: 850; margin: 0 0 4px 0;">Manage Profile & Photo</h3>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">Upload your profile photo and manage personal details.</p>
+      </div>
+
+      <!-- Avatar Photo Upload Box -->
+      <div style="text-align: center; margin-bottom: 22px; padding: 18px; background: var(--bg-canvas); border-radius: 12px; border: 1.5px dashed var(--border-medium);">
+        <div style="position: relative; width: 92px; height: 92px; margin: 0 auto 12px auto;">
+          <div id="modalProfileAvatarPreview" class="profile-avatar-large" style="width: 92px; height: 92px; border-radius: 50%; border: 3px solid var(--accent-gold); overflow: hidden; background: var(--primary); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; box-shadow: 0 6px 18px rgba(15, 67, 50, 0.18);">
+            <span id="modalAvatarInitials">RV</span>
+          </div>
+          <button type="button" id="triggerPhotoSelectBtn" title="Upload New Photo" style="position: absolute; bottom: 0; right: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #ffffff; border: 2px solid #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
+            <i class="fa-solid fa-camera" style="font-size: 0.75rem;"></i>
+          </button>
+        </div>
+        <input type="file" id="learnerPhotoInput" accept="image/*" style="display: none;">
+        
+        <button type="button" id="changePhotoBtn" class="btn-refresh" style="font-size: 0.78rem; padding: 6px 14px; background: #ffffff; border: 1px solid var(--border-medium); cursor: pointer; border-radius: var(--radius-full);">
+          <i class="fa-solid fa-upload"></i> Choose Photo
+        </button>
+        <span id="photoUploadStatus" style="display: block; font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">Supported: JPG, PNG, WebP (Max 5MB)</span>
+      </div>
+
+      <form id="learnerProfileForm">
+        <div style="margin-bottom: 12px; text-align: left;">
+          <label style="display: block; font-size: 0.76rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px;">Student Legal Name</label>
+          <input type="text" id="profileModalFullName" disabled style="width: 100%; padding: 9px 12px; background: #f8fafc; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-size: 0.86rem; color: var(--text-secondary);">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; text-align: left;">
+          <div>
+            <label style="display: block; font-size: 0.76rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px;">Student ID</label>
+            <input type="text" id="profileModalStudentId" disabled style="width: 100%; padding: 9px 10px; background: #f8fafc; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: var(--primary);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.76rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px;">Enrolled Program</label>
+            <input type="text" id="profileModalProgram" disabled style="width: 100%; padding: 9px 10px; background: #f8fafc; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-size: 0.76rem; color: var(--text-secondary);">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; text-align: left;">
+          <div>
+            <label for="profileModalPhone" style="display: block; font-size: 0.76rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px;">Phone Number</label>
+            <input type="tel" id="profileModalPhone" placeholder="+91 98765 43210" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-size: 0.86rem; outline: none;">
+          </div>
+          <div>
+            <label for="profileModalWhatsapp" style="display: block; font-size: 0.76rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px;">WhatsApp Number</label>
+            <input type="tel" id="profileModalWhatsapp" placeholder="+91 98765 43210" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-size: 0.86rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="cancelProfileModalBtn" class="btn-refresh" style="cursor: pointer;">Cancel</button>
+          <button type="submit" id="saveProfileBtn" class="btn-print" style="padding: 9px 22px; font-size: 0.86rem; border-radius: var(--radius-full); cursor: pointer;">
+            <i class="fa-solid fa-check"></i> Save Changes
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

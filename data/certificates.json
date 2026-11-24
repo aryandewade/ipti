@@ -1,5 +1,19 @@
 [
   {
+    "id": "cert_1795520768441_fzz1",
+    "certId": "IPTI-CERT-2026-5609",
+    "studentName": "Aryan Dewade",
+    "studentEmail": "aryandewade1214@gmail.com",
+    "studentPhone": "+91 92729 02182",
+    "program": "AI, Machine Learning & Vision Systems",
+    "grade": "Distinction (Grade A+ • 95%)",
+    "issueDate": "2026-11-24",
+    "standard": "ISO 9001:2015 Accredited",
+    "status": "Verified",
+    "notes": "Successfully completed AI, Machine Learning & Vision Systems. Capstone: Computer Vision Automated Quality Inspection.",
+    "createdAt": "2026-11-24T11:46:08.440Z"
+  },
+  {
     "id": "cert_1795427001042_a1b2",
     "certId": "IPTI-CERT-2026-1042",
     "studentName": "Rahul V. Sharma",

@@ -82,18 +82,30 @@ body {
 
 .login-brand {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-logo-ring {
-  width: 84px;
-  height: 84px;
-  margin: 0 auto 14px auto;
+  width: 114px;
+  height: 114px;
+  margin: 0 auto 16px auto;
   border-radius: 50%;
-  border: 2.5px solid var(--accent-gold);
-  padding: 3px;
+  border: 3.5px solid var(--accent-gold);
+  padding: 4px;
   background: #ffffff;
-  box-shadow: 0 6px 20px rgba(15, 67, 50, 0.18);
+  box-shadow: 0 8px 28px rgba(15, 67, 50, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.login-logo-ring:hover {
+  transform: scale(1.04);
 }
 
 .login-logo-ring img {
@@ -105,17 +117,19 @@ body {
 
 .login-brand h2 {
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   font-weight: 800;
   color: var(--primary);
   line-height: 1.2;
+  text-align: center;
 }
 
 .login-brand span.sub {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
   display: block;
-  margin-top: 2px;
+  margin-top: 3px;
+  text-align: center;
 }
 
 .login-info-banner {
@@ -147,14 +161,18 @@ body {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
-.input-with-icon i {
+.input-with-icon > i:first-child {
   position: absolute;
   left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--text-muted);
   font-size: 0.9rem;
   pointer-events: none;
+  z-index: 2;
 }
 
 .input-with-icon input {
@@ -182,11 +200,31 @@ body {
 .btn-toggle-pass {
   position: absolute;
   right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.92rem;
+  line-height: 1;
+  z-index: 2;
+  transition: color 0.2s ease;
+}
+
+.btn-toggle-pass i {
+  position: static;
+  color: inherit;
+  font-size: inherit;
+  pointer-events: auto;
+}
+
+.btn-toggle-pass:hover {
+  color: var(--primary);
 }
 
 .login-error-msg {
@@ -396,16 +434,39 @@ body {
 }
 
 .student-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--primary);
   color: #ffffff;
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border: 2px solid var(--accent-gold);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(15, 67, 50, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.student-pill:hover .student-avatar {
+  transform: scale(1.08);
+}
+
+.student-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .student-info {
@@ -1417,22 +1478,36 @@ body {
   color: #647d72;
 }
 
-/* Print Styles */
+/* Print Styles (Single-Page Guarantee) */
 @media print {
+  @page {
+    size: portrait;
+    margin: 8mm 10mm;
+  }
+
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   body * {
     visibility: hidden;
   }
+
   #diplomaPrintArea, #diplomaPrintArea * {
     visibility: visible;
   }
+
   #diplomaPrintArea {
     position: fixed;
     left: 0;
     top: 0;
     width: 100%;
-    height: 100%;
     margin: 0;
     padding: 20px;
     box-shadow: none;
+    box-sizing: border-box;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }

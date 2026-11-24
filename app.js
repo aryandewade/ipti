@@ -6,12 +6,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   initHeroCanvas();
   initPromptTypewriter();
-  initHeroConsoleTabs();
   initRollingCounters();
   initCountdownTimer();
   initProgramFilter();
   initFAQAccordion();
   initMobileMenu();
+  initScrollspy();
   initModals();
   initForms();
   loadDynamicPrograms();
@@ -159,94 +159,6 @@ function initPromptTypewriter() {
   }
 
   typeStep();
-}
-
-/* --------------------------------------------------------------------------
-   02.5 HERO INNOVATION CONSOLE TABS
-   -------------------------------------------------------------------------- */
-function initHeroConsoleTabs() {
-  const tabContainer = document.getElementById('heroConsoleTabs');
-  if (!tabContainer) return;
-
-  const tabs = tabContainer.querySelectorAll('.console-track-tab');
-  const rigTitle = document.getElementById('telemetryRigTitle');
-  const protocol = document.getElementById('telemetryProtocol');
-  const mode = document.getElementById('telemetryMode');
-  const hardware = document.getElementById('telemetryHardware');
-  const capstone = document.getElementById('telemetryCapstone');
-  const codeSnippet = document.getElementById('telemetryCodeSnippet');
-
-  const trackData = {
-    automation: {
-      title: 'Siemens S7-1200 & KUKA Robotics Rig',
-      protocol: 'PROFINET / MODBUS TCP',
-      mode: '100% Physical Bench Time',
-      hardware: 'PLC, SCADA, VFD, HMI',
-      capstone: 'Automated Sorting Line',
-      code: `<span class="cmt">// Industrial Rig OB1 Cyclic Execution</span><br>
-<span class="kw">IF</span> "Safety_Interlock" = <span class="str">TRUE</span> <span class="kw">THEN</span><br>
-&nbsp;&nbsp;"Robot_Arm_1".ExecutePickCycle(PartID:=402, Speed:=100);<br>
-&nbsp;&nbsp;"SCADA_Telemetry".Broadcast(<span class="str">"BATCH_READY"</span>);<br>
-<span class="kw">END_IF</span>;`
-    },
-    embedded: {
-      title: 'STM32 ARM Cortex-M4 & FreeRTOS Station',
-      protocol: 'CAN 2.0B / I2C / SPI / MQTT',
-      mode: 'Hands-on Hardware Bench',
-      hardware: 'ARM MCU, Logic Analyzers, JTAG',
-      capstone: 'Industrial Telematics Gateway',
-      code: `<span class="cmt">// FreeRTOS Sensor Telemetry Task</span><br>
-<span class="kw">void</span> <span class="str">vSensorTask</span>(<span class="kw">void</span> *pvParameters) {<br>
-&nbsp;&nbsp;<span class="kw">for</span>(;;) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;CAN_Transmit(&hcan1, &txTelemetryPacket);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;vTaskDelay(pdMS_TO_TICKS(10));<br>
-&nbsp;&nbsp;}<br>
-}`
-    },
-    cad: {
-      title: 'SolidWorks & CATIA 5-Axis CAM Workstation',
-      protocol: 'GD&T ASME Y14.5 / ISO 1101',
-      mode: 'High-Spec CAD Workstations',
-      hardware: 'NVIDIA RTX Stations, 3D Scanners',
-      capstone: 'Automotive Sub-Frame & Transmission',
-      code: `<span class="cmt">// Parametric Stress & CNC Path Telemetry</span><br>
-[FEA_SOLVER] Von-Mises Stress: <span class="str">142.4 MPa</span> (Factor of Safety: 2.8)<br>
-[G_CODE] N105 G00 X45.20 Y120.00 Z5.00<br>
-[TOLERANCE] Flatness ⏥ 0.02 | Datum A<br>
-[STATUS] <span class="kw">PRODUCTION VALIDATED</span>`
-    },
-    software: {
-      title: 'TensorFlow / PyTorch & Cloud Microservices',
-      protocol: 'gRPC / REST / WebSockets / OAuth2',
-      mode: 'Production Dev & Deploy Clusters',
-      hardware: 'Edge AI Devices (Jetson Orin)',
-      capstone: 'Automated Defect Vision Pipeline',
-      code: `<span class="cmt">// Edge Vision Inference Loop</span><br>
-<span class="kw">async def</span> <span class="str">detect_anomalies</span>(frame_stream):<br>
-&nbsp;&nbsp;model = TensorRTInference(<span class="str">"quality_yolo_v10.engine"</span>)<br>
-&nbsp;&nbsp;<span class="kw">for</span> frame <span class="kw">in</span> frame_stream:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;preds = <span class="kw">await</span> model.predict(frame, conf=0.94)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">yield</span> {<span class="str">"status"</span>: 200, <span class="str">"accuracy"</span>: 0.992}`
-    }
-  };
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      const trackKey = tab.getAttribute('data-track');
-      const data = trackData[trackKey];
-      if (!data) return;
-
-      if (rigTitle) rigTitle.innerText = data.title;
-      if (protocol) protocol.innerText = data.protocol;
-      if (mode) mode.innerText = data.mode;
-      if (hardware) hardware.innerText = data.hardware;
-      if (capstone) capstone.innerText = data.capstone;
-      if (codeSnippet) codeSnippet.innerHTML = data.code;
-    });
-  });
 }
 
 /* --------------------------------------------------------------------------
@@ -427,6 +339,98 @@ function initMobileMenu() {
 }
 
 /* --------------------------------------------------------------------------
+   06.5 DYNAMIC SCROLLSPY & NAV ACTIVE TRACKING
+   -------------------------------------------------------------------------- */
+function initScrollspy() {
+  const navLinks = Array.from(document.querySelectorAll('.nav-links .nav-link[href^="#"]'));
+  if (!navLinks.length) return;
+
+  const sections = navLinks
+    .map(link => {
+      const id = link.getAttribute('href');
+      const el = document.querySelector(id);
+      return el ? { id, link, el } : null;
+    })
+    .filter(Boolean);
+
+  if (!sections.length) return;
+
+  let isManualClick = false;
+  let clickTimeout = null;
+
+  function setActive(activeLink) {
+    navLinks.forEach(l => l.classList.remove('active'));
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
+  }
+
+  function onScroll() {
+    if (isManualClick) return;
+
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight;
+
+    // If near bottom of the page, activate the last link (e.g. FAQ)
+    if (scrollY + windowHeight >= docHeight - 70) {
+      setActive(sections[sections.length - 1].link);
+      return;
+    }
+
+    // Offset for floating navbar + viewing focal point
+    const navOffset = 180;
+    let current = sections[0];
+
+    for (let i = 0; i < sections.length; i++) {
+      const top = sections[i].el.getBoundingClientRect().top + scrollY;
+      if (scrollY + navOffset >= top) {
+        current = sections[i];
+      }
+    }
+
+    if (current) {
+      setActive(current.link);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Handle smooth scroll on click
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        const target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+          isManualClick = true;
+          clearTimeout(clickTimeout);
+          setActive(link);
+
+          const navbarHeight = 85;
+          const targetY = target.getBoundingClientRect().top + window.scrollY - navbarHeight;
+
+          window.scrollTo({
+            top: targetY,
+            behavior: 'smooth'
+          });
+
+          // Re-enable scroll tracking once smooth scroll lands
+          clickTimeout = setTimeout(() => {
+            isManualClick = false;
+            onScroll();
+          }, 850);
+        }
+      }
+    });
+  });
+
+  // Run initial state check on load
+  onScroll();
+}
+
+/* --------------------------------------------------------------------------
    07. MODAL HANDLER
    -------------------------------------------------------------------------- */
 function initModals() {
@@ -447,10 +451,34 @@ function initModals() {
     formContent.style.display = 'block';
     successState.style.display = 'none';
 
+    let directDownloadBox = document.getElementById('modalSyllabusDirectDownload');
     if (isSyllabus) {
       modalTitle.innerText = 'Download Program Syllabus & Brochure';
+      const matched = (window._loadedPrograms || []).find(p => courseName && p.title.toLowerCase().includes(courseName.toLowerCase()));
+      if (matched && matched.syllabusUrl) {
+        if (!directDownloadBox) {
+          directDownloadBox = document.createElement('div');
+          directDownloadBox.id = 'modalSyllabusDirectDownload';
+          directDownloadBox.style.cssText = 'background: #ecfdf5; border: 1.5px solid #10b981; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;';
+          const formEl = document.getElementById('modalEnquiryForm');
+          if (formEl) formEl.parentNode.insertBefore(directDownloadBox, formEl);
+        }
+        directDownloadBox.style.display = 'flex';
+        directDownloadBox.innerHTML = `
+          <div style="font-size: 0.82rem; color: #065f46; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-file-pdf" style="color: #dc2626; font-size: 1.1rem;"></i>
+            <span>Official Syllabus Attached</span>
+          </div>
+          <a href="${matched.syllabusUrl}" download="${matched.syllabusFilename || 'Syllabus.pdf'}" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.78rem; text-decoration: none;">
+            <i class="fa-solid fa-download"></i> Direct Download PDF
+          </a>
+        `;
+      } else if (directDownloadBox) {
+        directDownloadBox.style.display = 'none';
+      }
     } else {
       modalTitle.innerText = 'Enquire for Upcoming Batch';
+      if (directDownloadBox) directDownloadBox.style.display = 'none';
     }
 
     if (courseName && modalCourseSelect) {
@@ -552,13 +580,21 @@ function initForms() {
       const submitBtn = document.getElementById('mainEnquiryBtn');
       const originalText = submitBtn.innerHTML;
 
+      // Ensure tick mark checkbox is ticked
+      const consentCheck = document.getElementById('mainConsentCheck') || mainForm.querySelector('[name="consentCheckbox"]');
+      if (consentCheck && !consentCheck.checked) {
+        alert('Please tick the confirmation checkbox to submit your admission enquiry.');
+        consentCheck.focus();
+        return;
+      }
+
       const payload = {
         fullName: mainForm.querySelector('[name="fullName"]').value,
         email: mainForm.querySelector('[name="email"]').value,
         phone: mainForm.querySelector('[name="phone"]').value,
         whatsapp: mainForm.querySelector('[name="whatsapp"]').value || mainForm.querySelector('[name="phone"]').value,
         course: mainForm.querySelector('[name="course"]').value,
-        learningMode: mainForm.querySelector('[name="learningMode"]').value,
+        learningMode: mainForm.querySelector('[name="learningMode"]')?.value || 'Classroom Training',
         experience: mainForm.querySelector('[name="experience"]').value,
         message: mainForm.querySelector('[name="message"]').value,
         source: 'Main Page Admission Form'
@@ -601,12 +637,20 @@ function initForms() {
       const submitBtn = modalForm.querySelector('button[type="submit"]');
       const originalText = submitBtn.innerHTML;
 
+      // Ensure tick mark checkbox is ticked
+      const modalConsent = document.getElementById('modalConsentCheck') || modalForm.querySelector('[name="consentCheckbox"]');
+      if (modalConsent && !modalConsent.checked) {
+        alert('Please tick the confirmation checkbox to submit your enquiry.');
+        modalConsent.focus();
+        return;
+      }
+
       const payload = {
         fullName: modalForm.querySelector('[name="fullName"]').value,
         email: modalForm.querySelector('[name="email"]').value,
         phone: modalForm.querySelector('[name="phone"]').value,
         course: modalForm.querySelector('[name="course"]').value,
-        learningMode: modalForm.querySelector('[name="learningMode"]').value,
+        learningMode: modalForm.querySelector('[name="learningMode"]')?.value || 'Classroom Training',
         message: modalForm.querySelector('[name="message"]').value,
         source: 'Modal Popup Form'
       };
@@ -671,6 +715,7 @@ async function loadDynamicPrograms() {
     if (!res.ok) return;
     const data = await res.json();
     if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+      window._loadedPrograms = data.data;
       renderPublicPrograms(data.data);
       populateCourseDropdowns(data.data);
     }
@@ -717,9 +762,16 @@ function renderPublicPrograms(programs) {
             ${tags.map(t => `<span class="tech-tag">${escapeHtmlApp(t)}</span>`).join('')}
           </div>
           <div class="program-card-cta">
+            ${p.syllabusUrl ? `
+            <a href="${p.syllabusUrl}" download="${p.syllabusFilename || 'IPTI-Program-Syllabus.pdf'}" class="btn btn-secondary" style="text-decoration: none;" title="Download Official Syllabus PDF">
+              <i class="fa-solid fa-file-arrow-down" style="color: var(--accent-gold); margin-right: 4px;"></i>
+              <span>Syllabus</span>
+            </a>
+            ` : `
             <button class="btn btn-secondary" data-open-modal="syllabus" data-course="${escapeHtmlApp(p.title)}">
               <span>Syllabus</span>
             </button>
+            `}
             <button class="btn btn-primary" data-open-modal="enquiry" data-course="${escapeHtmlApp(p.title)}">
               <span>Enrol Now</span>
             </button>

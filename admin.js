@@ -25,7 +25,6 @@ function initAuth() {
   const loginOverlay = document.getElementById('loginOverlay');
   const adminApp = document.getElementById('adminApp');
   const loginForm = document.getElementById('adminLoginForm');
-  const fillDemoBtn = document.getElementById('fillDemoCredsBtn');
   const togglePassBtn = document.getElementById('togglePasswordBtn');
   const passwordInput = document.getElementById('adminPassword');
   const logoutBtn = document.getElementById('adminLogoutBtn');
@@ -46,14 +45,6 @@ function initAuth() {
       if (icon) {
         icon.className = type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
       }
-    });
-  }
-
-  // Auto fill credentials for demonstration convenience
-  if (fillDemoBtn) {
-    fillDemoBtn.addEventListener('click', () => {
-      document.getElementById('adminUsername').value = 'admin';
-      document.getElementById('adminPassword').value = 'ipti@admin2026';
     });
   }
 
@@ -788,6 +779,22 @@ function renderAdminPrograms(programs) {
         <div class="admin-prog-tags">
           ${tags.map(t => `<span class="tech-tag">${escapeHtml(t)}</span>`).join('')}
         </div>
+
+        ${p.syllabusUrl ? `
+        <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; background: #ecfdf5; border: 1px solid rgba(5,150,105,0.25); border-radius: 6px; padding: 6px 10px;">
+          <span style="font-size: 0.74rem; font-weight: 700; color: #065f46; display: inline-flex; align-items: center; gap: 5px;">
+            <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i>
+            ${escapeHtml(p.syllabusFilename || 'Syllabus Attached')}
+          </span>
+          <a href="${p.syllabusUrl}" target="_blank" download style="font-size: 0.74rem; font-weight: 700; color: #059669; text-decoration: none;">
+            <i class="fa-solid fa-download"></i> Download
+          </a>
+        </div>
+        ` : `
+        <div style="margin-top: 10px; font-size: 0.72rem; color: var(--text-muted); font-style: italic;">
+          No syllabus uploaded yet
+        </div>
+        `}
       </div>
     `;
   }).join('');
@@ -947,6 +954,18 @@ function initProgramManagement() {
         form.reset();
         document.getElementById('progFormId').value = '';
         document.getElementById('programModalHeading').innerText = 'Add New Training Program';
+        
+        // Reset syllabus fields
+        const sylUrl = document.getElementById('progFormSyllabusUrl');
+        const sylFile = document.getElementById('progFormSyllabusFilename');
+        const sylDisplay = document.getElementById('progFormSyllabusNameDisplay');
+        const sylPreview = document.getElementById('progFormSyllabusPreviewLink');
+        const sylBadge = document.getElementById('progFormSyllabusBadge');
+        if (sylUrl) sylUrl.value = '';
+        if (sylFile) sylFile.value = '';
+        if (sylDisplay) sylDisplay.innerText = 'No file selected';
+        if (sylPreview) { sylPreview.style.display = 'none'; sylPreview.href = '#'; }
+        if (sylBadge) { sylBadge.innerText = 'Optional'; sylBadge.style.color = 'var(--text-muted)'; }
       }
     }
   }
@@ -968,6 +987,63 @@ function initProgramManagement() {
     });
   }
 
+  // Syllabus File Upload Trigger & Handler
+  const triggerSylBtn = document.getElementById('triggerSyllabusUploadBtn');
+  const sylFileInput = document.getElementById('progFormSyllabusFile');
+  if (triggerSylBtn && sylFileInput) {
+    triggerSylBtn.addEventListener('click', () => sylFileInput.click());
+
+    sylFileInput.addEventListener('change', async () => {
+      const file = sylFileInput.files[0];
+      if (!file) return;
+
+      const sylDisplay = document.getElementById('progFormSyllabusNameDisplay');
+      const sylBadge = document.getElementById('progFormSyllabusBadge');
+      const sylUrlInput = document.getElementById('progFormSyllabusUrl');
+      const sylFilenameInput = document.getElementById('progFormSyllabusFilename');
+      const sylPreview = document.getElementById('progFormSyllabusPreviewLink');
+
+      if (sylDisplay) sylDisplay.innerText = `Uploading "${file.name}"...`;
+      if (sylBadge) { sylBadge.innerText = 'Uploading...'; sylBadge.style.color = 'var(--accent-gold)'; }
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const res = await fetch('/api/programs/upload-syllabus', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${currentToken}`
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              fileData: reader.result
+            })
+          });
+
+          const data = await res.json();
+          if (data.success && data.url) {
+            if (sylUrlInput) sylUrlInput.value = data.url;
+            if (sylFilenameInput) sylFilenameInput.value = data.filename || file.name;
+            if (sylDisplay) sylDisplay.innerText = `✓ ${file.name}`;
+            if (sylBadge) { sylBadge.innerText = 'Uploaded'; sylBadge.style.color = '#059669'; }
+            if (sylPreview) {
+              sylPreview.style.display = 'inline-flex';
+              sylPreview.href = data.url;
+            }
+          } else {
+            alert('Syllabus upload error: ' + (data.error || 'Failed to upload'));
+            if (sylDisplay) sylDisplay.innerText = 'Upload failed';
+          }
+        } catch (err) {
+          alert('Error uploading syllabus file: ' + err.message);
+          if (sylDisplay) sylDisplay.innerText = 'Upload failed';
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   // Handle Form Submit
   if (form) {
     form.addEventListener('submit', async (e) => {
@@ -978,6 +1054,9 @@ function initProgramManagement() {
       const progId = document.getElementById('progFormId').value;
       const isEdit = Boolean(progId);
 
+      const sylUrlInput = document.getElementById('progFormSyllabusUrl');
+      const sylFilenameInput = document.getElementById('progFormSyllabusFilename');
+
       const payload = {
         title: document.getElementById('progFormTitle').value.trim(),
         category: document.getElementById('progFormCategory').value,
@@ -987,7 +1066,9 @@ function initProgramManagement() {
         mode: document.getElementById('progFormMode').value.trim() || 'Classroom / Hybrid',
         credentials: document.getElementById('progFormCredentials').value.trim() || 'ISO Certification',
         description: document.getElementById('progFormDesc').value.trim(),
-        techTags: document.getElementById('progFormTags').value.trim()
+        techTags: document.getElementById('progFormTags').value.trim(),
+        syllabusUrl: sylUrlInput ? sylUrlInput.value.trim() : '',
+        syllabusFilename: sylFilenameInput ? sylFilenameInput.value.trim() : ''
       };
 
       try {
@@ -1040,6 +1121,39 @@ function initProgramManagement() {
     document.getElementById('progFormCredentials').value = item.credentials || '';
     document.getElementById('progFormDesc').value = item.description || '';
     document.getElementById('progFormTags').value = Array.isArray(item.techTags) ? item.techTags.join(', ') : '';
+
+    // Populate syllabus data
+    const sylUrlInput = document.getElementById('progFormSyllabusUrl');
+    const sylFilenameInput = document.getElementById('progFormSyllabusFilename');
+    const sylDisplay = document.getElementById('progFormSyllabusNameDisplay');
+    const sylPreview = document.getElementById('progFormSyllabusPreviewLink');
+    const sylBadge = document.getElementById('progFormSyllabusBadge');
+
+    if (item.syllabusUrl) {
+      if (sylUrlInput) sylUrlInput.value = item.syllabusUrl;
+      if (sylFilenameInput) sylFilenameInput.value = item.syllabusFilename || '';
+      if (sylDisplay) sylDisplay.innerText = item.syllabusFilename ? `✓ ${item.syllabusFilename}` : '✓ Syllabus Attached';
+      if (sylPreview) {
+        sylPreview.style.display = 'inline-flex';
+        sylPreview.href = item.syllabusUrl;
+      }
+      if (sylBadge) {
+        sylBadge.innerText = 'Uploaded';
+        sylBadge.style.color = '#059669';
+      }
+    } else {
+      if (sylUrlInput) sylUrlInput.value = '';
+      if (sylFilenameInput) sylFilenameInput.value = '';
+      if (sylDisplay) sylDisplay.innerText = 'No file selected';
+      if (sylPreview) {
+        sylPreview.style.display = 'none';
+        sylPreview.href = '#';
+      }
+      if (sylBadge) {
+        sylBadge.innerText = 'Optional';
+        sylBadge.style.color = 'var(--text-muted)';
+      }
+    }
 
     openModal(true);
   };
@@ -1175,6 +1289,9 @@ function renderCertificatesTable(list) {
 
         <td>
           <div class="table-actions">
+            <a href="verify.html?id=${encodeURIComponent(cert.certId)}" target="_blank" class="action-icon-btn" title="Open Public Verification Page" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-shield-halved" style="color: var(--accent-gold);"></i>
+            </a>
             <button class="action-icon-btn" onclick="previewCertificate('${cert.id}')" title="Preview Digital Certificate">
               <i class="fa-solid fa-eye"></i>
             </button>
@@ -1418,7 +1535,6 @@ function initCandidateManagement() {
   const closeConvertBtn = document.getElementById('closeConvertLeadModalBtn');
   const cancelConvertBtn = document.getElementById('cancelConvertLeadModalBtn');
   const convertForm = document.getElementById('convertLeadForm');
-  const modalConvertLeadBtn = document.getElementById('modalConvertLeadBtn');
 
   // Search input with debounce
   let candDebounceTimer;
@@ -1605,15 +1721,6 @@ function initCandidateManagement() {
       convertModal.classList.remove('open');
       document.body.style.overflow = '';
     }
-  }
-
-  if (modalConvertLeadBtn) {
-    modalConvertLeadBtn.addEventListener('click', () => {
-      const activeEnquiryId = document.getElementById('deleteEnquiryFromModalBtn').dataset.enquiryId;
-      if (activeEnquiryId) {
-        window.openConvertLeadModal(activeEnquiryId);
-      }
-    });
   }
 
   if (convertForm) {

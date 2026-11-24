@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLearnerDashboard();
   initChangePasswordModal();
   initDiplomaModal();
+  initProfileManagementModal();
 });
 
 /* --------------------------------------------------------------------------
@@ -129,16 +130,6 @@ function initLearnerAuth() {
   }
 }
 
-// Quick demo login autofill helper
-window.fillLearnerDemo = function(id, pass) {
-  const idEl = document.getElementById('learnerInputId');
-  const passEl = document.getElementById('learnerInputPass');
-  if (idEl) idEl.value = id;
-  if (passEl) passEl.value = pass;
-  const submitBtn = document.getElementById('learnerLoginSubmitBtn');
-  if (submitBtn) submitBtn.focus();
-};
-
 /* --------------------------------------------------------------------------
    02. PROFILE LOADING & DASHBOARD RENDERING
    -------------------------------------------------------------------------- */
@@ -183,13 +174,17 @@ function renderDashboard(student, certificate) {
   if (headerName) headerName.innerText = student.fullName || 'Student';
   if (headerId) headerId.innerText = student.studentId || 'IPTI-STU';
   if (headerAvatar) {
-    const initials = (student.fullName || 'ST')
-      .split(' ')
-      .map(n => n[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
-    headerAvatar.innerText = initials;
+    if (student.photoUrl || student.avatarUrl) {
+      headerAvatar.innerHTML = `<img src="${student.photoUrl || student.avatarUrl}" alt="${escapeHtml(student.fullName)}">`;
+    } else {
+      const initials = (student.fullName || 'ST')
+        .split(' ')
+        .map(n => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+      headerAvatar.innerText = initials;
+    }
   }
 
   // 2. Default Password Security Warning
@@ -331,9 +326,6 @@ function renderDashboard(student, certificate) {
       critFeeDesc.innerText = `Clear remaining balance of ₹${balanceF.toLocaleString('en-IN')} to satisfy certificate eligibility.`;
     }
   }
-
-  // 7. Curriculum Modules
-  renderCurriculumModules(student.program);
 }
 
 function renderCertificateArea(student, certificate) {
@@ -364,10 +356,16 @@ function renderCertificateArea(student, certificate) {
           <span class="cert-meta-tag"><i class="fa-solid fa-calendar-check"></i> ${issueDate}</span>
         </div>
 
-        <button type="button" class="btn-diploma-view" onclick="openLearnerDiplomaModal()">
-          <i class="fa-solid fa-diploma"></i>
-          <span>View & Download Official Digital Diploma</span>
-        </button>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px;">
+          <button type="button" class="btn-diploma-view" onclick="openLearnerDiplomaModal()">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>View & Download Official Digital Diploma</span>
+          </button>
+          <a href="verify.html?id=${encodeURIComponent(certId)}" target="_blank" class="btn-diploma-view" style="background: #ffffff; color: var(--primary); border: 1.5px solid rgba(15, 67, 50, 0.25); text-decoration: none;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--accent-gold);"></i>
+            <span>Public Verification Page ↗</span>
+          </a>
+        </div>
       </div>
     `;
   } else if (isEligible) {
@@ -396,34 +394,6 @@ function renderCertificateArea(student, certificate) {
       </div>
     `;
   }
-}
-
-function renderCurriculumModules(programTitle) {
-  const container = document.getElementById('curriculumModulesGrid');
-  if (!container) return;
-
-  let matchedModules = programModulesDb["Industrial Automation"];
-
-  if (programTitle) {
-    const pLower = programTitle.toLowerCase();
-    if (pLower.includes('embedded')) matchedModules = programModulesDb["Embedded Systems"];
-    else if (pLower.includes('cad') || pLower.includes('mechanical')) matchedModules = programModulesDb["CAD"];
-    else if (pLower.includes('ai') || pLower.includes('machine') || pLower.includes('vision')) matchedModules = programModulesDb["AI"];
-    else if (pLower.includes('software') || pLower.includes('full-stack') || pLower.includes('web')) matchedModules = programModulesDb["Software"];
-  }
-
-  container.innerHTML = matchedModules.map(mod => `
-    <div class="module-card">
-      <div class="module-header">
-        <span class="module-num">${mod.num}</span>
-        <h4 class="module-title">${escapeHtml(mod.title)}</h4>
-      </div>
-      <p class="module-desc">${escapeHtml(mod.desc)}</p>
-      <div class="module-tools">
-        ${mod.tools.map(tool => `<span class="tool-badge">${escapeHtml(tool)}</span>`).join('')}
-      </div>
-    </div>
-  `).join('');
 }
 
 /* --------------------------------------------------------------------------
@@ -582,6 +552,208 @@ window.simulateDownloadReceipt = function(receiptNo, amount) {
   alert(`Official Receipt: ${receiptNo}\nAmount Paid: ₹${Number(amount).toLocaleString('en-IN')}\nStatus: Verified\nInstitution: IPTI\n\nOfficial PDF receipt opened in print dialog.`);
   window.print();
 };
+
+/* --------------------------------------------------------------------------
+   05. MANAGE LEARNER PROFILE & AVATAR PHOTO UPLOAD
+   -------------------------------------------------------------------------- */
+function initProfileManagementModal() {
+  const modal = document.getElementById('learnerProfileModal');
+  const openBtn = document.getElementById('openManageProfileBtn');
+  const studentPill = document.getElementById('studentPillProfileTrigger');
+  const closeBtn = document.getElementById('closeProfileModalBtn');
+  const cancelBtn = document.getElementById('cancelProfileModalBtn');
+  const triggerPhotoBtn = document.getElementById('triggerPhotoSelectBtn');
+  const changePhotoBtn = document.getElementById('changePhotoBtn');
+  const photoInput = document.getElementById('learnerPhotoInput');
+  const photoStatus = document.getElementById('photoUploadStatus');
+  const avatarPreview = document.getElementById('modalProfileAvatarPreview');
+  const form = document.getElementById('learnerProfileForm');
+
+  function openProfileModal() {
+    if (!modal) return;
+    const s = currentStudentData;
+    if (!s) return;
+
+    const nameEl = document.getElementById('profileModalFullName');
+    const idEl = document.getElementById('profileModalStudentId');
+    const progEl = document.getElementById('profileModalProgram');
+    const phoneEl = document.getElementById('profileModalPhone');
+    const whatsappEl = document.getElementById('profileModalWhatsapp');
+
+    if (nameEl) nameEl.value = s.fullName || '';
+    if (idEl) idEl.value = s.studentId || '';
+    if (progEl) progEl.value = s.program || '';
+    if (phoneEl) phoneEl.value = s.phone || '';
+    if (whatsappEl) whatsappEl.value = s.whatsapp || s.phone || '';
+
+    // Render current photo in modal preview
+    if (s.photoUrl || s.avatarUrl) {
+      if (avatarPreview) avatarPreview.innerHTML = `<img src="${s.photoUrl || s.avatarUrl}" alt="${escapeHtml(s.fullName)}" style="width: 100%; height: 100%; object-fit: cover;">`;
+    } else {
+      const initials = (s.fullName || 'ST').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+      const modalInitials = document.getElementById('modalAvatarInitials');
+      if (modalInitials) modalInitials.innerText = initials;
+      if (avatarPreview) avatarPreview.innerHTML = `<span id="modalAvatarInitials">${initials}</span>`;
+    }
+
+    if (photoStatus) {
+      photoStatus.innerText = 'Supported: JPG, PNG, WebP (Max 5MB)';
+      photoStatus.style.color = 'var(--text-muted)';
+    }
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeProfileModal() {
+    if (modal) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openProfileModal);
+  if (studentPill) studentPill.addEventListener('click', openProfileModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeProfileModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeProfileModal);
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeProfileModal();
+    });
+  }
+
+  // Trigger file selection
+  if (triggerPhotoBtn && photoInput) {
+    triggerPhotoBtn.addEventListener('click', () => photoInput.click());
+  }
+  if (changePhotoBtn && photoInput) {
+    changePhotoBtn.addEventListener('click', () => photoInput.click());
+  }
+
+  // Handle Photo File Selection & Upload
+  if (photoInput) {
+    photoInput.addEventListener('change', () => {
+      const file = photoInput.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (JPG, PNG, WebP).');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image file size must be under 5MB.');
+        return;
+      }
+
+      if (photoStatus) {
+        photoStatus.innerText = 'Processing & uploading photo...';
+        photoStatus.style.color = 'var(--accent-gold)';
+      }
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Data = reader.result;
+
+        // Preview immediately
+        if (avatarPreview) {
+          avatarPreview.innerHTML = `<img src="${base64Data}" alt="Profile Preview" style="width: 100%; height: 100%; object-fit: cover;">`;
+        }
+
+        try {
+          const res = await fetch('/api/learner/photo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${currentLearnerToken}`
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              photoData: base64Data
+            })
+          });
+
+          const data = await res.json();
+          if (data.success && data.photoUrl) {
+            if (currentStudentData) {
+              currentStudentData.photoUrl = data.photoUrl;
+              currentStudentData.avatarUrl = data.photoUrl;
+            }
+
+            // Update header avatar
+            const headerAvatar = document.getElementById('headerAvatar');
+            if (headerAvatar) {
+              headerAvatar.innerHTML = `<img src="${data.photoUrl}" alt="Avatar">`;
+            }
+
+            if (photoStatus) {
+              photoStatus.innerText = '✓ Profile photo updated successfully!';
+              photoStatus.style.color = '#059669';
+            }
+          } else {
+            alert('Upload failed: ' + (data.error || 'Server error'));
+            if (photoStatus) photoStatus.innerText = 'Upload failed. Try again.';
+          }
+        } catch (err) {
+          alert('Network error while uploading photo: ' + err.message);
+          if (photoStatus) photoStatus.innerText = 'Upload failed. Try again.';
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Form Submit for Contact Details
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveProfileBtn');
+      const origText = saveBtn ? saveBtn.innerHTML : 'Save Changes';
+
+      const phoneVal = document.getElementById('profileModalPhone')?.value.trim();
+      const whatsappVal = document.getElementById('profileModalWhatsapp')?.value.trim();
+
+      try {
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+        }
+
+        const res = await fetch('/api/learner/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentLearnerToken}`
+          },
+          body: JSON.stringify({
+            phone: phoneVal,
+            whatsapp: whatsappVal
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          if (currentStudentData) {
+            currentStudentData.phone = phoneVal;
+            currentStudentData.whatsapp = whatsappVal;
+          }
+          alert('Profile contact details updated successfully!');
+          closeProfileModal();
+        } else {
+          alert('Error: ' + (data.error || 'Could not update profile'));
+        }
+      } catch (err) {
+        alert('Server error saving profile: ' + err.message);
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = origText;
+        }
+      }
+    });
+  }
+}
 
 function escapeHtml(str) {
   if (!str) return '';

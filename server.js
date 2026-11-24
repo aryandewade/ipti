@@ -32,6 +32,14 @@ const programsFile = path.join(dataDir, 'programs.json');
 const certificatesFile = path.join(dataDir, 'certificates.json');
 const candidatesFile = path.join(dataDir, 'candidates.json');
 
+// Uploads Directories
+const uploadsDir = path.join(__dirname, 'uploads');
+const syllabusDir = path.join(uploadsDir, 'syllabus');
+const avatarsDir = path.join(uploadsDir, 'avatars');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+if (!fs.existsSync(syllabusDir)) fs.mkdirSync(syllabusDir, { recursive: true });
+if (!fs.existsSync(avatarsDir)) fs.mkdirSync(avatarsDir, { recursive: true });
+
 const LEARNER_SECRET_KEY = process.env.LEARNER_SECRET_KEY || 'ipti_learner_secret_jwt_key_2026';
 
 // =========================================================================
@@ -82,6 +90,8 @@ const candidateSchema = new mongoose.Schema({
   projectTitle: { type: String, default: '' },
   password: { type: String, default: 'ipti@123' },
   hasChangedPassword: { type: Boolean, default: false },
+  photoUrl: { type: String, default: '' },
+  avatarUrl: { type: String, default: '' },
   notes: { type: String, default: '' },
   createdAt: { type: String, default: () => new Date().toISOString() },
   updatedAt: { type: String, default: () => new Date().toISOString() }
@@ -117,6 +127,8 @@ const programSchema = new mongoose.Schema({
   mode: { type: String, default: 'Classroom / Hybrid' },
   credentials: { type: String, default: 'ISO Certification' },
   techTags: { type: [String], default: [] },
+  syllabusUrl: { type: String, default: '' },
+  syllabusFilename: { type: String, default: '' },
   active: { type: Boolean, default: true },
   curriculum: { type: Array, default: [] },
   enrolledStudentsCount: { type: Number, default: 0 },
@@ -786,10 +798,49 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static files
+// Defensive HTTP Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
+  next();
+});
+
+// Sensitive Static Route & System File Shielding
+// Completely blocks direct web requests to /data JSON files, server source code, packages & configs
+app.use((req, res, next) => {
+  const normalizedPath = (req.path || '').toLowerCase().replace(/\\/g, '/');
+  const blockedPatterns = [
+    /^\/data(\/|$)/,
+    /^\/server\.js(\/|$)/,
+    /^\/package\.json(\/|$)/,
+    /^\/package-lock\.json(\/|$)/,
+    /^\/test-suite\.js(\/|$)/,
+    /^\/\.env(\/|$)/,
+    /^\/\.git(\/|$)/
+  ];
+
+  if (blockedPatterns.some(pattern => pattern.test(normalizedPath))) {
+    return res.status(403).json({ success: false, error: 'Access forbidden: Protected system resource' });
+  }
+  next();
+});
+
+// Safe Static Asset Serving (whitelist /assets, /uploads and safe public files, ignoring dotfiles)
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
-app.use('/data', express.static(path.join(__dirname, 'data')));
-app.use(express.static(__dirname));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(__dirname, {
+  dotfiles: 'ignore',
+  index: ['index.html']
+}));
+
+// Route Aliases
+app.get('/verify', (req, res) => res.sendFile(path.join(__dirname, 'verify.html')));
+app.get('/verify-certificate', (req, res) => res.sendFile(path.join(__dirname, 'verify.html')));
+app.get('/learner', (req, res) => res.sendFile(path.join(__dirname, 'learner.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 // Simple token generator & validator
 function generateToken(username) {
@@ -878,6 +929,82 @@ function requireLearner(req, res, next) {
 }
 
 // =========================================================================
+// DEFENSIVE SECURITY & CRYPTOGRAPHY UTILITIES
+// =========================================================================
+
+// In-Memory Sliding-Window Rate Limiter for Authentication Endpoints (Brute-force protection)
+const loginAttempts = new Map();
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15-minute sliding window
+const MAX_LOGIN_ATTEMPTS = 25; // 25 attempts per IP per 15 minutes
+
+function authRateLimiter(req, res, next) {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const record = loginAttempts.get(ip) || { count: 0, firstAttempt: now };
+
+  if (now - record.firstAttempt > RATE_LIMIT_WINDOW_MS) {
+    record.count = 1;
+    record.firstAttempt = now;
+  } else {
+    record.count += 1;
+  }
+  loginAttempts.set(ip, record);
+
+  if (record.count > MAX_LOGIN_ATTEMPTS) {
+    return res.status(429).json({
+      success: false,
+      error: 'Too many authentication attempts from this IP. Please try again after 15 minutes.'
+    });
+  }
+  next();
+}
+
+// Constant-time string comparison helper to prevent timing side channels
+function safeStringCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if (aBuf.length !== bBuf.length) {
+    crypto.timingSafeEqual(aBuf, aBuf);
+    return false;
+  }
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
+
+// Password Hashing & Verification Utilities (Node.js Native scrypt + salt)
+function hashPassword(plain) {
+  if (!plain) return '';
+  const salt = crypto.randomBytes(16).toString('hex');
+  const derivedKey = crypto.scryptSync(plain, salt, 64);
+  return `scrypt:${salt}:${derivedKey.toString('hex')}`;
+}
+
+function verifyPassword(plain, stored) {
+  if (!stored || !plain) return false;
+  if (!stored.startsWith('scrypt:')) {
+    // Backward compatibility with initial plaintext seeds (e.g. ipti@123)
+    return plain === stored;
+  }
+  try {
+    const parts = stored.split(':');
+    if (parts.length !== 3) return false;
+    const [, salt, hash] = parts;
+    const keyBuffer = Buffer.from(hash, 'hex');
+    const derivedKey = crypto.scryptSync(plain, salt, 64);
+    return crypto.timingSafeEqual(keyBuffer, derivedKey);
+  } catch (err) {
+    return false;
+  }
+}
+
+// Candidate Payload Sanitizer (Redacts password / hash from all outgoing API responses)
+function sanitizeCandidate(cand) {
+  if (!cand || typeof cand !== 'object') return cand;
+  const { password, ...safe } = cand;
+  return safe;
+}
+
+// =========================================================================
 // API ROUTES
 // =========================================================================
 
@@ -916,14 +1043,14 @@ app.get('/api/database/status', (req, res) => {
 });
 
 // 2. Admin Login
-app.post('/api/auth/login', (req, res) => {
+const handleAdminLogin = (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ success: false, error: 'Username and password are required' });
   }
 
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+  if (safeStringCompare(username, ADMIN_USERNAME) && safeStringCompare(password, ADMIN_PASSWORD)) {
     const token = generateToken(username);
     return res.json({
       success: true,
@@ -941,7 +1068,10 @@ app.post('/api/auth/login', (req, res) => {
       error: 'Invalid credentials. Please verify your admin username and password.'
     });
   }
-});
+};
+
+app.post('/api/auth/login', authRateLimiter, handleAdminLogin);
+app.post('/api/admin/login', authRateLimiter, handleAdminLogin);
 
 // 3. Admin Verify Session
 app.post('/api/auth/verify', (req, res) => {
@@ -1338,6 +1468,34 @@ app.get('/api/programs/:id', (req, res) => {
   }
 });
 
+// 2.5. Upload Syllabus Document for Program (Admin Protected)
+app.post('/api/programs/upload-syllabus', requireAdmin, (req, res) => {
+  try {
+    const { filename, fileData } = req.body;
+    if (!filename || !fileData) {
+      return res.status(400).json({ success: false, error: 'Filename and file data are required.' });
+    }
+
+    const ext = path.extname(filename) || '.pdf';
+    const cleanBase = path.basename(filename, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const safeName = `${cleanBase}_${Date.now()}${ext}`;
+    const filePath = path.join(syllabusDir, safeName);
+
+    const base64Data = fileData.replace(/^data:[^;]+;base64,/, '');
+    fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+    const publicUrl = `/uploads/syllabus/${safeName}`;
+    res.json({
+      success: true,
+      url: publicUrl,
+      filename: safeName,
+      originalName: filename
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 3. Add New Program (Admin Protected)
 app.post('/api/programs', requireAdmin, (req, res) => {
   try {
@@ -1351,7 +1509,9 @@ app.post('/api/programs', requireAdmin, (req, res) => {
       labHours,
       mode,
       credentials,
-      techTags
+      techTags,
+      syllabusUrl,
+      syllabusFilename
     } = req.body;
 
     if (!title || !description) {
@@ -1385,6 +1545,8 @@ app.post('/api/programs', requireAdmin, (req, res) => {
       mode: mode ? mode.trim() : 'Classroom / Hybrid',
       credentials: credentials ? credentials.trim() : 'ISO Certification',
       techTags: parsedTags.length > 0 ? parsedTags : ['Hands-on Lab', 'Industry Project'],
+      syllabusUrl: syllabusUrl ? String(syllabusUrl).trim() : '',
+      syllabusFilename: syllabusFilename ? String(syllabusFilename).trim() : '',
       active: true,
       createdAt: timestamp,
       updatedAt: timestamp
@@ -1428,6 +1590,8 @@ app.put('/api/programs/:id', requireAdmin, (req, res) => {
       mode,
       credentials,
       techTags,
+      syllabusUrl,
+      syllabusFilename,
       active
     } = req.body;
 
@@ -1450,6 +1614,8 @@ app.put('/api/programs/:id', requireAdmin, (req, res) => {
       mode: mode !== undefined ? mode.trim() : current.mode,
       credentials: credentials !== undefined ? credentials.trim() : current.credentials,
       techTags: parsedTags,
+      syllabusUrl: syllabusUrl !== undefined ? String(syllabusUrl).trim() : (current.syllabusUrl || ''),
+      syllabusFilename: syllabusFilename !== undefined ? String(syllabusFilename).trim() : (current.syllabusFilename || ''),
       active: active !== undefined ? Boolean(active) : current.active,
       updatedAt: timestamp
     };
@@ -1552,15 +1718,166 @@ app.get('/api/certificates/stats', requireAdmin, (req, res) => {
   }
 });
 
-// 3. Verify Certificate (Public Endpoint)
-app.get('/api/certificates/verify/:certId', (req, res) => {
+// 3. Verify Certificate & Credential (Public Anti-Fraud Endpoint)
+// Rule: When verifying through Student ID, ensure the certificate has actually been generated first!
+// If generated -> returns verified certificate & hash.
+// If not generated -> explicitly alerts that the certificate must be generated first before verification.
+app.get('/api/certificates/verify/:query', (req, res) => {
   try {
-    const list = readCertificates();
-    const cert = list.find(c => c.certId.toUpperCase() === req.params.certId.toUpperCase() || c.id === req.params.certId);
-    if (!cert) {
-      return res.status(404).json({ success: false, error: 'Certificate credential not found' });
+    let rawQuery = (req.params.query || '').trim();
+    if (!rawQuery) {
+      return res.status(400).json({ success: false, error: 'Certificate ID or Student Unique ID is required' });
     }
-    res.json({ success: true, certificate: cert });
+
+    // Clean URL query parameters if pasted by user
+    if (rawQuery.includes('?id=')) {
+      rawQuery = rawQuery.split('?id=')[1].split('&')[0];
+    } else if (rawQuery.includes('?certId=')) {
+      rawQuery = rawQuery.split('?certId=')[1].split('&')[0];
+    } else if (rawQuery.includes('/verify/')) {
+      rawQuery = rawQuery.split('/verify/')[1].split('?')[0];
+    }
+
+    const cleanQuery = decodeURIComponent(rawQuery).trim();
+    const upperQuery = cleanQuery.toUpperCase();
+    const alphaNumQuery = upperQuery.replace(/[^A-Z0-9]/g, '');
+
+    const certs = readCertificates();
+    const candidates = readCandidates();
+
+    // -------------------------------------------------------------------------
+    // A. CHECK IF QUERY IS SPECIFICALLY A STUDENT ID (e.g. IPTI-2026-STU-XX or STU-XX)
+    // -------------------------------------------------------------------------
+    const studentCandidate = candidates.find(c => {
+      if (!c.studentId) return false;
+      const sId = c.studentId.toUpperCase();
+      const sAlpha = sId.replace(/[^A-Z0-9]/g, '');
+      return sId === upperQuery || (alphaNumQuery.length >= 4 && sAlpha === alphaNumQuery);
+    });
+
+    if (studentCandidate) {
+      // REQUIREMENT: Make sure certificate is generated first, then verify it!
+      const hasGeneratedCert = Boolean(
+        studentCandidate.certificateIssued && 
+        studentCandidate.certificateId && 
+        certs.some(c => c.certId && c.certId.toUpperCase() === studentCandidate.certificateId.toUpperCase())
+      );
+
+      if (!hasGeneratedCert) {
+        // Certificate is NOT generated yet for this Student ID!
+        return res.json({
+          success: false,
+          type: 'certificate_not_generated',
+          status: 'not_generated',
+          candidate: {
+            studentId: studentCandidate.studentId,
+            fullName: studentCandidate.fullName,
+            program: studentCandidate.program,
+            batch: studentCandidate.batch,
+            learningMode: studentCandidate.learningMode || 'Classroom Training',
+            admissionDate: studentCandidate.admissionDate,
+            eligibleForCertificate: Boolean(studentCandidate.eligibleForCertificate),
+            certificateIssued: false,
+            message: `Learner record authenticated (${studentCandidate.fullName} • ${studentCandidate.studentId}). However, the official completion certificate has NOT been generated yet. Please generate/issue the certificate through the IPTI Admin Portal first before it can be verified.`
+          },
+          error: `Certificate has not been generated yet for Student ID "${studentCandidate.studentId}". The certificate must be generated first before verification.`
+        });
+      }
+
+      // Certificate HAS been generated for this Student ID! Proceed to verify it.
+      const cert = certs.find(c => c.certId && c.certId.toUpperCase() === studentCandidate.certificateId.toUpperCase());
+      const hashInput = `${cert.certId}:${cert.studentName}:${cert.issueDate}:IPTI_SECURE_REGISTRY_2026`;
+      const verificationHash = crypto.createHash('sha256').update(hashInput).digest('hex').substring(0, 24).toUpperCase();
+
+      return res.json({
+        success: true,
+        type: 'certificate',
+        status: 'verified',
+        certificate: {
+          id: cert.id,
+          certId: cert.certId,
+          studentName: cert.studentName,
+          studentEmail: cert.studentEmail || studentCandidate.email,
+          program: cert.program,
+          grade: cert.grade || 'Distinction (Grade A+)',
+          issueDate: cert.issueDate,
+          standard: cert.standard || 'ISO 9001:2015 Accredited Center of Excellence',
+          status: cert.status || 'Verified',
+          notes: cert.notes || '',
+          studentId: studentCandidate.studentId,
+          projectTitle: studentCandidate.projectTitle || cert.projectTitle || '',
+          learningMode: studentCandidate.learningMode || 'Classroom & Hands-on Lab Practice',
+          batch: studentCandidate.batch || '',
+          verificationHash: `IPTI-${verificationHash.slice(0, 4)}-${verificationHash.slice(4, 8)}-${verificationHash.slice(8, 12)}`,
+          verifiedAt: new Date().toISOString()
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // B. CHECK DIRECT CERTIFICATE ID QUERY (e.g. IPTI-CERT-2026-XXXX, 5609, 1042)
+    // -------------------------------------------------------------------------
+    let cert = certs.find(c => {
+      if (!c) return false;
+      const cId = (c.certId || '').toUpperCase();
+      const internalId = (c.id || '').toUpperCase();
+      const cAlpha = cId.replace(/[^A-Z0-9]/g, '');
+
+      // 1. Exact certId or internal ID
+      if (cId === upperQuery || internalId === upperQuery) return true;
+      // 2. Alphanumeric match (ignoring dashes/spaces)
+      if (alphaNumQuery && cAlpha === alphaNumQuery) return true;
+      // 3. Partial certId suffix (e.g. user typed "5609" or "CERT-2026-5609")
+      if (alphaNumQuery.length >= 4 && (cAlpha.endsWith(alphaNumQuery) || cId.endsWith(upperQuery))) return true;
+
+      return false;
+    });
+
+    if (cert) {
+      // Find linked candidate for additional dossier context
+      const linkedCandidate = candidates.find(c => 
+        (c.certificateId && c.certificateId.toUpperCase() === cert.certId.toUpperCase()) ||
+        (c.email && cert.studentEmail && c.email.toLowerCase() === cert.studentEmail.toLowerCase()) ||
+        (c.fullName && cert.studentName && c.fullName.toLowerCase() === cert.studentName.toLowerCase())
+      );
+
+      const hashInput = `${cert.certId}:${cert.studentName}:${cert.issueDate}:IPTI_SECURE_REGISTRY_2026`;
+      const verificationHash = crypto.createHash('sha256').update(hashInput).digest('hex').substring(0, 24).toUpperCase();
+
+      return res.json({
+        success: true,
+        type: 'certificate',
+        status: 'verified',
+        certificate: {
+          id: cert.id,
+          certId: cert.certId,
+          studentName: cert.studentName,
+          studentEmail: cert.studentEmail || (linkedCandidate ? linkedCandidate.email : ''),
+          program: cert.program,
+          grade: cert.grade || 'Distinction (Grade A+)',
+          issueDate: cert.issueDate,
+          standard: cert.standard || 'ISO 9001:2015 Accredited Center of Excellence',
+          status: cert.status || 'Verified',
+          notes: cert.notes || '',
+          studentId: linkedCandidate ? linkedCandidate.studentId : (cert.studentId || null),
+          projectTitle: linkedCandidate ? linkedCandidate.projectTitle : (cert.projectTitle || ''),
+          learningMode: linkedCandidate ? linkedCandidate.learningMode : 'Classroom & Hands-on Lab Practice',
+          batch: linkedCandidate ? linkedCandidate.batch : '',
+          verificationHash: `IPTI-${verificationHash.slice(0, 4)}-${verificationHash.slice(4, 8)}-${verificationHash.slice(8, 12)}`,
+          verifiedAt: new Date().toISOString()
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // C. CREDENTIAL NOT FOUND ANYWHERE (Anti-Fraud Warning)
+    // -------------------------------------------------------------------------
+    return res.status(404).json({
+      success: false,
+      status: 'not_found',
+      error: `No credential or enrolled student record matches ID "${cleanQuery}" in the IPTI central academic registry.`
+    });
+
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -1595,6 +1912,24 @@ app.post('/api/certificates', requireAdmin, (req, res) => {
 
     list.unshift(newCert);
     writeCertificates(list);
+
+    // Automatically synchronize and link candidate record if one matches this email or student name
+    try {
+      const candidates = readCandidates();
+      const candIdx = candidates.findIndex(c =>
+        (studentEmail && c.email && c.email.toLowerCase() === studentEmail.trim().toLowerCase()) ||
+        (studentName && c.fullName && c.fullName.toLowerCase() === studentName.trim().toLowerCase())
+      );
+      if (candIdx !== -1) {
+        candidates[candIdx].certificateIssued = true;
+        candidates[candIdx].certificateId = generatedCertId;
+        candidates[candIdx].eligibleForCertificate = true;
+        candidates[candIdx].updatedAt = timestamp;
+        writeCandidates(candidates);
+      }
+    } catch (candSyncErr) {
+      console.warn('Candidate sync notice:', candSyncErr.message);
+    }
 
     res.status(201).json({ success: true, message: 'Certificate issued successfully', data: newCert });
   } catch (err) {
@@ -1700,7 +2035,7 @@ app.get('/api/candidates', requireAdmin, (req, res) => {
     // Sort descending by admission / creation date
     list.sort((a, b) => new Date(b.admissionDate || b.createdAt || 0) - new Date(a.admissionDate || a.createdAt || 0));
 
-    res.json({ success: true, count: list.length, data: list });
+    res.json({ success: true, count: list.length, data: list.map(sanitizeCandidate) });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -1742,7 +2077,7 @@ app.get('/api/candidates/:id', requireAdmin, (req, res) => {
     if (!candidate) {
       return res.status(404).json({ success: false, error: 'Candidate record not found' });
     }
-    res.json({ success: true, data: candidate });
+    res.json({ success: true, data: sanitizeCandidate(candidate) });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -1826,7 +2161,7 @@ app.post('/api/candidates', requireAdmin, (req, res) => {
       certificateId: '',
       attendance: Number(attendance) || 90,
       projectTitle: projectTitle ? projectTitle.trim() : 'Industrial Capstone Benchmark',
-      password: 'ipti@123',
+      password: hashPassword('ipti@123'),
       hasChangedPassword: false,
       notes: notes ? notes.trim() : 'Newly enrolled candidate.',
       createdAt: timestamp,
@@ -1836,7 +2171,7 @@ app.post('/api/candidates', requireAdmin, (req, res) => {
     list.unshift(newCandidate);
     writeCandidates(list);
 
-    res.status(201).json({ success: true, message: 'Candidate enrolled successfully', data: newCandidate });
+    res.status(201).json({ success: true, message: 'Candidate enrolled successfully', data: sanitizeCandidate(newCandidate) });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -1910,7 +2245,7 @@ app.patch('/api/candidates/:id', requireAdmin, (req, res) => {
     list[index] = cand;
     writeCandidates(list);
 
-    res.json({ success: true, message: 'Candidate details updated successfully', data: cand });
+    res.json({ success: true, message: 'Candidate details updated successfully', data: sanitizeCandidate(cand) });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -1939,7 +2274,7 @@ app.patch('/api/candidates/:id/toggle-eligibility', requireAdmin, (req, res) => 
       message: cand.eligibleForCertificate
         ? `Candidate marked as ELIGIBLE for Certificate.`
         : `Certificate eligibility revoked for candidate.`,
-      data: cand
+      data: sanitizeCandidate(cand)
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -1987,7 +2322,7 @@ app.post('/api/candidates/:id/payments', requireAdmin, (req, res) => {
     list[index] = cand;
     writeCandidates(list);
 
-    res.json({ success: true, message: `Payment of ₹${numAmount.toLocaleString('en-IN')} recorded successfully`, data: cand, payment: newPayment });
+    res.json({ success: true, message: `Payment of ₹${numAmount.toLocaleString('en-IN')} recorded successfully`, data: sanitizeCandidate(cand), payment: newPayment });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -2016,7 +2351,7 @@ app.post('/api/enquiries/:id/convert', requireAdmin, (req, res) => {
       enq.status = 'Enrolled';
       enquiries[enqIndex] = enq;
       writeEnquiries(enquiries);
-      return res.json({ success: true, message: 'Lead already enrolled as student candidate', data: existingCand });
+      return res.json({ success: true, message: 'Lead already enrolled as student candidate', data: sanitizeCandidate(existingCand) });
     }
 
     const year = new Date().getFullYear();
@@ -2065,7 +2400,7 @@ app.post('/api/enquiries/:id/convert', requireAdmin, (req, res) => {
       certificateId: '',
       attendance: 90,
       projectTitle: 'Industrial Capstone Project',
-      password: 'ipti@123',
+      password: hashPassword('ipti@123'),
       hasChangedPassword: false,
       notes: notes ? notes.trim() : `Converted from enquiry (${enq.trackingId}).`,
       createdAt: timestamp,
@@ -2090,7 +2425,7 @@ app.post('/api/enquiries/:id/convert', requireAdmin, (req, res) => {
     res.status(201).json({
       success: true,
       message: `Lead converted successfully! Assigned Student ID: ${studentId}`,
-      data: newCandidate
+      data: sanitizeCandidate(newCandidate)
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -2187,8 +2522,8 @@ app.get('/api/candidates/export/csv', (req, res) => {
 // LEARNER CANDIDATE PORTAL API ROUTES (STUDENT LOGIN & PROFILE)
 // =========================================================================
 
-// 1. Learner Login (Public)
-app.post('/api/learner/login', (req, res) => {
+// 1. Learner Login (Public with Rate Limiting)
+app.post('/api/learner/login', authRateLimiter, (req, res) => {
   try {
     const studentId = req.body.studentId || req.body.loginId || req.body.username || req.body.email;
     const password = req.body.password;
@@ -2200,18 +2535,26 @@ app.post('/api/learner/login', (req, res) => {
     const list = readCandidates();
     const cleanId = studentId.trim();
 
-    const candidate = list.find(c =>
+    const candidateIndex = list.findIndex(c =>
       (c.studentId && c.studentId.toUpperCase() === cleanId.toUpperCase()) ||
       (c.email && c.email.toLowerCase() === cleanId.toLowerCase())
     );
 
-    if (!candidate) {
+    if (candidateIndex === -1) {
       return res.status(401).json({ success: false, error: 'No enrolled student record found for this Student ID or Email.' });
     }
 
+    const candidate = list[candidateIndex];
     const currentPass = candidate.password || 'ipti@123';
-    if (password.trim() !== currentPass) {
+    if (!verifyPassword(password.trim(), currentPass)) {
       return res.status(401).json({ success: false, error: 'Incorrect password. Default initial password is ipti@123' });
+    }
+
+    // Transparently upgrade legacy plaintext password to secure scrypt hash on successful login
+    if (!candidate.password || !candidate.password.startsWith('scrypt:')) {
+      candidate.password = hashPassword(password.trim());
+      list[candidateIndex] = candidate;
+      writeCandidates(list);
     }
 
     const token = generateLearnerToken(candidate.studentId);
@@ -2229,7 +2572,7 @@ app.post('/api/learner/login', (req, res) => {
         program: candidate.program,
         batch: candidate.batch,
         admissionDate: candidate.admissionDate,
-        learningMode: candidate.learningMode,
+        learningMode: learningModeSafe(candidate),
         hasChangedPassword: Boolean(candidate.hasChangedPassword)
       }
     });
@@ -2237,6 +2580,10 @@ app.post('/api/learner/login', (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+function learningModeSafe(cand) {
+  return cand.learningMode || 'Classroom Training';
+}
 
 // 2. Get Logged-In Learner Profile, Fees, & Certificate Status (Learner protected)
 app.get('/api/learner/profile', requireLearner, (req, res) => {
@@ -2258,7 +2605,7 @@ app.get('/api/learner/profile', requireLearner, (req, res) => {
     );
 
     // Sanitize password out of response
-    const { password, ...safeStudent } = cand;
+    const safeStudent = sanitizeCandidate(cand);
 
     res.json({
       success: true,
@@ -2293,11 +2640,11 @@ app.post('/api/learner/change-password', requireLearner, (req, res) => {
     const cand = list[index];
     const actualCurrent = cand.password || 'ipti@123';
 
-    if (currentPassword !== actualCurrent) {
+    if (!verifyPassword(currentPassword, actualCurrent)) {
       return res.status(400).json({ success: false, error: 'Current password does not match.' });
     }
 
-    cand.password = newPassword.trim();
+    cand.password = hashPassword(newPassword.trim());
     cand.hasChangedPassword = true;
     cand.updatedAt = new Date().toISOString();
 
@@ -2313,8 +2660,76 @@ app.post('/api/learner/change-password', requireLearner, (req, res) => {
   }
 });
 
-// Start Server (when running locally / standalone)
-if (!isVercel) {
+// 4. Learner Profile Photo Upload (Learner protected)
+app.post('/api/learner/photo', requireLearner, (req, res) => {
+  try {
+    const { studentId } = req.learner;
+    const { photoData, filename } = req.body;
+    if (!photoData) {
+      return res.status(400).json({ success: false, error: 'Photo data is required' });
+    }
+
+    const ext = filename ? (path.extname(filename) || '.jpg') : '.jpg';
+    const cleanId = studentId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const safeName = `avatar_${cleanId}_${Date.now()}${ext}`;
+    const filePath = path.join(avatarsDir, safeName);
+
+    const base64Data = photoData.replace(/^data:[^;]+;base64,/, '');
+    fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+    const publicUrl = `/uploads/avatars/${safeName}`;
+    const candidates = readCandidates();
+    const cand = candidates.find(c => c.studentId.toUpperCase() === studentId.toUpperCase());
+    if (cand) {
+      cand.photoUrl = publicUrl;
+      cand.avatarUrl = publicUrl;
+      cand.updatedAt = new Date().toISOString();
+      writeCandidates(candidates);
+    }
+
+    res.json({
+      success: true,
+      message: 'Profile photo updated successfully',
+      photoUrl: publicUrl
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 5. Learner Update Profile Details (Learner protected)
+app.put('/api/learner/profile', requireLearner, (req, res) => {
+  try {
+    const { studentId } = req.learner;
+    const { phone, whatsapp, photoUrl } = req.body;
+    const candidates = readCandidates();
+    const cand = candidates.find(c => c.studentId.toUpperCase() === studentId.toUpperCase());
+    if (!cand) {
+      return res.status(404).json({ success: false, error: 'Student record not found' });
+    }
+
+    if (phone !== undefined) cand.phone = String(phone).trim();
+    if (whatsapp !== undefined) cand.whatsapp = String(whatsapp).trim();
+    if (photoUrl !== undefined) {
+      cand.photoUrl = String(photoUrl).trim();
+      cand.avatarUrl = String(photoUrl).trim();
+    }
+    cand.updatedAt = new Date().toISOString();
+    writeCandidates(candidates);
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      student: sanitizeCandidate(cand)
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Start Server (when running standalone directly, not when imported)
+const isDirectRun = process.argv[1] && (fileURLToPath(import.meta.url) === process.argv[1] || process.argv[1].endsWith('server.js'));
+if (!isVercel && isDirectRun) {
   app.listen(PORT, () => {
     console.log(`=======================================================`);
     console.log(`  IPTI Official Portal & Server Running on Port ${PORT}`);

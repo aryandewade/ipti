@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTI | Official Certificate Credential Verification</title>
+  <meta name="description" content="Official Certificate Verification Portal for IPTI (Institute of Professional Training & Innovation). Instant real-time authentication of professional certifications, diplomas, and student credentials.">
+  <meta name="keywords" content="IPTI Certificate Verification, Verify IPTI Certificate, Credential Verification, Student ID Verification, Anti-fraud diploma check, ISO 9001 certified training">
+  
+  <!-- OpenGraph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="IPTI Official Certificate Verification Registry">
+  <meta property="og:description" content="Authenticate professional diplomas and institutional certifications issued by the Institute of Professional Training & Innovation.">
+  <meta property="og:image" content="assets/ipti-logo.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="assets/ipti-logo.jpg">
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="verify.css">
+</head>
+<body>
+
+  <!-- Background Decorative Grid & Glows -->
+  <div class="bg-grid-overlay"></div>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Top Security Announcement Ticker -->
+  <aside class="top-security-bar" aria-label="Official Verification Status">
+    <div class="container top-bar-content">
+      <span class="sec-badge"><i class="fa-solid fa-lock"></i> OFFICIAL REGISTRY</span>
+      <span>Centralized Credential Authentication &amp; Anti-Tamper Verification Protocol</span>
+      <span class="sec-iso">• ISO 9001:2015 Accredited</span>
+      <a href="index.html" class="top-back-link">Return to IPTI Main Site ↗</a>
+    </div>
+  </aside>
+
+  <!-- Floating Island Header Navigation -->
+  <header class="verify-header-container">
+    <nav class="verify-navbar">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/ipti-logo.jpg" alt="IPTI Crest" class="brand-logo-img">
+        <div class="brand-text">
+          <span class="brand-name">IPTI <span class="brand-name-tag">REGISTRY</span></span>
+          <span class="brand-tagline">Institute of Professional Training &amp; Innovation</span>
+        </div>
+      </a>
+
+      <div class="nav-right-actions">
+        <a href="index.html" class="nav-action-link"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+        <a href="index.html#programs" class="nav-action-link"><i class="fa-solid fa-graduation-cap"></i> <span>Programs</span></a>
+        <a href="learner.html" class="learner-portal-btn">
+          <i class="fa-solid fa-user-graduate"></i>
+          <span>Learner Portal</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- =========================================================================
+       HERO & SEARCH CONSOLE
+       ========================================================================= -->
+  <main class="verify-main-content">
+    <div class="container">
+
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+        <a href="index.html">Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>Certificate Verification</span>
+      </nav>
+
+      <!-- Verification Hero Header -->
+      <div class="verify-hero-header">
+        <div class="eyebrow-chip">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>OFFICIAL ANTI-TAMPER CREDENTIAL REGISTRY</span>
+        </div>
+
+        <h1 class="verify-hero-title">
+          Verify Certificate Authenticity
+        </h1>
+        
+        <p class="verify-hero-subtitle">
+          Instant authentication of official qualifications issued by IPTI for employers, institutions, and learners.
+        </p>
+      </div>
+
+      <!-- Search Console Card -->
+      <div class="verify-search-card">
+        <form id="verifyForm" class="verify-search-form" autocomplete="off">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-fingerprint search-icon"></i>
+            <input 
+              type="text" 
+              id="certQueryInput" 
+              class="search-input" 
+              placeholder="Enter Certificate ID (e.g., IPTI-CERT-2026-1042) or Student ID (e.g., IPTI-2026-STU-01)"
+              required
+              spellcheck="false"
+            >
+            <button type="button" id="clearInputBtn" class="clear-input-btn" title="Clear input" style="display: none;">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          
+          <button type="submit" id="verifySubmitBtn" class="verify-submit-btn">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Verify Credential</span>
+          </button>
+        </form>
+
+        <!-- Quick Demo Chips -->
+        <div class="quick-chips-row">
+          <span class="chips-label"><i class="fa-solid fa-bolt" style="color: var(--accent-gold);"></i> Sample IDs:</span>
+          <button type="button" class="quick-chip" data-id="IPTI-CERT-2026-1042">
+            <span>IPTI-CERT-2026-1042</span>
+          </button>
+          <button type="button" class="quick-chip" data-id="IPTI-2026-STU-01">
+            <span>IPTI-2026-STU-01</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           DYNAMIC RESULT DISPLAY AREA
+           ===================================================================== -->
+      <div id="resultContainer" class="result-display-section" style="display: none;">
+        <!-- Populated via verify.js -->
+      </div>
+
+      <!-- =====================================================================
+           COMPACT INSTITUTIONAL TRUST GUARANTEE
+           ===================================================================== -->
+      <div class="compact-trust-strip">
+        <div class="trust-item">
+          <i class="fa-solid fa-database"></i>
+          <div>
+            <strong>Central Ledger</strong>
+            <span>Verified directly against IPTI academic records</span>
+          </div>
+        </div>
+        <div class="trust-item">
+          <i class="fa-solid fa-fingerprint"></i>
+          <div>
+            <strong>SHA-256 Anti-Tamper</strong>
+            <span>Cryptographic signature prevents duplication</span>
+          </div>
+        </div>
+        <div class="trust-item">
+          <i class="fa-solid fa-building-circle-check"></i>
+          <div>
+            <strong>Corporate Validated</strong>
+            <span>Directly recognized for hiring &amp; background checks</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       FOOTER
+       ========================================================================= -->
+  <footer class="verify-footer">
+    <div class="container">
+      <div class="footer-top-row">
+        <div class="footer-brand-wrap">
+          <img src="assets/ipti-logo.jpg" alt="IPTI Crest" class="footer-crest">
+          <div>
+            <span class="footer-title">IPTI Central Credential Registry</span>
+            <p class="footer-sub">Institute of Professional Training &amp; Innovation • ISO 9001:2015 Certified Center of Excellence</p>
+          </div>
+        </div>
+
+        <div class="footer-quick-links">
+          <a href="index.html">Main Website</a>
+          <a href="index.html#vision-mission">Vision &amp; Mission</a>
+          <a href="index.html#programs">Programs</a>
+          <a href="learner.html">Learner Portal</a>
+          <a href="mailto:verification@ipti.edu.in">Verification Desk</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom-row">
+        <p>&copy; 2026 Institute of Professional Training &amp; Innovation (IPTI). All Rights Reserved. This verification registry is an official anti-fraud system for validating authentic institutional credentials.</p>
+        <span class="security-status-tag"><i class="fa-solid fa-circle-check" style="color: #10B981;"></i> Ledger Active &amp; Synced</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Container -->
+  <div id="toastNotification" class="toast-box"></div>
+
+  <!-- Scripts -->
+  <script src="verify.js"></script>
+</body>
+</html>
