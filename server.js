@@ -5,6 +5,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 
 dotenv.config();
 
@@ -32,6 +33,257 @@ const certificatesFile = path.join(dataDir, 'certificates.json');
 const candidatesFile = path.join(dataDir, 'candidates.json');
 
 const LEARNER_SECRET_KEY = process.env.LEARNER_SECRET_KEY || 'ipti_learner_secret_jwt_key_2026';
+
+// =========================================================================
+// MONGODB ATLAS INTEGRATION & SCHEMAS
+// =========================================================================
+const MONGODB_URI = process.env.MONGODB_URI;
+let isMongoConnected = false;
+
+// 1. Enquiry Schema (Leads / Enquiries submitted on site)
+const enquirySchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  trackingId: { type: String, index: true },
+  fullName: { type: String, required: true },
+  email: { type: String, required: true, index: true },
+  phone: { type: String, required: true },
+  whatsapp: { type: String, default: '' },
+  course: { type: String, required: true },
+  learningMode: { type: String, default: 'Classroom Training' },
+  message: { type: String, default: '' },
+  status: { type: String, default: 'New', index: true },
+  interest: { type: String, default: 'Pending', index: true },
+  notes: { type: Array, default: [] },
+  createdAt: { type: String, default: () => new Date().toISOString() },
+  updatedAt: { type: String, default: () => new Date().toISOString() }
+}, { collection: 'enquiries', timestamps: true });
+
+// 2. Candidate Schema (Enrolled Students & LMS Ledger)
+const candidateSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  studentId: { type: String, required: true, unique: true, index: true },
+  fullName: { type: String, required: true },
+  email: { type: String, required: true, index: true },
+  phone: { type: String, required: true },
+  whatsapp: { type: String, default: '' },
+  program: { type: String, required: true },
+  batch: { type: String, default: 'Morning Cohort' },
+  admissionDate: { type: String, default: () => new Date().toISOString().slice(0, 10) },
+  learningMode: { type: String, default: 'Classroom Training' },
+  totalFees: { type: Number, default: 0 },
+  paidFees: { type: Number, default: 0 },
+  balanceFees: { type: Number, default: 0 },
+  paymentStatus: { type: String, default: 'Pending', index: true },
+  paymentHistory: { type: Array, default: [] },
+  eligibleForCertificate: { type: Boolean, default: false, index: true },
+  certificateIssued: { type: Boolean, default: false },
+  certificateId: { type: String, default: '' },
+  attendance: { type: Number, default: 0 },
+  projectTitle: { type: String, default: '' },
+  password: { type: String, default: 'ipti@123' },
+  hasChangedPassword: { type: Boolean, default: false },
+  notes: { type: String, default: '' },
+  createdAt: { type: String, default: () => new Date().toISOString() },
+  updatedAt: { type: String, default: () => new Date().toISOString() }
+}, { collection: 'candidates', timestamps: true });
+
+// 3. Certificate Schema (Issued Credentials & Diplomas)
+const certificateSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  certId: { type: String, required: true, unique: true, index: true },
+  studentName: { type: String, required: true },
+  studentEmail: { type: String, required: true, index: true },
+  studentPhone: { type: String, default: '' },
+  program: { type: String, required: true },
+  issueDate: { type: String, required: true },
+  grade: { type: String, default: 'Grade A+' },
+  verified: { type: Boolean, default: true },
+  score: { type: Number, default: 95 },
+  issuedBy: { type: String, default: 'IPTI Academic Council' },
+  downloadUrl: { type: String, default: '' },
+  createdAt: { type: String, default: () => new Date().toISOString() }
+}, { collection: 'certificates', timestamps: true });
+
+// 4. Program Schema (Training Programs)
+const programSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  category: { type: String, default: 'automation' },
+  badge: { type: String, default: '' },
+  icon: { type: String, default: 'fa-gears' },
+  description: { type: String, default: '' },
+  duration: { type: String, default: '3 Months' },
+  labHours: { type: String, default: '100+ Hrs Lab' },
+  mode: { type: String, default: 'Classroom / Hybrid' },
+  credentials: { type: String, default: 'ISO Certification' },
+  techTags: { type: [String], default: [] },
+  active: { type: Boolean, default: true },
+  curriculum: { type: Array, default: [] },
+  enrolledStudentsCount: { type: Number, default: 0 },
+  featured: { type: Boolean, default: false }
+}, { collection: 'programs', timestamps: true });
+
+const EnquiryModel = mongoose.models.Enquiry || mongoose.model('Enquiry', enquirySchema);
+const CandidateModel = mongoose.models.Candidate || mongoose.model('Candidate', candidateSchema);
+const CertificateModel = mongoose.models.Certificate || mongoose.model('Certificate', certificateSchema);
+const ProgramModel = mongoose.models.Program || mongoose.model('Program', programSchema);
+
+async function initDatabase() {
+  if (!MONGODB_URI) {
+    console.log('📦 [Database Mode] Local persistent JSON files (data/) active.');
+    return;
+  }
+
+  if (MONGODB_URI.includes('<db_password>')) {
+    console.log('\n================================================================');
+    console.log('⚠️  [MongoDB Atlas Notice] Placeholder <db_password> detected.');
+    console.log('⚠️  Please replace <db_password> in your .env file with your actual MongoDB Atlas password.');
+    console.log('📁  Local persistent JSON storage (data/) is active and serving data.');
+    console.log('================================================================\n');
+    return;
+  }
+
+  try {
+    console.log('⏳ [MongoDB Atlas] Connecting to cluster...');
+    await mongoose.connect(MONGODB_URI, {
+      dbName: 'ipti_db',
+      serverSelectionTimeoutMS: 8000
+    });
+    isMongoConnected = true;
+    console.log('🍃 [MongoDB Atlas] Connected successfully to cluster (database: ipti_db)');
+    await migrateLocalDataToMongo();
+  } catch (err) {
+    console.error('❌ [MongoDB Atlas Connection Failed]:', err.message);
+    console.log('📁 Continuing with local persistent JSON files.\n');
+    isMongoConnected = false;
+  }
+}
+
+async function migrateLocalDataToMongo() {
+  try {
+    // 1. Sync Enquiries
+    const enqCount = await EnquiryModel.countDocuments();
+    if (enqCount === 0) {
+      const local = readEnquiries();
+      if (local.length > 0) {
+        await EnquiryModel.insertMany(local);
+        console.log(`✅ [MongoDB Seeder] Migrated ${local.length} enquiries to MongoDB Atlas.`);
+      }
+    } else {
+      const docs = await EnquiryModel.find().lean();
+      if (docs.length > 0) {
+        const cleaned = docs.map(({ _id, __v, ...rest }) => rest);
+        fs.writeFileSync(enquiriesFile, JSON.stringify(cleaned, null, 2), 'utf-8');
+      }
+    }
+
+    // 2. Sync Candidates
+    const candCount = await CandidateModel.countDocuments();
+    if (candCount === 0) {
+      const local = readCandidates();
+      if (local.length > 0) {
+        await CandidateModel.insertMany(local);
+        console.log(`✅ [MongoDB Seeder] Migrated ${local.length} candidates to MongoDB Atlas.`);
+      }
+    } else {
+      const docs = await CandidateModel.find().lean();
+      if (docs.length > 0) {
+        const cleaned = docs.map(({ _id, __v, ...rest }) => rest);
+        fs.writeFileSync(candidatesFile, JSON.stringify(cleaned, null, 2), 'utf-8');
+      }
+    }
+
+    // 3. Sync Certificates
+    const certCount = await CertificateModel.countDocuments();
+    if (certCount === 0) {
+      const local = readCertificates();
+      if (local.length > 0) {
+        await CertificateModel.insertMany(local);
+        console.log(`✅ [MongoDB Seeder] Migrated ${local.length} certificates to MongoDB Atlas.`);
+      }
+    }
+
+    // 4. Sync Programs
+    const progCount = await ProgramModel.countDocuments();
+    if (progCount === 0) {
+      const local = readPrograms();
+      if (local.length > 0) {
+        await ProgramModel.insertMany(local);
+        console.log(`✅ [MongoDB Seeder] Migrated ${local.length} programs to MongoDB Atlas.`);
+      }
+    }
+  } catch (err) {
+    console.error('⚠️ [MongoDB Initial Migration Error]:', err.message);
+  }
+}
+
+// Background sync helpers
+async function syncEnquiriesToMongo(enquiries) {
+  if (!isMongoConnected || !Array.isArray(enquiries)) return;
+  try {
+    const ops = enquiries.map(e => ({
+      updateOne: {
+        filter: { id: e.id },
+        update: { $set: e },
+        upsert: true
+      }
+    }));
+    await EnquiryModel.bulkWrite(ops);
+  } catch (err) {
+    console.error('⚠️ [MongoDB Sync Enquiries Error]:', err.message);
+  }
+}
+
+async function syncCandidatesToMongo(candidates) {
+  if (!isMongoConnected || !Array.isArray(candidates)) return;
+  try {
+    const ops = candidates.map(c => ({
+      updateOne: {
+        filter: { id: c.id },
+        update: { $set: c },
+        upsert: true
+      }
+    }));
+    await CandidateModel.bulkWrite(ops);
+  } catch (err) {
+    console.error('⚠️ [MongoDB Sync Candidates Error]:', err.message);
+  }
+}
+
+async function syncCertificatesToMongo(certificates) {
+  if (!isMongoConnected || !Array.isArray(certificates)) return;
+  try {
+    const ops = certificates.map(c => ({
+      updateOne: {
+        filter: { id: c.id },
+        update: { $set: c },
+        upsert: true
+      }
+    }));
+    await CertificateModel.bulkWrite(ops);
+  } catch (err) {
+    console.error('⚠️ [MongoDB Sync Certificates Error]:', err.message);
+  }
+}
+
+async function syncProgramsToMongo(programs) {
+  if (!isMongoConnected || !Array.isArray(programs)) return;
+  try {
+    const ops = programs.map(p => ({
+      updateOne: {
+        filter: { id: p.id },
+        update: { $set: p },
+        upsert: true
+      }
+    }));
+    await ProgramModel.bulkWrite(ops);
+  } catch (err) {
+    console.error('⚠️ [MongoDB Sync Programs Error]:', err.message);
+  }
+}
+
+// Trigger initial DB connection
+initDatabase().catch(err => console.error('[DB Initialization Error]:', err.message));
 
 // Initial default training programs
 const defaultPrograms = [
@@ -151,6 +403,9 @@ function readPrograms() {
 function writePrograms(programs) {
   try {
     fs.writeFileSync(programsFile, JSON.stringify(programs, null, 2), 'utf-8');
+    if (isMongoConnected) {
+      syncProgramsToMongo(programs);
+    }
     return true;
   } catch (err) {
     console.error('Error saving programs to database:', err);
@@ -235,6 +490,9 @@ function readCertificates() {
 function writeCertificates(certificates) {
   try {
     fs.writeFileSync(certificatesFile, JSON.stringify(certificates, null, 2), 'utf-8');
+    if (isMongoConnected) {
+      syncCertificatesToMongo(certificates);
+    }
     return true;
   } catch (err) {
     console.error('Error writing certificates database:', err);
@@ -410,6 +668,9 @@ function readCandidates() {
 function writeCandidates(candidates) {
   try {
     fs.writeFileSync(candidatesFile, JSON.stringify(candidates, null, 2), 'utf-8');
+    if (isMongoConnected) {
+      syncCandidatesToMongo(candidates);
+    }
     return true;
   } catch (err) {
     console.error('Error writing candidates database:', err);
@@ -510,6 +771,9 @@ function readEnquiries() {
 function writeEnquiries(enquiries) {
   try {
     fs.writeFileSync(enquiriesFile, JSON.stringify(enquiries, null, 2), 'utf-8');
+    if (isMongoConnected) {
+      syncEnquiriesToMongo(enquiries);
+    }
     return true;
   } catch (err) {
     console.error('Error saving enquiries to database:', err);
@@ -617,15 +881,37 @@ function requireLearner(req, res, next) {
 // API ROUTES
 // =========================================================================
 
-// 1. Health check
+// 1. Health check & Database Status
 app.get('/api/health', (req, res) => {
   const count = readEnquiries().length;
   res.json({
     status: 'online',
     institution: 'IPTI - Institute of Professional Training & Innovation',
-    database: 'Local Persistent JSON Storage (data/enquiries.json)',
+    database: isMongoConnected ? 'MongoDB Atlas (ipti_db)' : 'Local Persistent JSON Storage (data/*.json)',
+    mongoConnected: isMongoConnected,
     totalEnquiries: count,
     timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/database/status', (req, res) => {
+  res.json({
+    success: true,
+    connected: isMongoConnected,
+    mode: isMongoConnected ? 'MongoDB Atlas Cloud' : 'Local Persistent JSON Storage',
+    database: isMongoConnected ? 'ipti_db' : 'Local data/*.json files',
+    hasPasswordPlaceholder: Boolean(MONGODB_URI && MONGODB_URI.includes('<db_password>')),
+    message: isMongoConnected
+      ? 'Connected and synchronized with MongoDB Atlas cluster.'
+      : (MONGODB_URI && MONGODB_URI.includes('<db_password>'))
+        ? 'Placeholder <db_password> detected in MONGODB_URI. Please replace with your actual password in .env.'
+        : 'Running on local persistent JSON database.',
+    stats: {
+      enquiries: readEnquiries().length,
+      candidates: readCandidates().length,
+      certificates: readCertificates().length,
+      programs: readPrograms().length
+    }
   });
 });
 
