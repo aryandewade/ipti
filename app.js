@@ -3,11 +3,23 @@
    Front-End Application Logic, Animations, Canvas & Form Submissions
    ========================================================================== */
 
+(function cleanBrowserUrl() {
+  if (typeof window === 'undefined' || !window.history || !window.history.replaceState) return;
+  const p = window.location.pathname;
+  const s = window.location.search && window.location.search !== '?' ? window.location.search : '';
+  if (p === '/index.html') {
+    window.history.replaceState(null, '', '/' + s + window.location.hash);
+  } else if (p.endsWith('.html')) {
+    window.history.replaceState(null, '', p.replace(/\.html$/, '') + s + window.location.hash);
+  } else if (window.location.search === '?') {
+    window.history.replaceState(null, '', p + window.location.hash);
+  }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   initHeroCanvas();
   initPromptTypewriter();
   initRollingCounters();
-  initCountdownTimer();
   initProgramFilter();
   initFAQAccordion();
   initMobileMenu();
@@ -120,12 +132,11 @@ function initPromptTypewriter() {
   if (!typingEl) return;
 
   const prompts = [
-    'Siemens S7-1200 PLC, SCADA & Industrial Robotics automation...',
-    'STM32 ARM Cortex-M firmware, FreeRTOS & IoT protocols...',
-    'SolidWorks & CATIA mechanical surface modeling with GD&T...',
-    'React 19, Node.js & PostgreSQL scalable cloud architecture...',
-    'Electric Vehicle (EV) BMS logic, battery packs & motor controls...',
-    'Deep Learning computer vision for automated quality inspection...'
+    'Practical skill & corporate readiness...',
+    'Automation, AI, software & IoT tracks...',
+    'Business systems & executive skills...',
+    'Live projects & industry mentorship...',
+    'Verifiable credentials & placement prep...'
   ];
 
   let promptIdx = 0;
@@ -225,37 +236,6 @@ function initRollingCounters() {
     // Fallback if observer not supported
     setTimeout(startRollingAnimation, 800);
   }
-}
-
-/* --------------------------------------------------------------------------
-   03. COUNTDOWN TIMER
-   -------------------------------------------------------------------------- */
-function initCountdownTimer() {
-  const daysEl = document.getElementById('timerDays');
-  const hoursEl = document.getElementById('timerHours');
-  const minsEl = document.getElementById('timerMins');
-  const secsEl = document.getElementById('timerSecs');
-
-  if (!daysEl) return;
-
-  // Cohort target: 5 days from now
-  let targetTime = Date.now() + 5 * 24 * 60 * 60 * 1000 + 14 * 60 * 60 * 1000;
-
-  function update() {
-    const diff = Math.max(0, targetTime - Date.now());
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const m = Math.floor((diff / (1000 * 60)) % 60);
-    const s = Math.floor((diff / 1000) % 60);
-
-    daysEl.innerText = d.toString().padStart(2, '0');
-    hoursEl.innerText = h.toString().padStart(2, '0');
-    minsEl.innerText = m.toString().padStart(2, '0');
-    secsEl.innerText = s.toString().padStart(2, '0');
-  }
-
-  update();
-  setInterval(update, 1000);
 }
 
 /* --------------------------------------------------------------------------
@@ -557,13 +537,13 @@ function initForms() {
 
         if (data.success) {
           heroForm.reset();
-          alert(`✅ Thank you, ${payload.fullName}! Your enquiry is registered (Ref: ${data.trackingId}). An IPTI counselor will connect with you on WhatsApp shortly.`);
+          alert(`Thank you, ${payload.fullName}! Your enquiry is registered (Ref: ${data.trackingId}). An IPTI counselor will connect with you on WhatsApp shortly.`);
         } else {
           alert('Submission error: ' + (data.error || 'Please check your inputs'));
         }
       } catch (err) {
         console.warn('Backend server not responding, saving locally:', err);
-        alert(`✅ Thank you, ${payload.fullName}! Your enquiry has been recorded. Our admissions team will reach out within 24 hours.`);
+        alert(`Thank you, ${payload.fullName}! Your enquiry has been recorded. Our admissions team will reach out within 24 hours.`);
         heroForm.reset();
       } finally {
         submitBtn.disabled = false;
@@ -700,7 +680,7 @@ function showSuccessDialog(trackingId, name) {
     successState.style.display = 'block';
     if (trackingDisplay) trackingDisplay.innerText = trackingId;
   } else {
-    alert(`🎉 Thank you, ${name}! Your inquiry has been registered. Reference ID: ${trackingId}`);
+    alert(`Thank you, ${name}! Your inquiry has been registered. Reference ID: ${trackingId}`);
   }
 }
 
@@ -746,7 +726,7 @@ function renderPublicPrograms(programs) {
               <span class="spec-item-val">${escapeHtmlApp(p.duration || '3-4 Months')}</span>
             </div>
             <div class="spec-item">
-              <span class="spec-item-label">Lab Hours</span>
+              <span class="spec-item-label">Practical Hours</span>
               <span class="spec-item-val">${escapeHtmlApp(p.labHours || '100+ Hrs')}</span>
             </div>
             <div class="spec-item">
@@ -755,7 +735,7 @@ function renderPublicPrograms(programs) {
             </div>
             <div class="spec-item">
               <span class="spec-item-label">Credentials</span>
-              <span class="spec-item-val">${escapeHtmlApp(p.credentials || 'ISO Certified')}</span>
+              <span class="spec-item-val">${escapeHtmlApp(p.credentials || 'Industry Certified')}</span>
             </div>
           </div>
           <div class="program-tech-tags">

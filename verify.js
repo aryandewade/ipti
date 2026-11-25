@@ -3,6 +3,17 @@
  * Anti-Tamper Real-Time Verification Engine
  */
 
+(function cleanBrowserUrl() {
+  if (typeof window === 'undefined' || !window.history || !window.history.replaceState) return;
+  const p = window.location.pathname;
+  const s = window.location.search && window.location.search !== '?' ? window.location.search : '';
+  if (p.endsWith('.html')) {
+    window.history.replaceState(null, '', p.replace(/\.html$/, '') + s + window.location.hash);
+  } else if (window.location.search === '?') {
+    window.history.replaceState(null, '', p + window.location.hash);
+  }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('verifyForm');
   const input = document.getElementById('certQueryInput');
@@ -47,9 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Check URL query parameters (e.g., verify.html?id=IPTI-CERT-2026-1042)
+  // Check URL query parameters (e.g., verify.html?id=IPTI-2026-STU-01)
   const urlParams = new URLSearchParams(window.location.search);
-  const autoId = urlParams.get('id') || urlParams.get('certId') || urlParams.get('studentId') || urlParams.get('query');
+  const autoId = urlParams.get('id') || urlParams.get('studentId') || urlParams.get('query');
   if (autoId && autoId.trim()) {
     input.value = autoId.trim();
     if (clearBtn) clearBtn.style.display = 'flex';
@@ -73,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="background: #FFFFFF; border: 1.5px solid rgba(15, 67, 50, 0.12); border-radius: 16px; padding: 48px 24px; text-align: center; box-shadow: 0 4px 20px rgba(15, 67, 50, 0.05);">
         <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.2rem; color: var(--accent-gold); margin-bottom: 16px;"></i>
         <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 6px;">Consulting IPTI Central Ledger...</h3>
-        <p style="font-size: 0.88rem; color: var(--text-muted);">Authenticating cryptographic credentials against the ISO 9001:2015 database.</p>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">Authenticating cryptographic credentials against the IPTI Central Registry.</p>
       </div>
     `;
 
@@ -109,27 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
       year: 'numeric'
     }) : 'Confirmed';
 
-    const verificationUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(cert.certId)}`;
+    const verificationUrl = `${window.location.origin}/verify?id=${encodeURIComponent(cert.studentId)}`;
 
     resultContainer.innerHTML = `
       <div class="verified-result-card" id="verifiedPrintCard">
-        
-        <!-- Top Status Banner -->
-        <div class="verified-banner-top">
-          <div class="banner-status-left">
-            <div class="status-shield-icon">
-              <i class="fa-solid fa-check"></i>
-            </div>
-            <div class="banner-status-titles">
-              <h2>Official Credential Authenticated</h2>
-              <p>Verified Authentic &amp; Active in IPTI Central Ledger</p>
-            </div>
-          </div>
-          <div class="banner-status-badge">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span>Verified Official</span>
-          </div>
-        </div>
 
         <!-- Single Clean Digital Credential Certificate -->
         <div class="credential-cert-body">
@@ -139,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="cert-header-center">
               <img src="assets/ipti-logo.jpg" alt="IPTI Crest" class="cert-crest-img">
               <h3 class="cert-inst-name">INSTITUTE OF PROFESSIONAL TRAINING &amp; INNOVATION</h3>
-              <p class="cert-inst-meta">Government Recognized • ISO 9001:2015 Center of Excellence</p>
+              <p class="cert-inst-meta">IPTI Certified • Center of Excellence</p>
             </div>
 
             <!-- Conferral Lead -->
@@ -147,12 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <!-- Student Name (Shown Once, Large & Authoritative) -->
             <h1 class="cert-student-name">${escapeHtml(cert.studentName)}</h1>
-
-            ${cert.studentId ? `
-            <div class="cert-student-id-pill">
-              <span>Student ID:</span> <strong>${escapeHtml(cert.studentId)}</strong>
-            </div>
-            ` : ''}
 
             <!-- Program Lead -->
             <p class="cert-prog-lead">has successfully completed all practical assessments and industrial capstone requirements for</p>
@@ -179,33 +167,29 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             ` : ''}
 
-            <!-- Essential Metadata 3-Column Strip (Shown Once!) -->
+            <!-- Essential Metadata 2-Column Strip -->
             <div class="cert-meta-strip">
               <div class="meta-strip-item">
-                <span class="m-lbl">CREDENTIAL ID</span>
-                <span class="m-val mono">${escapeHtml(cert.certId)}</span>
+                <span class="m-lbl">STUDENT ID</span>
+                <span class="m-val mono">${escapeHtml(cert.studentId)}</span>
               </div>
               <div class="meta-strip-item">
                 <span class="m-lbl">CONFERRAL DATE</span>
                 <span class="m-val">${escapeHtml(formattedIssueDate)}</span>
-              </div>
-              <div class="meta-strip-item">
-                <span class="m-lbl">SECURITY HASH (SHA-256)</span>
-                <span class="m-val mono hash">${escapeHtml(cert.verificationHash || 'IPTI-SECURE-2026-REG')}</span>
               </div>
             </div>
 
             <!-- Signatory Footer -->
             <div class="cert-sign-footer">
               <div class="sign-block left">
-                <div class="sign-name">Aryan Dewade</div>
+                <div class="sign-name">IPTI Academic Council</div>
                 <div class="sign-role">Academic Director, IPTI</div>
               </div>
 
               <div class="seal-block center">
                 <div class="official-seal-stamp">
                   <i class="fa-solid fa-certificate"></i>
-                  <span>ISO 9001:2015</span>
+                  <span>IPTI ACCREDITED</span>
                   <small>OFFICIAL SEAL</small>
                 </div>
               </div>
@@ -237,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="actions-right">
             <button type="button" id="verifyAnotherBtn" class="btn-action secondary">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <span>Verify Another ID</span>
+              <span>Verify Another Student ID</span>
             </button>
           </div>
         </div>
@@ -363,8 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="fraud-warning-box">
             <h4><i class="fa-solid fa-shield-halved"></i> Institutional Anti-Fraud Warning</h4>
             <p>
-              The identifier <strong>"${escapeHtml(query)}"</strong> does not match any certificate or enrolled candidate record in IPTI's database. 
-              To protect organizations from counterfeit qualifications, only certificates verifiable on this portal are authentic and recognized.
+              The Student ID <strong>"${escapeHtml(query)}"</strong> does not match any verified certificate or enrolled candidate record in IPTI's database. 
+              To protect organizations from counterfeit qualifications, only certificates verifiable by Student ID on this portal are authentic and recognized.
             </p>
           </div>
 

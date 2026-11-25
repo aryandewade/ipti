@@ -516,10 +516,10 @@ section[id] {
 }
 
 .hero-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 48px;
   align-items: center;
-  justify-content: center;
   position: relative;
   z-index: 2;
   width: 100%;
@@ -528,13 +528,55 @@ section[id] {
 .hero-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  max-width: 920px;
-  margin: 0 auto;
+  align-items: flex-start;
+  text-align: left;
+  max-width: 100%;
   position: relative;
   z-index: 2;
   width: 100%;
+}
+
+.hero-logo-showcase {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  align-self: start;
+  padding-top: 52px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-logo-showcase img {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  border-radius: 50%;
+  box-shadow: 0 24px 60px rgba(15, 67, 50, 0.14);
+  border: 6px solid rgba(255, 255, 255, 0.9);
+  background: #ffffff;
+}
+
+@media (max-width: 991px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    text-align: center;
+  }
+
+  .hero-content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-logo-showcase {
+    padding-top: 0;
+  }
+
+  .hero-logo-showcase img {
+    max-width: 280px;
+  }
 }
 
 .eyebrow-pill {
@@ -607,9 +649,9 @@ section[id] {
   font-size: 1.15rem;
   line-height: 1.7;
   color: var(--text-secondary);
-  margin: 0 auto 28px auto;
-  max-width: 820px;
-  text-align: center;
+  margin: 0 0 28px 0;
+  max-width: 680px;
+  text-align: left;
 }
 
 /* Prompt Box (Oma Mindly Interactive Training Explorer) */
@@ -619,9 +661,9 @@ section[id] {
   border-radius: var(--radius-lg);
   padding: 16px 20px;
   box-shadow: 0 12px 28px -4px rgba(15, 45, 34, 0.06);
-  margin: 0 auto 30px auto;
+  margin: 0 0 30px 0;
   width: 100%;
-  max-width: 760px;
+  max-width: 680px;
   text-align: left;
   transition: all 0.3s ease;
   position: relative;
@@ -637,7 +679,8 @@ section[id] {
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
-  font-size: 0.98rem;
+  font-size: 0.92rem;
+  min-height: 26px;
 }
 
 .prompt-lead {
@@ -646,15 +689,37 @@ section[id] {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .prompt-typing-text {
   color: var(--text-main);
   font-family: var(--font-mono);
+  font-size: 0.88rem;
   font-weight: 500;
   border-right: 2px solid var(--accent-gold);
   padding-right: 4px;
+  line-height: 24px;
+  height: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
   animation: blink 0.8s infinite;
+}
+
+@media (max-width: 767px) {
+  .prompt-box-top {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    min-height: 70px;
+  }
+
+  .prompt-typing-text {
+    white-space: normal;
+    height: auto;
+    line-height: 1.45;
+  }
 }
 
 @keyframes blink {
@@ -699,7 +764,7 @@ section[id] {
 .hero-actions-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 16px;
   flex-wrap: wrap;
   margin-bottom: 24px;
@@ -709,10 +774,10 @@ section[id] {
 .hero-audience-strip {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   flex-wrap: wrap;
-  margin: 0 auto 24px auto;
+  margin: 0 0 24px 0;
   padding: 8px 18px;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(15, 67, 50, 0.12);
@@ -1445,7 +1510,7 @@ section[id] {
 }
 
 /* --------------------------------------------------------------------------
-   08. METHODOLOGY & LAB INFRASTRUCTURE
+   08. METHODOLOGY & PRACTICAL INFRASTRUCTURE
    -------------------------------------------------------------------------- */
 .methodology-section {
   padding: 80px 0;
@@ -1512,7 +1577,7 @@ section[id] {
   line-height: 1.5;
 }
 
-.lab-preview-card {
+.facility-preview-card {
   background: linear-gradient(135deg, #092c21 0%, #0F4332 60%, #17543f 100%);
   border-radius: var(--radius-xl);
   padding: 30px;
@@ -1522,7 +1587,7 @@ section[id] {
   overflow: hidden;
 }
 
-.lab-preview-card::before {
+.facility-preview-card::before {
   content: '';
   position: absolute;
   top: -50px;
@@ -1532,7 +1597,7 @@ section[id] {
   background: radial-gradient(circle, rgba(197, 160, 89, 0.25) 0%, transparent 70%);
 }
 
-.lab-card-badge {
+.facility-card-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1546,21 +1611,21 @@ section[id] {
   margin-bottom: 16px;
 }
 
-.lab-preview-card h3 {
+.facility-preview-card h3 {
   font-size: 1.7rem;
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 12px;
 }
 
-.lab-preview-card p {
+.facility-preview-card p {
   font-size: 0.92rem;
   color: #d1e2db;
   line-height: 1.6;
   margin-bottom: 24px;
 }
 
-.lab-stats-row {
+.facility-stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
@@ -1568,14 +1633,14 @@ section[id] {
   padding-top: 20px;
 }
 
-.lab-stat-box span.num {
+.facility-stat-box span.num {
   font-size: 1.5rem;
   font-weight: 800;
   color: #dfb86c;
   display: block;
 }
 
-.lab-stat-box span.lbl {
+.facility-stat-box span.lbl {
   font-size: 0.72rem;
   color: #c0d4cc;
   text-transform: uppercase;

@@ -2,6 +2,17 @@
    IPTI LEARNER PORTAL ENGINE (STUDENT DESK & FEES LEDGER)
    ========================================================================== */
 
+(function cleanBrowserUrl() {
+  if (typeof window === 'undefined' || !window.history || !window.history.replaceState) return;
+  const p = window.location.pathname;
+  const s = window.location.search && window.location.search !== '?' ? window.location.search : '';
+  if (p.endsWith('.html')) {
+    window.history.replaceState(null, '', p.replace(/\.html$/, '') + s + window.location.hash);
+  } else if (window.location.search === '?') {
+    window.history.replaceState(null, '', p + window.location.hash);
+  }
+})();
+
 let currentLearnerToken = localStorage.getItem('ipti_learner_token') || null;
 let currentStudentData = null;
 let currentCertificateData = null;
@@ -42,7 +53,6 @@ const programModulesDb = {
 
 document.addEventListener('DOMContentLoaded', () => {
   initLearnerAuth();
-  initLearnerDashboard();
   initChangePasswordModal();
   initDiplomaModal();
   initProfileManagementModal();
@@ -202,7 +212,6 @@ function renderDashboard(student, certificate) {
   const welcomeGreeting = document.getElementById('welcomeGreeting');
   const welcomeSub = document.getElementById('welcomeSub');
   const profileBatchTag = document.getElementById('profileBatchTag');
-  const profileModeTag = document.getElementById('profileModeTag');
   const profileAdmitDate = document.getElementById('profileAdmitDate');
 
   if (welcomeGreeting) welcomeGreeting.innerText = `Welcome back, ${firstName}!`;
@@ -210,7 +219,6 @@ function renderDashboard(student, certificate) {
     welcomeSub.innerHTML = `Enrolled in <strong>${escapeHtml(student.program || 'Industrial Engineering')}</strong> at IPTI Engineering Innovation Center.`;
   }
   if (profileBatchTag) profileBatchTag.innerHTML = `<i class="fa-solid fa-clock"></i> ${escapeHtml(student.batch || 'Morning Cohort')}`;
-  if (profileModeTag) profileModeTag.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(student.learningMode || 'Classroom Training')}`;
 
   const admitDateFmt = new Date(student.admissionDate || student.createdAt).toLocaleDateString('en-IN', {
     day: '2-digit', month: 'short', year: 'numeric'
@@ -333,9 +341,10 @@ function renderCertificateArea(student, certificate) {
   if (!container) return;
 
   const isEligible = Boolean(student.eligibleForCertificate);
-  const certId = (certificate && certificate.certId) || student.certificateId;
+  const studentId = student.studentId || (certificate && certificate.studentId);
+  const isIssued = Boolean(certificate) || Boolean(student.certificateIssued);
 
-  if (isEligible && certId) {
+  if (isEligible && isIssued && studentId) {
     // Official Certificate is Issued & Ready
     const issueDate = certificate ? new Date(certificate.issueDate).toLocaleDateString('en-IN', {
       day: '2-digit', month: 'long', year: 'numeric'
@@ -348,10 +357,10 @@ function renderCertificateArea(student, certificate) {
           <i class="fa-solid fa-award"></i>
         </div>
         <h4 class="cert-showcase-title">Official Certificate Awarded</h4>
-        <p class="cert-showcase-sub">Congratulations! You have been conferred the official ISO 9001:2015 accredited course completion credential.</p>
+        <p class="cert-showcase-sub">Congratulations! You have been conferred the official course completion credential.</p>
         
         <div class="cert-meta-tags">
-          <span class="cert-meta-tag"><i class="fa-solid fa-id-badge"></i> ${escapeHtml(certId)}</span>
+          <span class="cert-meta-tag"><i class="fa-solid fa-id-badge"></i> ${escapeHtml(studentId)}</span>
           <span class="cert-meta-tag"><i class="fa-solid fa-medal"></i> ${escapeHtml(grade)}</span>
           <span class="cert-meta-tag"><i class="fa-solid fa-calendar-check"></i> ${issueDate}</span>
         </div>
@@ -361,7 +370,7 @@ function renderCertificateArea(student, certificate) {
             <i class="fa-solid fa-graduation-cap"></i>
             <span>View & Download Official Digital Diploma</span>
           </button>
-          <a href="verify.html?id=${encodeURIComponent(certId)}" target="_blank" class="btn-diploma-view" style="background: #ffffff; color: var(--primary); border: 1.5px solid rgba(15, 67, 50, 0.25); text-decoration: none;">
+          <a href="/verify?id=${encodeURIComponent(studentId)}" target="_blank" class="btn-diploma-view" style="background: #ffffff; color: var(--primary); border: 1.5px solid rgba(15, 67, 50, 0.25); text-decoration: none;">
             <i class="fa-solid fa-shield-halved" style="color: var(--accent-gold);"></i>
             <span>Public Verification Page ↗</span>
           </a>
@@ -376,10 +385,10 @@ function renderCertificateArea(student, certificate) {
           <i class="fa-solid fa-circle-check"></i>
         </div>
         <h4 class="cert-showcase-title" style="color: #065f46;">Eligible for Certificate</h4>
-        <p class="cert-showcase-sub">Your practical lab assessments, capstone project review, and fee clearance are approved! Your official credential serial is being generated by the Academic Directorate.</p>
+        <p class="cert-showcase-sub">Your practical assessments, capstone project review, and fee clearance are approved! Your official credential serial is being generated by the Academic Directorate.</p>
         
         <div class="cert-meta-tags">
-          <span class="cert-meta-tag" style="color: #065f46; border-color: rgba(5,150,105,0.3);"><i class="fa-solid fa-shield-halved"></i> ISO 9001:2015 Accredited</span>
+          <span class="cert-meta-tag" style="color: #065f46; border-color: rgba(5,150,105,0.3);"><i class="fa-solid fa-shield-halved"></i> Verified Authentic</span>
           <span class="cert-meta-tag" style="color: #065f46; border-color: rgba(5,150,105,0.3);"><i class="fa-solid fa-clock"></i> Directorate Conferral Pending</span>
         </div>
       </div>
@@ -536,7 +545,7 @@ window.openLearnerDiplomaModal = function() {
   if (modalName) modalName.innerText = s.fullName || 'Rahul V. Sharma';
   if (modalProg) modalProg.innerText = s.program || 'Industrial Automation & Robotics (PLC/SCADA)';
   if (modalGrade) modalGrade.innerText = `Awarded with ${c ? c.grade : 'Distinction (Grade A+ • 96%)'}`;
-  if (modalCertId) modalCertId.innerText = (c && c.certId) || s.certificateId || 'IPTI-CERT-2026-1042';
+  if (modalCertId) modalCertId.innerText = `Student ID: ${s.studentId || (c && c.studentId) || 'IPTI-2026-STU-01'}`;
 
   const issueDateStr = c ? new Date(c.issueDate).toLocaleDateString('en-IN', {
     day: '2-digit', month: 'long', year: 'numeric'
@@ -688,7 +697,7 @@ function initProfileManagementModal() {
             }
 
             if (photoStatus) {
-              photoStatus.innerText = '✓ Profile photo updated successfully!';
+              photoStatus.innerText = 'Profile photo updated successfully!';
               photoStatus.style.color = '#059669';
             }
           } else {

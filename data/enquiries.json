@@ -2,8 +2,8 @@
   {
     "id": "ipti_enq_1795424600569_y6qy8",
     "trackingId": "IPTI-2026-3902",
-    "fullName": "Aryan Dewade",
-    "email": "aryandewade1214@gmail.com",
+    "fullName": "Vikram S. Joshi",
+    "email": "vikram.joshi@example.com",
     "phone": "+919272902182",
     "whatsapp": "+919272902182",
     "course": "AI, Machine Learning & Computer Vision",
@@ -37,7 +37,7 @@
     "message": "Need curriculum and placement statistics.",
     "status": "New",
     "priority": "High",
-    "interest": "Interested",
+    "interest": "Not Interested",
     "source": "Verification Test",
     "notes": [
       {
@@ -47,7 +47,7 @@
       }
     ],
     "createdAt": "2026-11-23T08:56:12.322Z",
-    "updatedAt": "2026-11-23T08:56:12.322Z"
+    "updatedAt": "2026-11-25T10:03:04.716Z"
   },
   {
     "id": "ipti_enq_sample_1",

@@ -20,6 +20,14 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ipti@admin2026';
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || 'ipti_secure_jwt_secret_token_2026';
 
+// Global error handlers to keep daemon resilient against transient network drops
+process.on('unhandledRejection', (reason) => {
+  // Silent fallback - server keeps running with local JSON fallback
+});
+process.on('uncaughtException', (err) => {
+  console.error('Unhandled server exception caught safely:', err.message);
+});
+
 // Ensure data storage directory exists (supports local disk or Vercel serverless /tmp)
 const isVercel = Boolean(process.env.VERCEL || process.env.NOW_REGION);
 const dataDir = isVercel ? '/tmp' : path.join(__dirname, 'data');
@@ -85,7 +93,6 @@ const candidateSchema = new mongoose.Schema({
   paymentHistory: { type: Array, default: [] },
   eligibleForCertificate: { type: Boolean, default: false, index: true },
   certificateIssued: { type: Boolean, default: false },
-  certificateId: { type: String, default: '' },
   attendance: { type: Number, default: 0 },
   projectTitle: { type: String, default: '' },
   password: { type: String, default: 'ipti@123' },
@@ -100,13 +107,16 @@ const candidateSchema = new mongoose.Schema({
 // 3. Certificate Schema (Issued Credentials & Diplomas)
 const certificateSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
-  certId: { type: String, required: true, unique: true, index: true },
+  studentId: { type: String, required: true, unique: true, index: true },
   studentName: { type: String, required: true },
   studentEmail: { type: String, required: true, index: true },
   studentPhone: { type: String, default: '' },
   program: { type: String, required: true },
   issueDate: { type: String, required: true },
   grade: { type: String, default: 'Grade A+' },
+  standard: { type: String, default: 'IPTI Certified Standard' },
+  status: { type: String, default: 'Verified' },
+  notes: { type: String, default: '' },
   verified: { type: Boolean, default: true },
   score: { type: Number, default: 95 },
   issuedBy: { type: String, default: 'IPTI Academic Council' },
@@ -123,9 +133,9 @@ const programSchema = new mongoose.Schema({
   icon: { type: String, default: 'fa-gears' },
   description: { type: String, default: '' },
   duration: { type: String, default: '3 Months' },
-  labHours: { type: String, default: '100+ Hrs Lab' },
+  labHours: { type: String, default: '100+ Hrs Practical' },
   mode: { type: String, default: 'Classroom / Hybrid' },
-  credentials: { type: String, default: 'ISO Certification' },
+  credentials: { type: String, default: 'Industry Certification' },
   techTags: { type: [String], default: [] },
   syllabusUrl: { type: String, default: '' },
   syllabusFilename: { type: String, default: '' },
@@ -142,31 +152,36 @@ const ProgramModel = mongoose.models.Program || mongoose.model('Program', progra
 
 async function initDatabase() {
   if (!MONGODB_URI) {
-    console.log('📦 [Database Mode] Local persistent JSON files (data/) active.');
+    console.log('[Database Mode] Local persistent JSON files (data/) active.');
     return;
   }
 
   if (MONGODB_URI.includes('<db_password>')) {
     console.log('\n================================================================');
-    console.log('⚠️  [MongoDB Atlas Notice] Placeholder <db_password> detected.');
-    console.log('⚠️  Please replace <db_password> in your .env file with your actual MongoDB Atlas password.');
-    console.log('📁  Local persistent JSON storage (data/) is active and serving data.');
+    console.log('[MongoDB Atlas Notice] Placeholder <db_password> detected.');
+    console.log('Please replace <db_password> in your .env file with your actual MongoDB Atlas password.');
+    console.log('Local persistent JSON storage (data/) is active and serving data.');
     console.log('================================================================\n');
     return;
   }
 
+  // Attach error listener to prevent unhandled EventEmitter crash if credentials fail
+  mongoose.connection.on('error', () => {
+    isMongoConnected = false;
+  });
+
   try {
-    console.log('⏳ [MongoDB Atlas] Connecting to cluster...');
+    console.log('[MongoDB Atlas] Connecting to cluster...');
     await mongoose.connect(MONGODB_URI, {
       dbName: 'ipti_db',
-      serverSelectionTimeoutMS: 8000
+      serverSelectionTimeoutMS: 5000
     });
     isMongoConnected = true;
-    console.log('🍃 [MongoDB Atlas] Connected successfully to cluster (database: ipti_db)');
+    console.log('[MongoDB Atlas] Connected successfully to cluster (database: ipti_db)');
     await migrateLocalDataToMongo();
   } catch (err) {
-    console.error('❌ [MongoDB Atlas Connection Failed]:', err.message);
-    console.log('📁 Continuing with local persistent JSON files.\n');
+    console.error('[MongoDB Atlas Connection Failed]:', err.message);
+    console.log('Continuing with local persistent JSON files.\n');
     isMongoConnected = false;
   }
 }
@@ -179,7 +194,7 @@ async function migrateLocalDataToMongo() {
       const local = readEnquiries();
       if (local.length > 0) {
         await EnquiryModel.insertMany(local);
-        console.log(`✅ [MongoDB Seeder] Migrated ${local.length} enquiries to MongoDB Atlas.`);
+        console.log(`[MongoDB Seeder] Migrated ${local.length} enquiries to MongoDB Atlas.`);
       }
     } else {
       const docs = await EnquiryModel.find().lean();
@@ -195,7 +210,7 @@ async function migrateLocalDataToMongo() {
       const local = readCandidates();
       if (local.length > 0) {
         await CandidateModel.insertMany(local);
-        console.log(`✅ [MongoDB Seeder] Migrated ${local.length} candidates to MongoDB Atlas.`);
+        console.log(`[MongoDB Seeder] Migrated ${local.length} candidates to MongoDB Atlas.`);
       }
     } else {
       const docs = await CandidateModel.find().lean();
@@ -211,7 +226,7 @@ async function migrateLocalDataToMongo() {
       const local = readCertificates();
       if (local.length > 0) {
         await CertificateModel.insertMany(local);
-        console.log(`✅ [MongoDB Seeder] Migrated ${local.length} certificates to MongoDB Atlas.`);
+        console.log(`[MongoDB Seeder] Migrated ${local.length} certificates to MongoDB Atlas.`);
       }
     }
 
@@ -221,11 +236,11 @@ async function migrateLocalDataToMongo() {
       const local = readPrograms();
       if (local.length > 0) {
         await ProgramModel.insertMany(local);
-        console.log(`✅ [MongoDB Seeder] Migrated ${local.length} programs to MongoDB Atlas.`);
+        console.log(`[MongoDB Seeder] Migrated ${local.length} programs to MongoDB Atlas.`);
       }
     }
   } catch (err) {
-    console.error('⚠️ [MongoDB Initial Migration Error]:', err.message);
+    console.error('[MongoDB Initial Migration Error]:', err.message);
   }
 }
 
@@ -242,7 +257,7 @@ async function syncEnquiriesToMongo(enquiries) {
     }));
     await EnquiryModel.bulkWrite(ops);
   } catch (err) {
-    console.error('⚠️ [MongoDB Sync Enquiries Error]:', err.message);
+    console.error('[MongoDB Sync Enquiries Error]:', err.message);
   }
 }
 
@@ -258,7 +273,7 @@ async function syncCandidatesToMongo(candidates) {
     }));
     await CandidateModel.bulkWrite(ops);
   } catch (err) {
-    console.error('⚠️ [MongoDB Sync Candidates Error]:', err.message);
+    console.error('[MongoDB Sync Candidates Error]:', err.message);
   }
 }
 
@@ -274,7 +289,7 @@ async function syncCertificatesToMongo(certificates) {
     }));
     await CertificateModel.bulkWrite(ops);
   } catch (err) {
-    console.error('⚠️ [MongoDB Sync Certificates Error]:', err.message);
+    console.error('[MongoDB Sync Certificates Error]:', err.message);
   }
 }
 
@@ -290,7 +305,7 @@ async function syncProgramsToMongo(programs) {
     }));
     await ProgramModel.bulkWrite(ops);
   } catch (err) {
-    console.error('⚠️ [MongoDB Sync Programs Error]:', err.message);
+    console.error('[MongoDB Sync Programs Error]:', err.message);
   }
 }
 
@@ -307,9 +322,9 @@ const defaultPrograms = [
     icon: "fa-gears",
     description: "Comprehensive hands-on training on Siemens, Allen-Bradley, Mitsubishi PLCs, SCADA visualization, VFD drives, panel designing, and Industrial IoT integration.",
     duration: "4 Months",
-    labHours: "120+ Hrs Lab",
+    labHours: "120+ Hrs Practical",
     mode: "Classroom / Hybrid",
-    credentials: "ISO Certification",
+    credentials: "Industry Certification",
     techTags: ["Siemens TIA Portal", "Wonderware SCADA", "VFD & Servo", "Robotics PLC"],
     active: true,
     createdAt: new Date().toISOString(),
@@ -323,7 +338,7 @@ const defaultPrograms = [
     icon: "fa-microchip",
     description: "From bare-metal C programming to FreeRTOS on 32-bit ARM Cortex-M microcontrollers, PCB design in KiCAD, communication protocols (CAN, I2C, SPI), and cloud IoT telemetry.",
     duration: "4 Months",
-    labHours: "130+ Hrs Lab",
+    labHours: "130+ Hrs Practical",
     mode: "Classroom / Hybrid",
     credentials: "4 Hardware Comps",
     techTags: ["STM32 / ARM", "FreeRTOS", "Embedded C", "MQTT / BLE"],
@@ -340,7 +355,7 @@ const defaultPrograms = [
     description: "Master parametric 3D solid modeling, sheet metal, surface modeling, GD&T standards, plastic part design, and finite element stress analysis using Dassault & Autodesk tools.",
     duration: "3 Months",
     labHours: "100+ Hrs CAD",
-    mode: "Studio Lab",
+    mode: "Studio Practice",
     credentials: "ASME Y14.5",
     techTags: ["SolidWorks", "CATIA V5", "Ansys FEA", "GD&T"],
     active: true,
@@ -428,59 +443,59 @@ function writePrograms(programs) {
 const defaultCertificates = [
   {
     id: "cert_1795427001042_a1b2",
-    certId: "IPTI-CERT-2026-1042",
+    studentId: "IPTI-2026-STU-01",
     studentName: "Rahul V. Sharma",
     studentEmail: "rahul.sharma@example.com",
     studentPhone: "+91 98230 45671",
     program: "Industrial Automation & Robotics (PLC/SCADA)",
     grade: "Distinction (Grade A+ • 96%)",
     issueDate: "2026-02-18",
-    standard: "ISO 9001:2015 Accredited",
+    standard: "Government Recognized Standard",
     status: "Verified",
     notes: "Completed 120+ hours of physical PLC/SCADA benchwork and Automated Sorting Line capstone.",
     createdAt: "2026-02-18T10:00:00.000Z"
   },
   {
-    id: "cert_1795427001088_c3d4",
-    certId: "IPTI-CERT-2026-1088",
-    studentName: "Pooja Deshmukh",
-    studentEmail: "pooja.d@example.com",
-    studentPhone: "+91 99750 12894",
-    program: "Embedded Systems & IoT Engineering",
-    grade: "Grade A (89%)",
-    issueDate: "2026-01-25",
-    standard: "ISO 9001:2015 Accredited",
-    status: "Verified",
-    notes: "Built FreeRTOS sensor telemetry rig with CAN 2.0B bus integration.",
-    createdAt: "2026-01-25T11:30:00.000Z"
-  },
-  {
     id: "cert_1795427001120_e5f6",
-    certId: "IPTI-CERT-2026-1120",
+    studentId: "IPTI-2026-STU-03",
     studentName: "Amitesh Kulkarni",
     studentEmail: "amitesh.k@example.com",
     studentPhone: "+91 97640 88219",
     program: "CAD / CAM & Mechanical Product Design",
     grade: "Distinction (Grade A+ • 94%)",
     issueDate: "2026-03-02",
-    standard: "ISO 9001:2015 Accredited",
+    standard: "Government Recognized Standard",
     status: "Verified",
     notes: "Completed Automotive Transmission casing parametric design with GD&T and 5-axis CAM.",
     createdAt: "2026-03-02T09:15:00.000Z"
   },
   {
     id: "cert_1795427001205_g7h8",
-    certId: "IPTI-CERT-2026-1205",
+    studentId: "IPTI-2026-STU-04",
     studentName: "Neha S. Patil",
     studentEmail: "neha.patil@example.com",
     studentPhone: "+91 98901 23456",
     program: "AI, Machine Learning & Vision Systems",
     grade: "Distinction (Grade A+ • 97%)",
     issueDate: "2026-03-10",
-    standard: "ISO 9001:2015 Accredited",
+    standard: "Government Recognized Standard",
     status: "Verified",
     notes: "Delivered production-grade defect detection vision pipeline using TensorRT.",
     createdAt: "2026-03-10T14:20:00.000Z"
+  },
+  {
+    id: "cert_1795520768441_fzz1",
+    studentId: "IPTI-2026-STU-05",
+    studentName: "Vikram S. Joshi",
+    studentEmail: "vikram.joshi@example.com",
+    studentPhone: "+91 92729 02182",
+    program: "AI, Machine Learning & Vision Systems",
+    grade: "Distinction (Grade A+ • 95%)",
+    issueDate: "2026-11-24",
+    standard: "Government Recognized Standard",
+    status: "Verified",
+    notes: "Successfully completed AI, Machine Learning & Vision Systems. Capstone: Computer Vision Automated Quality Inspection.",
+    createdAt: "2026-11-24T11:46:08.440Z"
   }
 ];
 
@@ -535,12 +550,11 @@ const defaultCandidates = [
     ],
     eligibleForCertificate: true,
     certificateIssued: true,
-    certificateId: "IPTI-CERT-2026-1042",
     attendance: 96,
     projectTitle: "Automated Sorting Line & SCADA Telemetry Rig",
     password: "ipti@123",
     hasChangedPassword: false,
-    notes: "Distinction student. All lab benchmarks and capstone project completed.",
+    notes: "Distinction student. All practical benchmarks and capstone project completed.",
     createdAt: "2026-01-10T10:00:00.000Z",
     updatedAt: "2026-01-25T14:00:00.000Z"
   },
@@ -564,7 +578,6 @@ const defaultCandidates = [
     ],
     eligibleForCertificate: false,
     certificateIssued: false,
-    certificateId: "",
     attendance: 88,
     projectTitle: "STM32 FreeRTOS CAN 2.0B Telemetry Node",
     password: "ipti@123",
@@ -593,12 +606,11 @@ const defaultCandidates = [
     ],
     eligibleForCertificate: true,
     certificateIssued: true,
-    certificateId: "IPTI-CERT-2026-1120",
     attendance: 94,
     projectTitle: "Automotive Transmission Casing Parametric Design (GD&T)",
     password: "ipti@123",
     hasChangedPassword: false,
-    notes: "ISO Certificate issued. 100% attendance in SolidWorks module.",
+    notes: "Certificate issued. 100% attendance in SolidWorks module.",
     createdAt: "2026-01-20T11:00:00.000Z",
     updatedAt: "2026-03-02T09:15:00.000Z"
   },
@@ -622,7 +634,6 @@ const defaultCandidates = [
     ],
     eligibleForCertificate: true,
     certificateIssued: true,
-    certificateId: "IPTI-CERT-2026-1205",
     attendance: 97,
     projectTitle: "Edge AI Industrial Defect Detection with TensorRT",
     password: "ipti@123",
@@ -634,8 +645,8 @@ const defaultCandidates = [
   {
     id: "cand_2026_stu_05",
     studentId: "IPTI-2026-STU-05",
-    fullName: "Aryan Dewade",
-    email: "aryandewade1214@gmail.com",
+    fullName: "Vikram S. Joshi",
+    email: "vikram.joshi@example.com",
     phone: "+91 92729 02182",
     whatsapp: "+91 92729 02182",
     program: "AI, Machine Learning & Vision Systems",
@@ -650,8 +661,7 @@ const defaultCandidates = [
       { id: "pay_501", date: "2026-11-20", amount: 40000, method: "UPI Transfer", receiptNo: "REC-2026-210", notes: "Full upfront cohort registration" }
     ],
     eligibleForCertificate: true,
-    certificateIssued: false,
-    certificateId: "",
+    certificateIssued: true,
     attendance: 95,
     projectTitle: "Computer Vision Automated Quality Inspection",
     password: "ipti@123",
@@ -688,6 +698,38 @@ function writeCandidates(candidates) {
     console.error('Error writing candidates database:', err);
     return false;
   }
+}
+
+/**
+ * Generates a strictly unique Student ID (e.g. IPTI-2026-STU-06) checking both
+ * candidates and certificates collections so no duplicate Student ID is ever produced.
+ */
+function generateUniqueStudentId(candidates = [], certificates = []) {
+  const year = new Date().getFullYear();
+  const usedIds = new Set([
+    ...candidates.map(c => (c.studentId || '').trim().toUpperCase()),
+    ...certificates.map(c => (c.studentId || '').trim().toUpperCase())
+  ]);
+  let num = 1;
+  let candidateId = '';
+  do {
+    candidateId = `IPTI-${year}-STU-${String(num).padStart(2, '0')}`;
+    num++;
+  } while (usedIds.has(candidateId.toUpperCase()));
+  return candidateId;
+}
+
+/**
+ * Checks if a Student ID is already in use in a collection (excluding an optional internal id).
+ */
+function isStudentIdTaken(studentId, list = [], excludeInternalId = null) {
+  if (!studentId) return false;
+  const upper = studentId.trim().toUpperCase();
+  return list.some(item =>
+    item.id !== excludeInternalId &&
+    item.studentId &&
+    item.studentId.trim().toUpperCase() === upper
+  );
 }
 
 // Initialize database with sample entries if empty
@@ -841,6 +883,8 @@ app.get('/verify', (req, res) => res.sendFile(path.join(__dirname, 'verify.html'
 app.get('/verify-certificate', (req, res) => res.sendFile(path.join(__dirname, 'verify.html')));
 app.get('/learner', (req, res) => res.sendFile(path.join(__dirname, 'learner.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/privacy-policy', (req, res) => res.sendFile(path.join(__dirname, 'privacy-policy.html')));
+app.get('/terms-and-conditions', (req, res) => res.sendFile(path.join(__dirname, 'terms-and-conditions.html')));
 
 // Simple token generator & validator
 function generateToken(username) {
@@ -1541,10 +1585,10 @@ app.post('/api/programs', requireAdmin, (req, res) => {
       icon: icon ? icon.trim() : 'fa-graduation-cap',
       description: description.trim(),
       duration: duration ? duration.trim() : '3 Months',
-      labHours: labHours ? labHours.trim() : '100+ Hrs Lab',
+      labHours: labHours ? labHours.trim() : '100+ Hrs Practical',
       mode: mode ? mode.trim() : 'Classroom / Hybrid',
-      credentials: credentials ? credentials.trim() : 'ISO Certification',
-      techTags: parsedTags.length > 0 ? parsedTags : ['Hands-on Lab', 'Industry Project'],
+      credentials: credentials ? credentials.trim() : 'Industry Certification',
+      techTags: parsedTags.length > 0 ? parsedTags : ['Hands-on Practice', 'Industry Project'],
       syllabusUrl: syllabusUrl ? String(syllabusUrl).trim() : '',
       syllabusFilename: syllabusFilename ? String(syllabusFilename).trim() : '',
       active: true,
@@ -1673,7 +1717,7 @@ app.get('/api/certificates', requireAdmin, (req, res) => {
       const q = search.trim().toLowerCase();
       list = list.filter(c => 
         (c.studentName && c.studentName.toLowerCase().includes(q)) ||
-        (c.certId && c.certId.toLowerCase().includes(q)) ||
+        (c.studentId && c.studentId.toLowerCase().includes(q)) ||
         (c.studentEmail && c.studentEmail.toLowerCase().includes(q)) ||
         (c.program && c.program.toLowerCase().includes(q))
       );
@@ -1719,6 +1763,7 @@ app.get('/api/certificates/stats', requireAdmin, (req, res) => {
 });
 
 // 3. Verify Certificate & Credential (Public Anti-Fraud Endpoint)
+// Verification is strictly performed ONLY on the basis of unique Student ID.
 // Rule: When verifying through Student ID, ensure the certificate has actually been generated first!
 // If generated -> returns verified certificate & hash.
 // If not generated -> explicitly alerts that the certificate must be generated first before verification.
@@ -1726,14 +1771,14 @@ app.get('/api/certificates/verify/:query', (req, res) => {
   try {
     let rawQuery = (req.params.query || '').trim();
     if (!rawQuery) {
-      return res.status(400).json({ success: false, error: 'Certificate ID or Student Unique ID is required' });
+      return res.status(400).json({ success: false, error: 'Student ID is required' });
     }
 
     // Clean URL query parameters if pasted by user
     if (rawQuery.includes('?id=')) {
       rawQuery = rawQuery.split('?id=')[1].split('&')[0];
-    } else if (rawQuery.includes('?certId=')) {
-      rawQuery = rawQuery.split('?certId=')[1].split('&')[0];
+    } else if (rawQuery.includes('?studentId=')) {
+      rawQuery = rawQuery.split('?studentId=')[1].split('&')[0];
     } else if (rawQuery.includes('/verify/')) {
       rawQuery = rawQuery.split('/verify/')[1].split('?')[0];
     }
@@ -1745,26 +1790,23 @@ app.get('/api/certificates/verify/:query', (req, res) => {
     const certs = readCertificates();
     const candidates = readCandidates();
 
-    // -------------------------------------------------------------------------
-    // A. CHECK IF QUERY IS SPECIFICALLY A STUDENT ID (e.g. IPTI-2026-STU-XX or STU-XX)
-    // -------------------------------------------------------------------------
-    const studentCandidate = candidates.find(c => {
-      if (!c.studentId) return false;
-      const sId = c.studentId.toUpperCase();
+    const matchesStudentId = (targetId) => {
+      if (!targetId) return false;
+      const sId = targetId.trim().toUpperCase();
       const sAlpha = sId.replace(/[^A-Z0-9]/g, '');
       return sId === upperQuery || (alphaNumQuery.length >= 4 && sAlpha === alphaNumQuery);
-    });
+    };
+
+    // -------------------------------------------------------------------------
+    // A. CHECK ENROLLED CANDIDATES BY STUDENT ID
+    // -------------------------------------------------------------------------
+    const studentCandidate = candidates.find(c => matchesStudentId(c.studentId));
+    const matchedCert = certs.find(c => matchesStudentId(c.studentId));
 
     if (studentCandidate) {
-      // REQUIREMENT: Make sure certificate is generated first, then verify it!
-      const hasGeneratedCert = Boolean(
-        studentCandidate.certificateIssued && 
-        studentCandidate.certificateId && 
-        certs.some(c => c.certId && c.certId.toUpperCase() === studentCandidate.certificateId.toUpperCase())
-      );
+      const hasGeneratedCert = Boolean(studentCandidate.certificateIssued && matchedCert);
 
       if (!hasGeneratedCert) {
-        // Certificate is NOT generated yet for this Student ID!
         return res.json({
           success: false,
           type: 'certificate_not_generated',
@@ -1784,9 +1826,7 @@ app.get('/api/certificates/verify/:query', (req, res) => {
         });
       }
 
-      // Certificate HAS been generated for this Student ID! Proceed to verify it.
-      const cert = certs.find(c => c.certId && c.certId.toUpperCase() === studentCandidate.certificateId.toUpperCase());
-      const hashInput = `${cert.certId}:${cert.studentName}:${cert.issueDate}:IPTI_SECURE_REGISTRY_2026`;
+      const hashInput = `${matchedCert.studentId}:${matchedCert.studentName}:${matchedCert.issueDate}:IPTI_SECURE_REGISTRY_2026`;
       const verificationHash = crypto.createHash('sha256').update(hashInput).digest('hex').substring(0, 24).toUpperCase();
 
       return res.json({
@@ -1794,19 +1834,18 @@ app.get('/api/certificates/verify/:query', (req, res) => {
         type: 'certificate',
         status: 'verified',
         certificate: {
-          id: cert.id,
-          certId: cert.certId,
-          studentName: cert.studentName,
-          studentEmail: cert.studentEmail || studentCandidate.email,
-          program: cert.program,
-          grade: cert.grade || 'Distinction (Grade A+)',
-          issueDate: cert.issueDate,
-          standard: cert.standard || 'ISO 9001:2015 Accredited Center of Excellence',
-          status: cert.status || 'Verified',
-          notes: cert.notes || '',
-          studentId: studentCandidate.studentId,
-          projectTitle: studentCandidate.projectTitle || cert.projectTitle || '',
-          learningMode: studentCandidate.learningMode || 'Classroom & Hands-on Lab Practice',
+          id: matchedCert.id,
+          studentId: matchedCert.studentId,
+          studentName: matchedCert.studentName,
+          studentEmail: matchedCert.studentEmail || studentCandidate.email,
+          program: matchedCert.program,
+          grade: matchedCert.grade || 'Distinction (Grade A+)',
+          issueDate: matchedCert.issueDate,
+          standard: matchedCert.standard || 'IPTI Certified Center of Excellence',
+          status: matchedCert.status || 'Verified',
+          notes: matchedCert.notes || '',
+          projectTitle: studentCandidate.projectTitle || matchedCert.projectTitle || '',
+          learningMode: studentCandidate.learningMode || 'Classroom & Hands-on Practical Training',
           batch: studentCandidate.batch || '',
           verificationHash: `IPTI-${verificationHash.slice(0, 4)}-${verificationHash.slice(4, 8)}-${verificationHash.slice(8, 12)}`,
           verifiedAt: new Date().toISOString()
@@ -1815,33 +1854,10 @@ app.get('/api/certificates/verify/:query', (req, res) => {
     }
 
     // -------------------------------------------------------------------------
-    // B. CHECK DIRECT CERTIFICATE ID QUERY (e.g. IPTI-CERT-2026-XXXX, 5609, 1042)
+    // B. CHECK STANDALONE CERTIFICATES BY STUDENT ID
     // -------------------------------------------------------------------------
-    let cert = certs.find(c => {
-      if (!c) return false;
-      const cId = (c.certId || '').toUpperCase();
-      const internalId = (c.id || '').toUpperCase();
-      const cAlpha = cId.replace(/[^A-Z0-9]/g, '');
-
-      // 1. Exact certId or internal ID
-      if (cId === upperQuery || internalId === upperQuery) return true;
-      // 2. Alphanumeric match (ignoring dashes/spaces)
-      if (alphaNumQuery && cAlpha === alphaNumQuery) return true;
-      // 3. Partial certId suffix (e.g. user typed "5609" or "CERT-2026-5609")
-      if (alphaNumQuery.length >= 4 && (cAlpha.endsWith(alphaNumQuery) || cId.endsWith(upperQuery))) return true;
-
-      return false;
-    });
-
-    if (cert) {
-      // Find linked candidate for additional dossier context
-      const linkedCandidate = candidates.find(c => 
-        (c.certificateId && c.certificateId.toUpperCase() === cert.certId.toUpperCase()) ||
-        (c.email && cert.studentEmail && c.email.toLowerCase() === cert.studentEmail.toLowerCase()) ||
-        (c.fullName && cert.studentName && c.fullName.toLowerCase() === cert.studentName.toLowerCase())
-      );
-
-      const hashInput = `${cert.certId}:${cert.studentName}:${cert.issueDate}:IPTI_SECURE_REGISTRY_2026`;
+    if (matchedCert) {
+      const hashInput = `${matchedCert.studentId}:${matchedCert.studentName}:${matchedCert.issueDate}:IPTI_SECURE_REGISTRY_2026`;
       const verificationHash = crypto.createHash('sha256').update(hashInput).digest('hex').substring(0, 24).toUpperCase();
 
       return res.json({
@@ -1849,20 +1865,19 @@ app.get('/api/certificates/verify/:query', (req, res) => {
         type: 'certificate',
         status: 'verified',
         certificate: {
-          id: cert.id,
-          certId: cert.certId,
-          studentName: cert.studentName,
-          studentEmail: cert.studentEmail || (linkedCandidate ? linkedCandidate.email : ''),
-          program: cert.program,
-          grade: cert.grade || 'Distinction (Grade A+)',
-          issueDate: cert.issueDate,
-          standard: cert.standard || 'ISO 9001:2015 Accredited Center of Excellence',
-          status: cert.status || 'Verified',
-          notes: cert.notes || '',
-          studentId: linkedCandidate ? linkedCandidate.studentId : (cert.studentId || null),
-          projectTitle: linkedCandidate ? linkedCandidate.projectTitle : (cert.projectTitle || ''),
-          learningMode: linkedCandidate ? linkedCandidate.learningMode : 'Classroom & Hands-on Lab Practice',
-          batch: linkedCandidate ? linkedCandidate.batch : '',
+          id: matchedCert.id,
+          studentId: matchedCert.studentId,
+          studentName: matchedCert.studentName,
+          studentEmail: matchedCert.studentEmail || '',
+          program: matchedCert.program,
+          grade: matchedCert.grade || 'Distinction (Grade A+)',
+          issueDate: matchedCert.issueDate,
+          standard: matchedCert.standard || 'IPTI Certified Center of Excellence',
+          status: matchedCert.status || 'Verified',
+          notes: matchedCert.notes || '',
+          projectTitle: matchedCert.projectTitle || '',
+          learningMode: 'Classroom & Hands-on Practical Training',
+          batch: '',
           verificationHash: `IPTI-${verificationHash.slice(0, 4)}-${verificationHash.slice(4, 8)}-${verificationHash.slice(8, 12)}`,
           verifiedAt: new Date().toISOString()
         }
@@ -1870,12 +1885,12 @@ app.get('/api/certificates/verify/:query', (req, res) => {
     }
 
     // -------------------------------------------------------------------------
-    // C. CREDENTIAL NOT FOUND ANYWHERE (Anti-Fraud Warning)
+    // C. STUDENT ID NOT FOUND ANYWHERE (Anti-Fraud Warning)
     // -------------------------------------------------------------------------
     return res.status(404).json({
       success: false,
       status: 'not_found',
-      error: `No credential or enrolled student record matches ID "${cleanQuery}" in the IPTI central academic registry.`
+      error: `No student record or certificate matches Student ID "${cleanQuery}" in the IPTI central academic registry.`
     });
 
   } catch (err) {
@@ -1886,49 +1901,74 @@ app.get('/api/certificates/verify/:query', (req, res) => {
 // 4. Issue New Certificate (Admin protected)
 app.post('/api/certificates', requireAdmin, (req, res) => {
   try {
-    const { studentName, studentEmail, studentPhone, program, grade, issueDate, standard, notes, certId } = req.body;
+    const { studentId, studentName, studentEmail, studentPhone, program, grade, issueDate, standard, notes } = req.body;
     if (!studentName || !program) {
       return res.status(400).json({ success: false, error: 'Student name and program are required' });
     }
 
-    const list = readCertificates();
+    const certs = readCertificates();
+    const candidates = readCandidates();
     const timestamp = new Date().toISOString();
-    const generatedCertId = certId && certId.trim() ? certId.trim() : `IPTI-CERT-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    let resolvedStudentId = studentId ? studentId.trim() : '';
+    let candIdx = -1;
+
+    if (resolvedStudentId) {
+      candIdx = candidates.findIndex(c => c.studentId && c.studentId.trim().toUpperCase() === resolvedStudentId.toUpperCase());
+      if (candIdx !== -1) {
+        resolvedStudentId = candidates[candIdx].studentId;
+        if (studentEmail && candidates[candIdx].email && candidates[candIdx].email.toLowerCase() !== studentEmail.trim().toLowerCase()) {
+          return res.status(409).json({
+            success: false,
+            error: `Student ID "${resolvedStudentId}" is already assigned to ${candidates[candIdx].fullName} (${candidates[candIdx].email}). Student ID must be unique.`
+          });
+        }
+      }
+    } else {
+      candIdx = candidates.findIndex(c =>
+        (studentEmail && c.email && c.email.toLowerCase() === studentEmail.trim().toLowerCase()) ||
+        (studentName && c.fullName && c.fullName.toLowerCase() === studentName.trim().toLowerCase())
+      );
+      if (candIdx !== -1) {
+        resolvedStudentId = candidates[candIdx].studentId;
+      }
+    }
+
+    if (!resolvedStudentId) {
+      resolvedStudentId = generateUniqueStudentId(candidates, certs);
+    }
+
+    if (isStudentIdTaken(resolvedStudentId, certs)) {
+      return res.status(409).json({
+        success: false,
+        error: `A certificate has already been issued for Student ID "${resolvedStudentId}". Student ID must be unique.`
+      });
+    }
 
     const newCert = {
       id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      certId: generatedCertId,
+      studentId: resolvedStudentId,
       studentName: studentName.trim(),
       studentEmail: studentEmail ? studentEmail.trim() : '',
       studentPhone: studentPhone ? studentPhone.trim() : '',
       program: program.trim(),
       grade: grade ? grade.trim() : 'Distinction (Grade A+)',
       issueDate: issueDate || timestamp.slice(0, 10),
-      standard: standard ? standard.trim() : 'ISO 9001:2015 Accredited',
+      standard: standard ? standard.trim() : 'IPTI Certified Standard',
       status: 'Verified',
       notes: notes ? notes.trim() : '',
       createdAt: timestamp
     };
 
-    list.unshift(newCert);
-    writeCertificates(list);
+    certs.unshift(newCert);
+    writeCertificates(certs);
 
-    // Automatically synchronize and link candidate record if one matches this email or student name
-    try {
-      const candidates = readCandidates();
-      const candIdx = candidates.findIndex(c =>
-        (studentEmail && c.email && c.email.toLowerCase() === studentEmail.trim().toLowerCase()) ||
-        (studentName && c.fullName && c.fullName.toLowerCase() === studentName.trim().toLowerCase())
-      );
-      if (candIdx !== -1) {
-        candidates[candIdx].certificateIssued = true;
-        candidates[candIdx].certificateId = generatedCertId;
-        candidates[candIdx].eligibleForCertificate = true;
-        candidates[candIdx].updatedAt = timestamp;
-        writeCandidates(candidates);
-      }
-    } catch (candSyncErr) {
-      console.warn('Candidate sync notice:', candSyncErr.message);
+    // Sync linked candidate record if present
+    if (candIdx !== -1) {
+      candidates[candIdx].certificateIssued = true;
+      candidates[candIdx].eligibleForCertificate = true;
+      candidates[candIdx].updatedAt = timestamp;
+      writeCandidates(candidates);
     }
 
     res.status(201).json({ success: true, message: 'Certificate issued successfully', data: newCert });
@@ -1942,14 +1982,28 @@ app.put('/api/certificates/:id', requireAdmin, (req, res) => {
   try {
     const { id } = req.params;
     const list = readCertificates();
-    const index = list.findIndex(c => c.id === id || c.certId === id);
+    const index = list.findIndex(c => c.id === id || (c.studentId && c.studentId.toUpperCase() === id.toUpperCase()));
 
     if (index === -1) {
       return res.status(404).json({ success: false, error: 'Certificate not found' });
     }
 
-    const { studentName, studentEmail, studentPhone, program, grade, issueDate, standard, status, notes } = req.body;
+    const { studentId, studentName, studentEmail, studentPhone, program, grade, issueDate, standard, status, notes } = req.body;
     const cert = list[index];
+
+    if (studentId !== undefined) {
+      const cleanSid = studentId.trim();
+      if (!cleanSid) {
+        return res.status(400).json({ success: false, error: 'Student ID cannot be empty' });
+      }
+      if (isStudentIdTaken(cleanSid, list, cert.id)) {
+        return res.status(409).json({
+          success: false,
+          error: `Student ID "${cleanSid}" is already used by another certificate. Student ID must be unique.`
+        });
+      }
+      cert.studentId = cleanSid;
+    }
 
     if (studentName) cert.studentName = studentName.trim();
     if (studentEmail !== undefined) cert.studentEmail = studentEmail.trim();
@@ -1976,14 +2030,26 @@ app.delete('/api/certificates/:id', requireAdmin, (req, res) => {
   try {
     const { id } = req.params;
     let list = readCertificates();
-    const originalLen = list.length;
-    list = list.filter(c => c.id !== id && c.certId !== id);
+    const targetCert = list.find(c => c.id === id || (c.studentId && c.studentId.toUpperCase() === id.toUpperCase()));
 
-    if (list.length === originalLen) {
+    if (!targetCert) {
       return res.status(404).json({ success: false, error: 'Certificate not found' });
     }
 
+    list = list.filter(c => c.id !== targetCert.id);
     writeCertificates(list);
+
+    // Sync candidate flag if linked by Student ID
+    if (targetCert.studentId) {
+      const candidates = readCandidates();
+      const candIdx = candidates.findIndex(c => c.studentId && c.studentId.toUpperCase() === targetCert.studentId.toUpperCase());
+      if (candIdx !== -1) {
+        candidates[candIdx].certificateIssued = false;
+        candidates[candIdx].updatedAt = new Date().toISOString();
+        writeCandidates(candidates);
+      }
+    }
+
     res.json({ success: true, message: 'Certificate revoked and deleted successfully' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -2087,6 +2153,7 @@ app.get('/api/candidates/:id', requireAdmin, (req, res) => {
 app.post('/api/candidates', requireAdmin, (req, res) => {
   try {
     const {
+      studentId: requestedStudentId,
       fullName,
       email,
       phone,
@@ -2108,6 +2175,7 @@ app.post('/api/candidates', requireAdmin, (req, res) => {
     }
 
     const list = readCandidates();
+    const certs = readCertificates();
     const cleanEmail = email.trim().toLowerCase();
 
     // Check duplicate email
@@ -2115,9 +2183,17 @@ app.post('/api/candidates', requireAdmin, (req, res) => {
       return res.status(400).json({ success: false, error: 'A student candidate with this email address already exists.' });
     }
 
+    let studentId = '';
+    if (requestedStudentId && requestedStudentId.trim()) {
+      studentId = requestedStudentId.trim();
+      if (isStudentIdTaken(studentId, list) || isStudentIdTaken(studentId, certs)) {
+        return res.status(409).json({ success: false, error: `Student ID "${studentId}" already exists. Student ID must be unique.` });
+      }
+    } else {
+      studentId = generateUniqueStudentId(list, certs);
+    }
+
     const year = new Date().getFullYear();
-    const stuNum = String(list.length + 1).padStart(2, '0');
-    const studentId = `IPTI-${year}-STU-${stuNum}`;
     const timestamp = new Date().toISOString();
 
     const tFees = Number(totalFees) || 0;
@@ -2158,7 +2234,6 @@ app.post('/api/candidates', requireAdmin, (req, res) => {
       paymentHistory,
       eligibleForCertificate: Boolean(eligibleForCertificate),
       certificateIssued: false,
-      certificateId: '',
       attendance: Number(attendance) || 90,
       projectTitle: projectTitle ? projectTitle.trim() : 'Industrial Capstone Benchmark',
       password: hashPassword('ipti@123'),
@@ -2189,6 +2264,7 @@ app.patch('/api/candidates/:id', requireAdmin, (req, res) => {
 
     const cand = list[index];
     const {
+      studentId: newStudentId,
       fullName,
       email,
       phone,
@@ -2201,11 +2277,32 @@ app.patch('/api/candidates/:id', requireAdmin, (req, res) => {
       paidFees,
       eligibleForCertificate,
       certificateIssued,
-      certificateId,
       attendance,
       projectTitle,
       notes
     } = req.body;
+
+    if (newStudentId !== undefined) {
+      const cleanSid = newStudentId.trim();
+      if (!cleanSid) {
+        return res.status(400).json({ success: false, error: 'Student ID cannot be empty' });
+      }
+      if (cleanSid.toUpperCase() !== cand.studentId.toUpperCase()) {
+        const certs = readCertificates();
+        if (isStudentIdTaken(cleanSid, list, cand.id) || isStudentIdTaken(cleanSid, certs)) {
+          return res.status(409).json({ success: false, error: `Student ID "${cleanSid}" already exists. Student ID must be unique.` });
+        }
+        const oldSid = cand.studentId;
+        cand.studentId = cleanSid;
+        // Keep linked certificate synchronized with updated Student ID
+        const certIdx = certs.findIndex(c => c.studentId && c.studentId.toUpperCase() === oldSid.toUpperCase());
+        if (certIdx !== -1) {
+          certs[certIdx].studentId = cleanSid;
+          certs[certIdx].updatedAt = new Date().toISOString();
+          writeCertificates(certs);
+        }
+      }
+    }
 
     if (fullName) cand.fullName = fullName.trim();
     if (email) cand.email = email.trim().toLowerCase();
@@ -2224,9 +2321,6 @@ app.patch('/api/candidates/:id', requireAdmin, (req, res) => {
     }
     if (certificateIssued !== undefined) {
       cand.certificateIssued = Boolean(certificateIssued);
-    }
-    if (certificateId !== undefined) {
-      cand.certificateId = certificateId.trim();
     }
 
     if (totalFees !== undefined || paidFees !== undefined) {
@@ -2355,8 +2449,8 @@ app.post('/api/enquiries/:id/convert', requireAdmin, (req, res) => {
     }
 
     const year = new Date().getFullYear();
-    const stuNum = String(candidates.length + 1).padStart(2, '0');
-    const studentId = `IPTI-${year}-STU-${stuNum}`;
+    const certs = readCertificates();
+    const studentId = generateUniqueStudentId(candidates, certs);
     const timestamp = new Date().toISOString();
 
     const tFees = Number(totalFees) || 35000;
@@ -2397,7 +2491,6 @@ app.post('/api/enquiries/:id/convert', requireAdmin, (req, res) => {
       paymentHistory,
       eligibleForCertificate: false,
       certificateIssued: false,
-      certificateId: '',
       attendance: 90,
       projectTitle: 'Industrial Capstone Project',
       password: hashPassword('ipti@123'),
@@ -2477,7 +2570,6 @@ app.get('/api/candidates/export/csv', (req, res) => {
       'Payment Status',
       'Eligible For Certificate',
       'Certificate Issued',
-      'Certificate ID',
       'Attendance (%)',
       'Capstone Project'
     ];
@@ -2503,7 +2595,6 @@ app.get('/api/candidates/export/csv', (req, res) => {
       escapeCsv(c.paymentStatus),
       escapeCsv(c.eligibleForCertificate ? 'Yes' : 'No'),
       escapeCsv(c.certificateIssued ? 'Yes' : 'No'),
-      escapeCsv(c.certificateId || 'N/A'),
       escapeCsv(`${c.attendance || 0}%`),
       escapeCsv(c.projectTitle)
     ].join(','));
@@ -2596,12 +2687,10 @@ app.get('/api/learner/profile', requireLearner, (req, res) => {
       return res.status(404).json({ success: false, error: 'Student profile not found' });
     }
 
-    // Look for matching certificate in certificates database
+    // Look for matching certificate in certificates database strictly via Student ID
     const certificates = readCertificates();
     const matchingCert = certificates.find(cert =>
-      (cand.certificateId && cert.certId.toUpperCase() === cand.certificateId.toUpperCase()) ||
-      cert.studentEmail.toLowerCase() === cand.email.toLowerCase() ||
-      cert.studentName.toLowerCase() === cand.fullName.toLowerCase()
+      (cert.studentId && cert.studentId.toUpperCase() === cand.studentId.toUpperCase())
     );
 
     // Sanitize password out of response

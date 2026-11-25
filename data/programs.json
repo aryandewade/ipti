@@ -7,9 +7,9 @@
     "icon": "fa-gears",
     "description": "Comprehensive hands-on training on Siemens, Allen-Bradley, Mitsubishi PLCs, SCADA visualization, VFD drives, panel designing, and Industrial IoT integration.",
     "duration": "4 Months",
-    "labHours": "120+ Hrs Lab",
+    "labHours": "120+ Hrs Practical",
     "mode": "Classroom / Hybrid",
-    "credentials": "ISO Certification",
+    "credentials": "Industry Certification",
     "techTags": [
       "Siemens TIA Portal",
       "Wonderware SCADA",
@@ -30,7 +30,7 @@
     "icon": "fa-microchip",
     "description": "From bare-metal C programming to FreeRTOS on 32-bit ARM Cortex-M microcontrollers, PCB design in KiCAD, communication protocols (CAN, I2C, SPI), and cloud IoT telemetry.",
     "duration": "4 Months",
-    "labHours": "130+ Hrs Lab",
+    "labHours": "130+ Hrs Practical",
     "mode": "Classroom / Hybrid",
     "credentials": "4 Hardware Comps",
     "techTags": [
@@ -54,7 +54,7 @@
     "description": "Master parametric 3D solid modeling, sheet metal, surface modeling, GD&T standards, plastic part design, and finite element stress analysis using Dassault & Autodesk tools.",
     "duration": "3 Months",
     "labHours": "100+ Hrs CAD",
-    "mode": "Studio Lab",
+    "mode": "Studio Practice",
     "credentials": "ASME Y14.5",
     "techTags": [
       "SolidWorks",

@@ -143,7 +143,7 @@ body {
   gap: 6px;
 }
 
-.sec-iso {
+.sec-badge-tag {
   color: #D1D5DB;
   font-size: 0.78rem;
   font-weight: 600;
@@ -798,7 +798,7 @@ body {
 
 .cert-meta-strip {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
@@ -1290,7 +1290,7 @@ body {
     justify-content: center;
     text-align: center;
   }
-  .sec-iso {
+  .sec-badge-tag {
     display: none;
   }
   .top-back-link {

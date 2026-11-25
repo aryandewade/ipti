@@ -3,6 +3,17 @@
    Handles Authentication, Stats, Lead Filtering, Live Updates & CSV Export
    ========================================================================== */
 
+(function cleanBrowserUrl() {
+  if (typeof window === 'undefined' || !window.history || !window.history.replaceState) return;
+  const p = window.location.pathname;
+  const s = window.location.search && window.location.search !== '?' ? window.location.search : '';
+  if (p.endsWith('.html')) {
+    window.history.replaceState(null, '', p.replace(/\.html$/, '') + s + window.location.hash);
+  } else if (window.location.search === '?') {
+    window.history.replaceState(null, '', p + window.location.hash);
+  }
+})();
+
 let currentToken = localStorage.getItem('ipti_admin_token') || '';
 let currentEnquiryId = null;
 let allEnquiriesCache = [];
@@ -278,10 +289,10 @@ function renderTable(list) {
 
         <td>
           <select class="interest-pill-select ${interestClass}" onchange="updateLeadInterest('${item.id}', this.value, event)" title="Change candidate lead status">
-            <option value="Interested" ${interest === 'Interested' ? 'selected' : ''}>⭐ Interested</option>
-            <option value="Converted" ${interest === 'Converted' ? 'selected' : ''}>🎓 Converted</option>
-            <option value="Not Interested" ${interest === 'Not Interested' ? 'selected' : ''}>❌ Not Interested</option>
-            <option value="Pending" ${interest === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+            <option value="Pending" ${interest === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Interested" ${interest === 'Interested' ? 'selected' : ''}>Interested</option>
+            <option value="Not Interested" ${interest === 'Not Interested' ? 'selected' : ''}>Not Interested</option>
+            <option value="Converted" ${interest === 'Converted' ? 'selected' : ''}>Converted</option>
           </select>
         </td>
 
@@ -647,18 +658,11 @@ function initViewTabs() {
     if (viewCandidates) viewCandidates.classList.add('hidden');
     if (viewCertificates) viewCertificates.classList.add('hidden');
     
-    // Refresh latest programs & analytics
+    // Refresh latest programs
     fetchPrograms();
-    fetchProgramAnalytics();
 
-    // Smooth scroll directly to the Analytics section
     setTimeout(() => {
-      const analyticsSection = document.getElementById('programAnalyticsSection') || viewPrograms;
-      if (analyticsSection && scrollToAnalytics) {
-        analyticsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 60);
   }
 
@@ -771,7 +775,7 @@ function renderAdminPrograms(programs) {
 
         <div class="admin-prog-specs">
           <div>Duration: <strong>${escapeHtml(p.duration || '3-4 Months')}</strong></div>
-          <div>Lab: <strong>${escapeHtml(p.labHours || '100+ Hrs')}</strong></div>
+          <div>Practical: <strong>${escapeHtml(p.labHours || '100+ Hrs')}</strong></div>
           <div>Mode: <strong>${escapeHtml(p.mode || 'Classroom')}</strong></div>
           <div>Standard: <strong>${escapeHtml(p.credentials || 'Certified')}</strong></div>
         </div>
@@ -804,42 +808,12 @@ function renderAdminPrograms(programs) {
    08. PROGRAM LEAD DEMAND ANALYTICS ENGINE
    -------------------------------------------------------------------------- */
 async function fetchProgramAnalytics() {
-  const container = document.getElementById('programAnalyticsList');
-  const summaryTag = document.getElementById('analyticsSummaryTag');
-
-  try {
-    const headers = {};
-    if (currentToken) {
-      headers['Authorization'] = `Bearer ${currentToken}`;
-    }
-    const res = await fetch('/api/programs/analytics', { headers });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && data.analytics) {
-        const a = data.analytics;
-        if (summaryTag && a.topProgram && a.topProgram.count > 0) {
-          summaryTag.innerText = `Top Demand: ${a.topProgram.title} (${a.topProgram.count} enquiries)`;
-        } else if (summaryTag) {
-          summaryTag.innerText = `${a.totalPrograms || 6} Courses Tracked`;
-        }
-
-        renderProgramAnalytics(a.programsBreakdown || [], a.totalEnquiries || 0);
-        return;
-      }
-    }
-  } catch (err) {
-    console.warn('Analytics fetch error, falling back to client computation:', err);
-  }
-
-  // Client-side fallback calculation from memory cache
-  computeLocalAnalytics();
+  // Program analytics card removed from UI
+  return;
 }
 
 function computeLocalAnalytics() {
-  const container = document.getElementById('programAnalyticsList');
-  const summaryTag = document.getElementById('analyticsSummaryTag');
-  if (!container) return;
+  return;
 
   const programs = allProgramsCache && allProgramsCache.length > 0 ? allProgramsCache : [
     { title: "Industrial Automation & Robotics (PLC/SCADA)", category: "automation" },
@@ -895,8 +869,7 @@ function computeLocalAnalytics() {
 }
 
 function renderProgramAnalytics(breakdown, total) {
-  const container = document.getElementById('programAnalyticsList');
-  if (!container) return;
+  return;
 
   if (breakdown.length === 0) {
     container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No leads recorded yet for analytics.</p>';
@@ -1025,7 +998,7 @@ function initProgramManagement() {
           if (data.success && data.url) {
             if (sylUrlInput) sylUrlInput.value = data.url;
             if (sylFilenameInput) sylFilenameInput.value = data.filename || file.name;
-            if (sylDisplay) sylDisplay.innerText = `✓ ${file.name}`;
+            if (sylDisplay) sylDisplay.innerText = file.name;
             if (sylBadge) { sylBadge.innerText = 'Uploaded'; sylBadge.style.color = '#059669'; }
             if (sylPreview) {
               sylPreview.style.display = 'inline-flex';
@@ -1062,9 +1035,9 @@ function initProgramManagement() {
         category: document.getElementById('progFormCategory').value,
         badge: document.getElementById('progFormBadge').value.trim() || 'Core Track',
         duration: document.getElementById('progFormDuration').value.trim() || '4 Months',
-        labHours: document.getElementById('progFormLabHours').value.trim() || '120+ Hrs Lab',
+        labHours: document.getElementById('progFormLabHours').value.trim() || '120+ Hrs Practical',
         mode: document.getElementById('progFormMode').value.trim() || 'Classroom / Hybrid',
-        credentials: document.getElementById('progFormCredentials').value.trim() || 'ISO Certification',
+        credentials: document.getElementById('progFormCredentials').value.trim() || 'Industry Certification',
         description: document.getElementById('progFormDesc').value.trim(),
         techTags: document.getElementById('progFormTags').value.trim(),
         syllabusUrl: sylUrlInput ? sylUrlInput.value.trim() : '',
@@ -1090,7 +1063,7 @@ function initProgramManagement() {
         const data = await res.json();
 
         if (data.success) {
-          alert(`🎉 Program "${payload.title}" has been ${isEdit ? 'updated' : 'added'} successfully and is now LIVE on the website!`);
+          alert(`Program "${payload.title}" has been ${isEdit ? 'updated' : 'added'} successfully and is now LIVE on the website!`);
           closeModal();
           fetchPrograms();
           fetchProgramAnalytics();
@@ -1132,7 +1105,7 @@ function initProgramManagement() {
     if (item.syllabusUrl) {
       if (sylUrlInput) sylUrlInput.value = item.syllabusUrl;
       if (sylFilenameInput) sylFilenameInput.value = item.syllabusFilename || '';
-      if (sylDisplay) sylDisplay.innerText = item.syllabusFilename ? `✓ ${item.syllabusFilename}` : '✓ Syllabus Attached';
+      if (sylDisplay) sylDisplay.innerText = item.syllabusFilename ? item.syllabusFilename : 'Syllabus Attached';
       if (sylPreview) {
         sylPreview.style.display = 'inline-flex';
         sylPreview.href = item.syllabusUrl;
@@ -1253,8 +1226,8 @@ function renderCertificatesTable(list) {
       <tr data-id="${cert.id}">
         <td>
           <div style="display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-family: var(--font-mono); font-weight: 750; color: var(--primary); font-size: 0.88rem;">${escapeHtml(cert.certId)}</span>
-            <span style="font-size: 0.72rem; color: var(--text-dim);"><i class="fa-solid fa-stamp" style="color: var(--accent-gold);"></i> ISO Accredited</span>
+            <span style="font-family: var(--font-mono); font-weight: 750; color: var(--primary); font-size: 0.88rem;">${escapeHtml(cert.studentId)}</span>
+            <span style="font-size: 0.72rem; color: var(--text-dim);"><i class="fa-solid fa-stamp" style="color: var(--accent-gold);"></i> Officially Verified</span>
           </div>
         </td>
 
@@ -1271,7 +1244,7 @@ function renderCertificatesTable(list) {
 
         <td class="course-cell">
           <span class="course-name">${escapeHtml(cert.program)}</span>
-          <span class="course-mode"><i class="fa-solid fa-award"></i> ${escapeHtml(cert.standard || 'ISO 9001:2015')}</span>
+          <span class="course-mode"><i class="fa-solid fa-award"></i> ${escapeHtml(cert.standard || 'IPTI Certified')}</span>
         </td>
 
         <td>
@@ -1289,7 +1262,7 @@ function renderCertificatesTable(list) {
 
         <td>
           <div class="table-actions">
-            <a href="verify.html?id=${encodeURIComponent(cert.certId)}" target="_blank" class="action-icon-btn" title="Open Public Verification Page" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+            <a href="/verify?id=${encodeURIComponent(cert.studentId)}" target="_blank" class="action-icon-btn" title="Open Public Verification Page" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
               <i class="fa-solid fa-shield-halved" style="color: var(--accent-gold);"></i>
             </a>
             <button class="action-icon-btn" onclick="previewCertificate('${cert.id}')" title="Preview Digital Certificate">
@@ -1390,7 +1363,7 @@ function initCertificateManagement() {
         program: document.getElementById('certFormProgram').value,
         issueDate: document.getElementById('certFormDate').value,
         grade: document.getElementById('certFormGrade').value.trim(),
-        certId: document.getElementById('certFormCustomId').value.trim(),
+        studentId: document.getElementById('certFormStudentId').value.trim(),
         notes: document.getElementById('certFormNotes').value.trim()
       };
 
@@ -1412,10 +1385,12 @@ function initCertificateManagement() {
 
         const data = await res.json();
         if (data.success) {
-          alert(`🎓 Certificate for "${payload.studentName}" ${isEdit ? 'updated' : 'issued'} successfully!`);
+          alert(`Certificate for "${payload.studentName}" ${isEdit ? 'updated' : 'issued'} successfully!`);
           closeModal();
           fetchCertificates();
           fetchCertificateStats();
+          if (typeof fetchCandidates === 'function') fetchCandidates();
+          if (typeof fetchCandidateStats === 'function') fetchCandidateStats();
         } else {
           alert('Error: ' + (data.error || 'Failed to save certificate'));
         }
@@ -1455,7 +1430,7 @@ function initCertificateManagement() {
     document.getElementById('prevStudentName').innerText = cert.studentName;
     document.getElementById('prevProgramName').innerText = cert.program;
     document.getElementById('prevGradeBadge').innerText = `Awarded with ${cert.grade || 'Distinction'}`;
-    document.getElementById('prevCertId').innerText = cert.certId;
+    document.getElementById('prevCertId').innerText = `Student ID: ${cert.studentId}`;
     document.getElementById('prevIssueDate').innerText = new Date(cert.issueDate || cert.createdAt).toLocaleDateString('en-IN', {
       day: 'numeric', month: 'long', year: 'numeric'
     });
@@ -1476,7 +1451,7 @@ function initCertificateManagement() {
     document.getElementById('certFormProgram').value = cert.program || '';
     document.getElementById('certFormDate').value = (cert.issueDate || '').slice(0, 10);
     document.getElementById('certFormGrade').value = cert.grade || '';
-    document.getElementById('certFormCustomId').value = cert.certId || '';
+    document.getElementById('certFormStudentId').value = cert.studentId || '';
     document.getElementById('certFormNotes').value = cert.notes || '';
 
     openModal(true);
@@ -1498,6 +1473,8 @@ function initCertificateManagement() {
         alert(`Certificate revoked successfully.`);
         fetchCertificates();
         fetchCertificateStats();
+        if (typeof fetchCandidates === 'function') fetchCandidates();
+        if (typeof fetchCandidateStats === 'function') fetchCandidateStats();
       } else {
         alert('Could not revoke certificate: ' + (data.error || 'Server error'));
       }
@@ -1597,6 +1574,7 @@ function initCandidateManagement() {
       const isEdit = Boolean(id);
 
       const payload = {
+        studentId: document.getElementById('candFormStudentId').value.trim(),
         fullName: document.getElementById('candFormFullName').value.trim(),
         email: document.getElementById('candFormEmail').value.trim(),
         phone: document.getElementById('candFormPhone').value.trim(),
@@ -1790,6 +1768,7 @@ function initCandidateManagement() {
     if (!cand) return;
 
     document.getElementById('candFormId').value = cand.id;
+    document.getElementById('candFormStudentId').value = cand.studentId || '';
     document.getElementById('candidateModalHeading').innerText = `Edit Candidate: ${cand.fullName}`;
     document.getElementById('candFormFullName').value = cand.fullName || '';
     document.getElementById('candFormEmail').value = cand.email || '';
@@ -1881,7 +1860,7 @@ function initCandidateManagement() {
       document.getElementById('certFormProgram').value = cand.program;
       document.getElementById('certFormDate').value = new Date().toISOString().slice(0, 10);
       document.getElementById('certFormGrade').value = 'Distinction (Grade A+ • 95%)';
-      document.getElementById('certFormCustomId').value = '';
+      document.getElementById('certFormStudentId').value = cand.studentId || '';
       document.getElementById('certFormNotes').value = `Successfully completed ${cand.program}. Capstone: ${cand.projectTitle || 'Industrial Project'}.`;
 
       certModal.classList.add('open');
@@ -1889,12 +1868,12 @@ function initCandidateManagement() {
     }
   };
 
-  window.previewCertificateById = function(certId) {
-    const cert = allCertificatesCache.find(c => c.certId === certId || c.id === certId);
-    if (cert && typeof window.openPreviewModal === 'function') {
-      window.openPreviewModal(cert);
+  window.previewCertificateByStudentId = function(studentId) {
+    const cert = allCertificatesCache.find(c => c.studentId && c.studentId.toUpperCase() === String(studentId).toUpperCase());
+    if (cert && typeof window.previewCertificate === 'function') {
+      window.previewCertificate(cert.id);
     } else {
-      alert(`Certificate ID: ${certId}`);
+      alert(`Certificate for Student ID: ${studentId}`);
     }
   };
 
@@ -2056,9 +2035,9 @@ function renderCandidatesTable(list) {
               </button>
             ` : ''}
 
-            ${item.certificateIssued && item.certificateId ? `
-              <span class="badge-cert-issued" onclick="previewCertificateById('${item.certificateId}')" title="View Digital Diploma">
-                <i class="fa-solid fa-diploma"></i> ${escapeHtml(item.certificateId)} ↗
+            ${item.certificateIssued ? `
+              <span class="badge-cert-issued" onclick="previewCertificateByStudentId('${escapeHtml(item.studentId)}')" title="View Digital Diploma">
+                <i class="fa-solid fa-award"></i> Certificate Issued ↗
               </span>
             ` : ''}
           </div>
@@ -2068,7 +2047,7 @@ function renderCandidatesTable(list) {
           <div style="display: flex; flex-direction: column; gap: 4px;">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span style="font-size: 0.82rem; font-weight: 750; color: ${item.attendance >= 90 ? '#059669' : '#d97706'};">
-                <i class="fa-solid fa-user-check"></i> ${item.attendance || 90}% Lab Attendance
+                <i class="fa-solid fa-user-check"></i> ${item.attendance || 90}% Practical Attendance
               </span>
             </div>
             <span style="font-size: 0.74rem; color: var(--text-secondary); line-height: 1.3;" title="${escapeHtml(item.projectTitle || 'Capstone Project')}">

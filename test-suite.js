@@ -18,10 +18,10 @@ const failures = [];
 
 function assert(condition, testName, details = '') {
   if (condition) {
-    console.log(`  ✅ PASS: ${testName}`);
+    console.log(`  [PASS] ${testName}`);
     passed++;
   } else {
-    console.error(`  ❌ FAIL: ${testName} ${details ? '(' + details + ')' : ''}`);
+    console.error(`  [FAIL] ${testName} ${details ? '(' + details + ')' : ''}`);
     failed++;
     failures.push({ testName, details });
   }
@@ -29,7 +29,7 @@ function assert(condition, testName, details = '') {
 
 async function runTests() {
   console.log('================================================================');
-  console.log('🚀 STARTING COMPREHENSIVE IPTI PLATFORM TEST SUITE');
+  console.log('STARTING COMPREHENSIVE IPTI PLATFORM TEST SUITE');
   console.log(`Testing Live Codebase on Port ${TEST_PORT}`);
   console.log('================================================================\n');
 
@@ -66,46 +66,45 @@ async function runTests() {
   }
 
   // ---------------------------------------------------------------------------
-  // 2. PUBLIC CERTIFICATE VERIFICATION ENGINE
+  // 2. PUBLIC CERTIFICATE VERIFICATION ENGINE (STUDENT ID ONLY)
   // ---------------------------------------------------------------------------
-  console.log('\n--- 2. Testing Certificate Verification Engine ---');
+  console.log('\n--- 2. Testing Certificate Verification Engine (Student ID Only) ---');
   
-  // A. Verify with valid Certificate ID
-  try {
-    const res = await fetch(`${BASE_URL}/api/certificates/verify/IPTI-CERT-2026-1042`);
-    const data = await res.json();
-    assert(res.status === 200 && data.success === true, 'Verify by Certificate ID (IPTI-CERT-2026-1042)', `Status ${res.status}`);
-    assert(data.type === 'certificate' && data.certificate?.studentName === 'Rahul V. Sharma', 'Verify response returns candidate name');
-    assert(Boolean(data.certificate?.verificationHash), 'Verify response contains cryptographic SHA-256 hash', data.certificate?.verificationHash);
-    assert(Boolean(data.certificate?.studentId), 'Verify response contains linked Student Unique ID', data.certificate?.studentId);
-  } catch (err) {
-    assert(false, 'Verify by Certificate ID', err.message);
-  }
-
-  // B. Verify with valid Student Unique ID (cross-reference)
+  // A. Verify with valid Student Unique ID (IPTI-2026-STU-01)
   try {
     const res = await fetch(`${BASE_URL}/api/certificates/verify/IPTI-2026-STU-01`);
     const data = await res.json();
-    assert(res.status === 200 && data.success === true, 'Verify by Student Unique ID (IPTI-2026-STU-01)', `Status ${res.status}`);
-    assert(data.type === 'certificate' && data.certificate?.certId === 'IPTI-CERT-2026-1042', 'Cross-references Student ID to Certificate ID');
+    assert(res.status === 200 && data.success === true, 'Verify by Student ID (IPTI-2026-STU-01)', `Status ${res.status}`);
+    assert(data.type === 'certificate' && data.certificate?.studentName === 'Rahul V. Sharma', 'Verify response returns candidate name');
+    assert(Boolean(data.certificate?.verificationHash), 'Verify response contains cryptographic SHA-256 hash', data.certificate?.verificationHash);
+    assert(data.certificate?.studentId === 'IPTI-2026-STU-01' && !data.certificate?.certId, 'Verify response maintains single unique Student ID only', data.certificate?.studentId);
   } catch (err) {
-    assert(false, 'Verify by Student Unique ID', err.message);
+    assert(false, 'Verify by Student ID (IPTI-2026-STU-01)', err.message);
   }
 
-  // C. Verify with another Certificate (Pooja Deshmukh)
+  // B. Verify with second Student ID (IPTI-2026-STU-03 - Amitesh Kulkarni)
   try {
-    const res = await fetch(`${BASE_URL}/api/certificates/verify/IPTI-CERT-2026-1088`);
+    const res = await fetch(`${BASE_URL}/api/certificates/verify/IPTI-2026-STU-03`);
     const data = await res.json();
-    assert(res.status === 200 && data.certificate?.studentName === 'Pooja Deshmukh', 'Verify second Certificate (IPTI-CERT-2026-1088 - Pooja Deshmukh)');
+    assert(res.status === 200 && data.certificate?.studentName === 'Amitesh Kulkarni', 'Verify second Student ID (IPTI-2026-STU-03 - Amitesh Kulkarni)');
   } catch (err) {
-    assert(false, 'Verify second Certificate', err.message);
+    assert(false, 'Verify second Student ID', err.message);
   }
 
-  // D. Verify non-existent ID (Anti-Fraud check)
+  // C. Reject legacy Certificate ID format (Verification strictly on basis of Student ID)
+  try {
+    const res = await fetch(`${BASE_URL}/api/certificates/verify/IPTI-CERT-2026-1042`);
+    const data = await res.json();
+    assert(res.status === 404 && data.status === 'not_found', 'Verification strictly uses Student ID only (rejects legacy Certificate ID)', `Status: ${res.status}`);
+  } catch (err) {
+    assert(false, 'Legacy Certificate ID rejection', err.message);
+  }
+
+  // D. Verify non-existent Student ID (Anti-Fraud check)
   try {
     const res = await fetch(`${BASE_URL}/api/certificates/verify/FAKE-CREDENTIAL-9999`);
     const data = await res.json();
-    assert(res.status === 404 && data.success === false, 'Anti-Fraud check for non-existent credential (404 expected)', `Status: ${res.status}`);
+    assert(res.status === 404 && data.success === false, 'Anti-Fraud check for non-existent Student ID (404 expected)', `Status: ${res.status}`);
     assert(data.status === 'not_found', 'Anti-Fraud response returns status: not_found');
   } catch (err) {
     assert(false, 'Anti-Fraud check', err.message);
@@ -202,31 +201,57 @@ async function runTests() {
       assert(false, 'Fetch Certificates & Stats', err.message);
     }
 
-    // G. Create Test Certificate, then verify, then clean up
+    // G. Create Test Certificate with Unique Student ID, enforce uniqueness, verify, then clean up
     try {
-      const testCertId = `IPTI-TEST-CERT-${Date.now().toString().slice(-4)}`;
+      const testStudentId = `IPTI-TEST-STU-${Date.now().toString().slice(-4)}`;
       const createRes = await fetch(`${BASE_URL}/api/certificates`, {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify({
-          certId: testCertId,
+          studentId: testStudentId,
           studentName: 'Automated Test Candidate',
           studentEmail: 'autotest@ipti.edu.in',
           studentPhone: '+91 99999 00000',
           program: 'Robotics & AI Automation',
           grade: 'Distinction (Grade A+ • 98%)',
           issueDate: new Date().toISOString().slice(0, 10),
-          standard: 'ISO 9001:2015 Accredited',
+          standard: 'Government Recognized Standard',
           notes: 'Automated Test Verification'
         })
       });
       const createData = await createRes.json();
-      assert(createRes.status === 201 && createData.success === true, 'Admin Issue New Certificate', `ID: ${testCertId}`);
+      assert(createRes.status === 201 && createData.success === true, 'Admin Issue New Certificate by Unique Student ID', `ID: ${testStudentId}`);
 
-      // Verify the newly created certificate via public endpoint
-      const verifyRes = await fetch(`${BASE_URL}/api/certificates/verify/${testCertId}`);
+      // Enforce duplicate Student ID rejection on certificates (409 expected)
+      const dupCertRes = await fetch(`${BASE_URL}/api/certificates`, {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          studentId: testStudentId,
+          studentName: 'Duplicate Test Candidate',
+          studentEmail: 'dup@ipti.edu.in',
+          program: 'Robotics & AI Automation'
+        })
+      });
+      assert(dupCertRes.status === 409, 'Enforce Unique Student ID on Certificate Issuance (409 on duplicate)', `Status: ${dupCertRes.status}`);
+
+      // Enforce duplicate Student ID rejection on candidates (409 expected)
+      const dupCandRes = await fetch(`${BASE_URL}/api/candidates`, {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          studentId: 'IPTI-2026-STU-01',
+          fullName: 'Duplicate Candidate',
+          email: 'uniqueemail@ipti.edu.in',
+          program: 'Robotics & AI Automation'
+        })
+      });
+      assert(dupCandRes.status === 409, 'Enforce Unique Student ID on Candidate Creation (409 on duplicate)', `Status: ${dupCandRes.status}`);
+
+      // Verify the newly created certificate via public endpoint using Student ID
+      const verifyRes = await fetch(`${BASE_URL}/api/certificates/verify/${testStudentId}`);
       const verifyData = await verifyRes.json();
-      assert(verifyRes.status === 200 && verifyData.certificate?.studentName === 'Automated Test Candidate', 'Public verification of newly issued certificate');
+      assert(verifyRes.status === 200 && verifyData.certificate?.studentName === 'Automated Test Candidate', 'Public verification of newly issued certificate by Student ID');
 
       // Delete/cleanup the test certificate
       if (createData.data?.id) {
@@ -303,7 +328,7 @@ async function runTests() {
       const data = await res.json();
       assert(res.status === 200 && data.success === true, 'Fetch Learner Profile (/api/learner/profile)');
       assert(data.student?.fullName === 'Rahul V. Sharma', 'Learner Profile returns student name');
-      assert(Boolean(data.certificate), 'Learner Profile returns matched official certificate', data.certificate?.certId);
+      assert(Boolean(data.certificate), 'Learner Profile returns matched official certificate', data.certificate?.studentId);
       assert(data.student?.eligibleForCertificate === true, 'Learner eligibility status verified');
 
       // D. Upload Learner Avatar Photo
@@ -438,7 +463,7 @@ async function runTests() {
   // SUMMARY
   // ---------------------------------------------------------------------------
   console.log('\n================================================================');
-  console.log(`🏁 TEST SUITE COMPLETE: ${passed} PASSED, ${failed} FAILED`);
+  console.log(`TEST SUITE COMPLETE: ${passed} PASSED, ${failed} FAILED`);
   console.log('================================================================\n');
 
   if (failed > 0) {
@@ -446,7 +471,7 @@ async function runTests() {
     failures.forEach((f, i) => console.error(`  ${i + 1}. ${f.testName}: ${f.details}`));
     process.exit(1);
   } else {
-    console.log('🎉 ALL SYSTEMS FULLY OPERATIONAL WITH ZERO BREAKAGES!');
+    console.log('ALL SYSTEMS FULLY OPERATIONAL WITH ZERO BREAKAGES!');
     process.exit(0);
   }
 }

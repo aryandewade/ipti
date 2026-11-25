@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPTI Admin Portal | Admissions & Enquiry CRM</title>
-  <link rel="icon" type="image/jpeg" href="assets/ipti-logo.jpg">
+  <link rel="icon" type="image/png" href="assets/ipti-favicon.png">
 
   <!-- Google Fonts & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,11 +63,11 @@
       </div>
 
       <div class="admin-header-actions">
-        <a href="learner.html" target="_blank" class="admin-action-btn">
+        <a href="/learner" target="_blank" class="admin-action-btn">
           <i class="fa-solid fa-graduation-cap" style="color: var(--accent-gold-dark);"></i>
           <span>Learner Portal</span>
         </a>
-        <a href="index.html" target="_blank" class="admin-action-btn">
+        <a href="/" target="_blank" class="admin-action-btn">
           <i class="fa-solid fa-arrow-up-right-from-square"></i>
           <span>View Live Website</span>
         </a>
@@ -176,25 +176,25 @@
             <span>All Leads</span>
             <span class="lead-count-badge" id="tabCountAll">0</span>
           </button>
+          <button class="lead-tab-btn" data-interest="Pending">
+            <i class="fa-solid fa-clock" style="color: #d97706;"></i>
+            <span>Pending Review</span>
+            <span class="lead-count-badge amber" id="tabCountPending">0</span>
+          </button>
           <button class="lead-tab-btn" data-interest="Interested">
             <i class="fa-solid fa-star" style="color: #059669;"></i>
             <span>Interested</span>
             <span class="lead-count-badge green" id="tabCountInterested">0</span>
-          </button>
-          <button class="lead-tab-btn" data-interest="Converted">
-            <i class="fa-solid fa-graduation-cap" style="color: #0d9488;"></i>
-            <span>Converted</span>
-            <span class="lead-count-badge teal" id="tabCountConverted">0</span>
           </button>
           <button class="lead-tab-btn" data-interest="Not Interested">
             <i class="fa-solid fa-circle-xmark" style="color: #dc2626;"></i>
             <span>Not Interested</span>
             <span class="lead-count-badge red" id="tabCountNotInterested">0</span>
           </button>
-          <button class="lead-tab-btn" data-interest="Pending">
-            <i class="fa-solid fa-clock" style="color: #d97706;"></i>
-            <span>Pending Review</span>
-            <span class="lead-count-badge amber" id="tabCountPending">0</span>
+          <button class="lead-tab-btn" data-interest="Converted">
+            <i class="fa-solid fa-graduation-cap" style="color: #0d9488;"></i>
+            <span>Converted</span>
+            <span class="lead-count-badge teal" id="tabCountConverted">0</span>
           </button>
         </div>
 
@@ -218,10 +218,10 @@
 
             <select id="interestFilter" class="filter-select">
               <option value="All">All Interest Status</option>
-              <option value="Interested">⭐ Interested Leads</option>
-              <option value="Converted">🎓 Converted (Enrolled)</option>
-              <option value="Not Interested">❌ Not Interested</option>
-              <option value="Pending">⏳ Pending Review</option>
+              <option value="Pending">Pending Review</option>
+              <option value="Interested">Interested Leads</option>
+              <option value="Not Interested">Not Interested</option>
+              <option value="Converted">Converted (Enrolled)</option>
             </select>
           </div>
 
@@ -350,14 +350,14 @@
 
             <select id="candPaymentFilter" class="filter-select">
               <option value="All">All Payment Statuses</option>
-              <option value="Paid">✓ Fully Paid (₹0 Due)</option>
-              <option value="Partial">⏳ Partial Installment Due</option>
-              <option value="Pending">❌ Payment Pending</option>
+              <option value="Paid">Fully Paid (₹0 Due)</option>
+              <option value="Partial">Partial Installment Due</option>
+              <option value="Pending">Payment Pending</option>
             </select>
 
             <select id="candEligibleFilter" class="filter-select">
               <option value="All">All Certificate Statuses</option>
-              <option value="true">⭐ Eligible for Certificate</option>
+              <option value="true">Eligible for Certificate</option>
               <option value="false">⏳ Not Yet Eligible</option>
             </select>
           </div>
@@ -418,19 +418,6 @@
           </button>
         </div>
 
-        <!-- Program-wise Analytics Card -->
-        <section class="program-analytics-card" id="programAnalyticsSection">
-          <div class="analytics-header-row">
-            <h3><i class="fa-solid fa-chart-pie" style="color: var(--accent-gold);"></i> Program Interest & Enquiry Distribution</h3>
-            <span id="analyticsSummaryTag" style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); background: var(--bg-recessed); padding: 4px 12px; border-radius: var(--radius-full);">Loading Analytics...</span>
-          </div>
-
-          <!-- Dynamic Analytics Bars Container -->
-          <div id="programAnalyticsList">
-            <p style="color: var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> Calculating program analytics...</p>
-          </div>
-        </section>
-
         <!-- Active Programs Grid -->
         <div style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
           <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary);">Live Programs Displayed on Website</h3>
@@ -452,7 +439,7 @@
         <div class="programs-view-header">
           <div>
             <h2>Student Certifications & Credential Ledger</h2>
-            <p>Issue, verify, and manage official ISO 9001:2015 accredited course completion certificates.</p>
+            <p>Issue, verify, and manage official course completion certificates and student credentials.</p>
           </div>
           <button id="openAddCertBtn" class="btn-csv-export" style="padding: 10px 20px; font-size: 0.88rem;">
             <i class="fa-solid fa-award"></i>
@@ -482,11 +469,11 @@
 
           <div class="stat-card">
             <div class="stat-card-top">
-              <span class="stat-card-title">Accredited Standard</span>
+              <span class="stat-card-title">Certification Standard</span>
               <div class="stat-icon today"><i class="fa-solid fa-shield-halved"></i></div>
             </div>
-            <div class="stat-card-value" style="font-size: 1.35rem; color: var(--primary);">ISO 9001:2015</div>
-            <span class="stat-card-sub">Audited Quality Benchmark</span>
+            <div class="stat-card-value" style="font-size: 1.35rem; color: var(--primary);">IPTI Certified</div>
+            <span class="stat-card-sub">Central Registry Standard</span>
           </div>
         </section>
 
@@ -495,7 +482,7 @@
           <div class="toolbar-filters">
             <div class="search-input-wrap">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="certSearchInput" placeholder="Search by student name, cert ID, email...">
+              <input type="text" id="certSearchInput" placeholder="Search by student ID, name, email...">
             </div>
 
             <select id="certProgramFilter" class="filter-select">
@@ -523,7 +510,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Certificate ID</th>
+                  <th>Student ID</th>
                   <th>Student Details</th>
                   <th>Certified Program</th>
                   <th>Issue Date & Grade</th>
@@ -593,10 +580,10 @@
           <span class="label">Lead Interest Status</span>
           <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
             <select id="modalInterestSelect" style="padding: 6px 10px; font-family: var(--font-sans); font-size: 0.85rem; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-medium); outline: none;">
-              <option value="Interested">⭐ Interested</option>
-              <option value="Converted">🎓 Converted (Enrolled)</option>
-              <option value="Not Interested">❌ Not Interested</option>
-              <option value="Pending">⏳ Pending Review</option>
+              <option value="Pending">Pending Review</option>
+              <option value="Interested">Interested</option>
+              <option value="Not Interested">Not Interested</option>
+              <option value="Converted">Converted (Enrolled)</option>
             </select>
             <button type="button" id="updateModalInterestBtn" class="btn-refresh" style="padding: 6px 12px; font-size: 0.78rem;">Save</button>
           </div>
@@ -675,8 +662,8 @@
             <input type="text" id="progFormDuration" placeholder="e.g. 4 Months" value="4 Months" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
           </div>
           <div>
-            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Lab Hours</label>
-            <input type="text" id="progFormLabHours" placeholder="e.g. 120+ Hrs Lab" value="120+ Hrs Lab" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Practical Hours</label>
+            <input type="text" id="progFormLabHours" placeholder="e.g. 120+ Hrs Practical" value="120+ Hrs Practical" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
           </div>
           <div>
             <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Learning Mode</label>
@@ -686,7 +673,7 @@
 
         <div style="margin-bottom: 14px;">
           <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Certification / Standard</label>
-          <input type="text" id="progFormCredentials" placeholder="e.g. ISO 9001:2015 / Production Portfolio" value="ISO Certification" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          <input type="text" id="progFormCredentials" placeholder="e.g. Industry Certification / Production Portfolio" value="Industry Certification" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
         </div>
 
         <div style="margin-bottom: 14px;">
@@ -792,13 +779,13 @@
         </div>
 
         <div style="margin-bottom: 14px;">
-          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Certificate Tracking ID (Leave blank to auto-generate)</label>
-          <input type="text" id="certFormCustomId" placeholder="e.g. IPTI-CERT-2026-1042" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Unique Student ID</label>
+          <input type="text" id="certFormStudentId" placeholder="e.g. IPTI-2026-STU-01 (Auto-generated if left blank)" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-mono); outline: none;">
         </div>
 
         <div style="margin-bottom: 20px;">
           <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Capstone / Assessment Notes</label>
-          <textarea id="certFormNotes" rows="2" placeholder="e.g. Successfully executed 120+ hours of physical PLC bench lab work..." style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;"></textarea>
+          <textarea id="certFormNotes" rows="2" placeholder="e.g. Successfully executed 120+ hours of physical PLC benchwork..." style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-sans); outline: none;"></textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 12px;">
@@ -830,7 +817,7 @@
           <div class="diploma-header">
             <img src="assets/ipti-logo.jpg" alt="IPTI Crest" class="diploma-crest">
             <h2 class="diploma-inst-title">INSTITUTE OF PROFESSIONAL TRAINING & INNOVATION</h2>
-            <p class="diploma-sub">Government Recognized • ISO 9001:2015 Certified Center of Excellence</p>
+            <p class="diploma-sub">IPTI Certified • Center of Excellence</p>
           </div>
 
           <div class="diploma-body">
@@ -843,7 +830,7 @@
 
           <div class="diploma-footer">
             <div class="diploma-sign-col">
-              <span class="diploma-sign-line">Aryan Dewade</span>
+              <span class="diploma-sign-line">IPTI Academic Council</span>
               <span class="diploma-sign-title">Academic Director</span>
             </div>
             <div class="diploma-seal-col">
@@ -851,7 +838,7 @@
                 <i class="fa-solid fa-stamp"></i>
                 <span>OFFICIAL VERIFIED</span>
               </div>
-              <span class="diploma-id-tag" id="prevCertId">IPTI-CERT-2026-1042</span>
+              <span class="diploma-id-tag" id="prevCertId">Student ID: IPTI-2026-STU-01</span>
             </div>
             <div class="diploma-sign-col">
               <span class="diploma-sign-line" id="prevIssueDate">18 February 2026</span>
@@ -878,6 +865,11 @@
 
       <form id="candidateForm">
         <input type="hidden" id="candFormId">
+
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px;">Unique Student ID (Auto-generated if left blank)</label>
+          <input type="text" id="candFormStudentId" placeholder="e.g. IPTI-2026-STU-06" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); font-family: var(--font-mono); outline: none;">
+        </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
           <div>
@@ -965,7 +957,7 @@
             <input type="checkbox" id="candFormEligibleCert" style="width: 18px; height: 18px; accent-color: var(--primary);">
             <div>
               <strong style="color: #92400e; font-size: 0.88rem; display: block;">Eligible for Certificate</strong>
-              <span style="font-size: 0.76rem; color: #b45309;">Check this box if candidate has met fee clearance and lab assessment criteria for certificate issuance.</span>
+              <span style="font-size: 0.76rem; color: #b45309;">Check this box if candidate has met fee clearance and practical assessment criteria for certificate issuance.</span>
             </div>
           </label>
         </div>
