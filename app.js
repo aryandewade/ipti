@@ -242,24 +242,27 @@ function initRollingCounters() {
    04. PROGRAM CATEGORY FILTER TABS
    -------------------------------------------------------------------------- */
 function initProgramFilter() {
-  const tabBtns = document.querySelectorAll('.program-tab-btn');
-  const cards = document.querySelectorAll('.program-card');
+  const tabsWrap = document.querySelector('.program-category-tabs');
+  if (!tabsWrap || tabsWrap.dataset.filterBound) return;
+  tabsWrap.dataset.filterBound = 'true';
 
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+  tabsWrap.addEventListener('click', (e) => {
+    const btn = e.target.closest('.program-tab-btn');
+    if (!btn) return;
 
-      const filter = btn.dataset.filter;
+    tabsWrap.querySelectorAll('.program-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 
-      cards.forEach(card => {
-        if (filter === 'all' || card.dataset.category === filter) {
-          card.style.display = 'flex';
-          card.style.animation = 'fadeIn 0.3s ease forwards';
-        } else {
-          card.style.display = 'none';
-        }
-      });
+    const filter = btn.dataset.filter || 'all';
+    const cards = document.querySelectorAll('.program-card');
+
+    cards.forEach(card => {
+      if (filter === 'all' || card.dataset.category === filter) {
+        card.style.display = 'flex';
+        card.style.animation = 'fadeIn 0.3s ease forwards';
+      } else {
+        card.style.display = 'none';
+      }
     });
   });
 }
@@ -574,7 +577,7 @@ function initForms() {
         phone: mainForm.querySelector('[name="phone"]').value,
         whatsapp: mainForm.querySelector('[name="whatsapp"]').value || mainForm.querySelector('[name="phone"]').value,
         course: mainForm.querySelector('[name="course"]').value,
-        learningMode: mainForm.querySelector('[name="learningMode"]')?.value || 'Classroom Training',
+        learningMode: 'Online',
         experience: mainForm.querySelector('[name="experience"]').value,
         message: mainForm.querySelector('[name="message"]').value,
         source: 'Main Page Admission Form'
@@ -630,7 +633,7 @@ function initForms() {
         email: modalForm.querySelector('[name="email"]').value,
         phone: modalForm.querySelector('[name="phone"]').value,
         course: modalForm.querySelector('[name="course"]').value,
-        learningMode: modalForm.querySelector('[name="learningMode"]')?.value || 'Classroom Training',
+        learningMode: 'Online',
         message: modalForm.querySelector('[name="message"]').value,
         source: 'Modal Popup Form'
       };
@@ -691,9 +694,18 @@ function showSuccessDialog(trackingId, name) {
 
 async function loadDynamicPrograms() {
   try {
-    const res = await fetch('/api/programs');
-    if (!res.ok) return;
-    const data = await res.json();
+    const [progRes, catRes] = await Promise.all([
+      fetch('/api/programs'),
+      fetch('/api/categories').catch(() => null)
+    ]);
+    if (!progRes.ok) return;
+    const data = await progRes.json();
+    if (catRes && catRes.ok) {
+      const catData = await catRes.json();
+      if (catData.success && Array.isArray(catData.data) && catData.data.length > 0) {
+        renderPublicCategoryTabs(catData.data);
+      }
+    }
     if (data.success && Array.isArray(data.data) && data.data.length > 0) {
       window._loadedPrograms = data.data;
       renderPublicPrograms(data.data);
@@ -702,6 +714,21 @@ async function loadDynamicPrograms() {
   } catch (e) {
     console.warn('Using static programs fallback:', e);
   }
+}
+
+function renderPublicCategoryTabs(categories) {
+  const tabsWrap = document.querySelector('.program-category-tabs');
+  if (!tabsWrap) return;
+  const activeBtn = tabsWrap.querySelector('.program-tab-btn.active');
+  const currentFilter = activeBtn ? activeBtn.dataset.filter : 'all';
+
+  tabsWrap.innerHTML = [
+    `<button class="program-tab-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">All Programs</button>`,
+    ...categories.map(c => {
+      const slug = escapeHtmlApp((c.slug || '').toLowerCase());
+      return `<button class="program-tab-btn ${currentFilter === slug ? 'active' : ''}" data-filter="${slug}">${escapeHtmlApp(c.name)}</button>`;
+    })
+  ].join('');
 }
 
 function renderPublicPrograms(programs) {
@@ -731,7 +758,7 @@ function renderPublicPrograms(programs) {
             </div>
             <div class="spec-item">
               <span class="spec-item-label">Mode</span>
-              <span class="spec-item-val">${escapeHtmlApp(p.mode || 'Classroom / Hybrid')}</span>
+              <span class="spec-item-val">${escapeHtmlApp(p.mode || 'Online')}</span>
             </div>
             <div class="spec-item">
               <span class="spec-item-label">Credentials</span>

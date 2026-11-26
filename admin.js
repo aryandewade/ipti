@@ -18,7 +18,13 @@ let currentToken = localStorage.getItem('ipti_admin_token') || '';
 let currentEnquiryId = null;
 let allEnquiriesCache = [];
 let allProgramsCache = [];
+let allCategoriesCache = [];
 let allCertificatesCache = [];
+let isCandidatesUnlocked = sessionStorage.getItem('ipti_candidates_unlocked') === '1';
+
+function formatDateTimeUpper(dateInput, opts) {
+  return new Date(dateInput).toLocaleString('en-IN', opts).replace(/\b(am|pm)\b/gi, m => m.toUpperCase());
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
@@ -116,6 +122,8 @@ function initAuth() {
       if (confirm('Are you sure you want to log out of the IPTI Admin Portal?')) {
         localStorage.removeItem('ipti_admin_token');
         localStorage.removeItem('ipti_admin_user');
+        sessionStorage.removeItem('ipti_candidates_unlocked');
+        isCandidatesUnlocked = false;
         currentToken = '';
         showLogin();
       }
@@ -160,16 +168,18 @@ function showApp() {
    02. DASHBOARD DATA LOADING & STATS
    -------------------------------------------------------------------------- */
 async function loadDashboardData() {
-  await Promise.all([
+  const tasks = [
     fetchStats(),
     fetchEnquiries(),
-    fetchCandidates(),
-    fetchCandidateStats(),
     fetchPrograms(),
     fetchProgramAnalytics(),
     fetchCertificates(),
     fetchCertificateStats()
-  ]);
+  ];
+  if (isCandidatesUnlocked) {
+    tasks.push(fetchCandidates(), fetchCandidateStats());
+  }
+  await Promise.all(tasks);
 }
 
 async function fetchStats() {
@@ -259,8 +269,8 @@ function renderTable(list) {
   }
 
   tableBody.innerHTML = list.map(item => {
-    const dateFormatted = new Date(item.createdAt).toLocaleDateString('en-IN', {
-      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    const dateFormatted = formatDateTimeUpper(item.createdAt, {
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true
     });
 
     const cleanPhone = (item.phone || '').replace(/[^0-9]/g, '');
@@ -284,7 +294,6 @@ function renderTable(list) {
 
         <td class="course-cell">
           <span class="course-name">${escapeHtml(item.course || 'General Training')}</span>
-          <span class="course-mode"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(item.learningMode || 'Classroom')}</span>
         </td>
 
         <td>
@@ -529,7 +538,6 @@ window.openDetailModal = function(id) {
   document.getElementById('modalEmail').innerText = item.email;
   document.getElementById('modalPhone').innerText = item.phone + (item.whatsapp ? ` (WA: ${item.whatsapp})` : '');
   document.getElementById('modalCourse').innerText = item.course || 'N/A';
-  document.getElementById('modalMode').innerText = item.learningMode || 'Classroom';
   document.getElementById('modalExperience').innerText = item.experience || 'Not specified';
   document.getElementById('modalSource').innerText = item.source || 'Website Form';
   document.getElementById('modalMessage').innerText = item.message || 'No specific requirements submitted.';
@@ -567,7 +575,7 @@ function renderNotes(notes) {
       <div>${escapeHtml(n.note)}</div>
       <div class="note-meta">
         <span>By: <strong>${escapeHtml(n.author || 'Admin')}</strong></span>
-        <span>${new Date(n.timestamp).toLocaleString('en-IN')}</span>
+        <span>${formatDateTimeUpper(n.timestamp, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</span>
       </div>
     </div>
   `).join('');
@@ -631,6 +639,90 @@ function initViewTabs() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function renderCandidatesAccessState() {
+    const lockSec = document.getElementById('candidatesLockSection');
+    const unlockedSec = document.getElementById('candidatesUnlockedContent');
+    if (isCandidatesUnlocked) {
+      if (lockSec) lockSec.classList.add('hidden');
+      if (unlockedSec) unlockedSec.classList.remove('hidden');
+      fetchCandidates();
+      fetchCandidateStats();
+    } else {
+      if (lockSec) lockSec.classList.remove('hidden');
+      if (unlockedSec) unlockedSec.classList.add('hidden');
+      const passInput = document.getElementById('candidatesLockPassword');
+      const errEl = document.getElementById('candidatesLockError');
+      if (errEl) { errEl.style.display = 'none'; errEl.innerText = ''; }
+      if (passInput) {
+        passInput.value = '';
+        setTimeout(() => passInput.focus(), 50);
+      }
+    }
+  }
+
+  const lockForm = document.getElementById('candidatesLockForm');
+  const toggleLockPassBtn = document.getElementById('toggleCandidatesLockPassBtn');
+  if (toggleLockPassBtn) {
+    toggleLockPassBtn.addEventListener('click', () => {
+      const inp = document.getElementById('candidatesLockPassword');
+      if (!inp) return;
+      const isPass = inp.type === 'password';
+      inp.type = isPass ? 'text' : 'password';
+      const icon = toggleLockPassBtn.querySelector('i');
+      if (icon) icon.className = isPass ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+    });
+  }
+
+  if (lockForm) {
+    lockForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const passInput = document.getElementById('candidatesLockPassword');
+      const errEl = document.getElementById('candidatesLockError');
+      const submitBtn = document.getElementById('candidatesLockSubmitBtn');
+      const password = passInput ? passInput.value : '';
+      if (!password) return;
+
+      if (errEl) { errEl.style.display = 'none'; errEl.innerText = ''; }
+      const origHtml = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Verifying...</span>';
+      }
+
+      try {
+        const res = await fetch('/api/admin/verify-candidates-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          isCandidatesUnlocked = true;
+          sessionStorage.setItem('ipti_candidates_unlocked', '1');
+          renderCandidatesAccessState();
+        } else {
+          if (errEl) {
+            errEl.innerText = data.error || 'Incorrect access password.';
+            errEl.style.display = 'block';
+          }
+        }
+      } catch (err) {
+        if (errEl) {
+          errEl.innerText = 'Verification error: ' + err.message;
+          errEl.style.display = 'block';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origHtml;
+        }
+      }
+    });
+  }
+
   function showCandidatesView() {
     if (tabCandidates) tabCandidates.classList.add('active');
     tabEnquiries.classList.remove('active');
@@ -642,8 +734,7 @@ function initViewTabs() {
     viewPrograms.classList.add('hidden');
     if (viewCertificates) viewCertificates.classList.add('hidden');
 
-    fetchCandidates();
-    fetchCandidateStats();
+    renderCandidatesAccessState();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -733,6 +824,7 @@ async function fetchPrograms() {
       if (badge) badge.innerText = `${data.data.length} Active Courses`;
       if (statPrograms) statPrograms.innerText = data.data.length;
       renderAdminPrograms(data.data);
+      fetchCategories();
     } else {
       if (grid) grid.innerHTML = '<p style="color: var(--text-muted);">No programs configured.</p>';
     }
@@ -776,7 +868,6 @@ function renderAdminPrograms(programs) {
         <div class="admin-prog-specs">
           <div>Duration: <strong>${escapeHtml(p.duration || '3-4 Months')}</strong></div>
           <div>Practical: <strong>${escapeHtml(p.labHours || '100+ Hrs')}</strong></div>
-          <div>Mode: <strong>${escapeHtml(p.mode || 'Classroom')}</strong></div>
           <div>Standard: <strong>${escapeHtml(p.credentials || 'Certified')}</strong></div>
         </div>
 
@@ -912,12 +1003,182 @@ function renderProgramAnalytics(breakdown, total) {
 /* --------------------------------------------------------------------------
    09. PROGRAM MODAL & CRUD LOGIC
    -------------------------------------------------------------------------- */
+async function fetchCategories() {
+  try {
+    const res = await fetch('/api/categories');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      allCategoriesCache = data.data;
+      populateCategoryDropdown();
+      renderCategoryManagerList();
+    }
+  } catch (err) {
+    console.error('Error fetching categories:', err);
+  }
+}
+
+function populateCategoryDropdown(selectedSlug) {
+  const select = document.getElementById('progFormCategory');
+  if (!select) return;
+  const currentVal = selectedSlug !== undefined ? selectedSlug : select.value;
+  const cats = allCategoriesCache.length > 0 ? allCategoriesCache : [
+    { slug: 'automation', name: 'Automation & Robotics' },
+    { slug: 'embedded', name: 'Embedded & IoT' },
+    { slug: 'mechanical', name: 'Mechanical CAD/CAM' },
+    { slug: 'software', name: 'Software & AI' }
+  ];
+  select.innerHTML = cats.map(c => `<option value="${escapeHtml(c.slug)}">${escapeHtml(c.name)}</option>`).join('');
+  if (currentVal && cats.some(c => c.slug === currentVal)) {
+    select.value = currentVal;
+  }
+}
+
+function renderCategoryManagerList() {
+  const container = document.getElementById('categoryListContainer');
+  if (!container) return;
+  if (!allCategoriesCache || allCategoriesCache.length === 0) {
+    container.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-muted);">No categories found.</p>';
+    return;
+  }
+  container.innerHTML = allCategoriesCache.map(cat => `
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: var(--bg-recessed); border: 1px solid var(--border-medium); border-radius: var(--radius-sm);">
+      <div>
+        <strong style="font-size: 0.86rem; color: var(--primary);">${escapeHtml(cat.name)}</strong>
+        <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: 8px; font-family: var(--font-mono);">${escapeHtml(cat.slug)}</span>
+      </div>
+      ${cat.isDefault
+        ? '<span style="font-size: 0.72rem; color: var(--text-dim); font-weight: 600;">Default</span>'
+        : `<button type="button" class="action-icon-btn delete" onclick="deleteTrainingCategory('${escapeHtml(cat.id)}', '${escapeHtml(cat.name)}')" title="Remove category"><i class="fa-solid fa-trash-can"></i></button>`
+      }
+    </div>
+  `).join('');
+}
+
+async function createTrainingCategory(rawName) {
+  const name = String(rawName || '').trim();
+  if (!name) return null;
+  const res = await fetch('/api/categories', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${currentToken}`
+    },
+    body: JSON.stringify({ name })
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.error || 'Could not add category');
+  }
+  await fetchCategories();
+  return data.data;
+}
+
+window.deleteTrainingCategory = async function(id, name) {
+  if (!confirm(`Remove training category "${name}"? Existing programs will remain intact.`)) return;
+  try {
+    const res = await fetch(`/api/categories/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${currentToken}` }
+    });
+    const data = await res.json();
+    if (!data.success) {
+      alert('Error: ' + (data.error || 'Could not delete category'));
+      return;
+    }
+    fetchCategories();
+  } catch (err) {
+    alert('Error deleting category: ' + err.message);
+  }
+};
+
 function initProgramManagement() {
   const openAddBtn = document.getElementById('openAddProgramBtn');
   const modal = document.getElementById('programModal');
   const closeBtn = document.getElementById('closeProgramModalBtn');
   const cancelBtn = document.getElementById('cancelProgramModalBtn');
   const form = document.getElementById('programForm');
+
+  // Category Manager & Inline Quick-Add Controls
+  const openAddCategoryBtn = document.getElementById('openAddCategoryBtn');
+  const categoryModal = document.getElementById('categoryModal');
+  const closeCatModalBtn = document.getElementById('closeCategoryModalBtn');
+  const cancelCatModalBtn = document.getElementById('cancelCategoryModalBtn');
+  const categoryForm = document.getElementById('categoryForm');
+  const toggleInlineCatBtn = document.getElementById('toggleInlineCatBtn');
+  const inlineCatRow = document.getElementById('inlineCatRow');
+  const inlineCatInput = document.getElementById('inlineCatNameInput');
+  const saveInlineCatBtn = document.getElementById('saveInlineCatBtn');
+
+  function openCategoryModal() {
+    if (categoryModal) {
+      categoryModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      fetchCategories();
+    }
+  }
+  function closeCategoryModal() {
+    if (categoryModal) {
+      categoryModal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (openAddCategoryBtn) openAddCategoryBtn.addEventListener('click', openCategoryModal);
+  if (closeCatModalBtn) closeCatModalBtn.addEventListener('click', closeCategoryModal);
+  if (cancelCatModalBtn) cancelCatModalBtn.addEventListener('click', closeCategoryModal);
+  if (categoryModal) {
+    categoryModal.addEventListener('click', (e) => {
+      if (e.target === categoryModal) closeCategoryModal();
+    });
+  }
+
+  if (categoryForm) {
+    categoryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('newCategoryNameInput');
+      const submitBtn = document.getElementById('saveCategorySubmitBtn');
+      if (!input || !input.value.trim()) return;
+      submitBtn.disabled = true;
+      try {
+        await createTrainingCategory(input.value);
+        input.value = '';
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  if (toggleInlineCatBtn && inlineCatRow) {
+    toggleInlineCatBtn.addEventListener('click', () => {
+      const hidden = inlineCatRow.style.display === 'none' || !inlineCatRow.style.display;
+      inlineCatRow.style.display = hidden ? 'flex' : 'none';
+      if (hidden && inlineCatInput) inlineCatInput.focus();
+    });
+  }
+
+  if (saveInlineCatBtn && inlineCatInput) {
+    saveInlineCatBtn.addEventListener('click', async () => {
+      const name = inlineCatInput.value.trim();
+      if (!name) return;
+      saveInlineCatBtn.disabled = true;
+      try {
+        const created = await createTrainingCategory(name);
+        if (created && created.slug) {
+          populateCategoryDropdown(created.slug);
+        }
+        inlineCatInput.value = '';
+        if (inlineCatRow) inlineCatRow.style.display = 'none';
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        saveInlineCatBtn.disabled = false;
+      }
+    });
+  }
+
+  fetchCategories();
 
   function openModal(isEdit = false) {
     if (modal) {
@@ -1036,7 +1297,7 @@ function initProgramManagement() {
         badge: document.getElementById('progFormBadge').value.trim() || 'Core Track',
         duration: document.getElementById('progFormDuration').value.trim() || '4 Months',
         labHours: document.getElementById('progFormLabHours').value.trim() || '120+ Hrs Practical',
-        mode: document.getElementById('progFormMode').value.trim() || 'Classroom / Hybrid',
+        mode: 'Online',
         credentials: document.getElementById('progFormCredentials').value.trim() || 'Industry Certification',
         description: document.getElementById('progFormDesc').value.trim(),
         techTags: document.getElementById('progFormTags').value.trim(),
@@ -1086,11 +1347,12 @@ function initProgramManagement() {
     document.getElementById('progFormId').value = item.id;
     document.getElementById('programModalHeading').innerText = 'Edit Training Program';
     document.getElementById('progFormTitle').value = item.title || '';
-    document.getElementById('progFormCategory').value = (item.category || 'automation').toLowerCase();
+    const editCatSlug = (item.category || 'automation').toLowerCase();
+    populateCategoryDropdown(editCatSlug);
+    document.getElementById('progFormCategory').value = editCatSlug;
     document.getElementById('progFormBadge').value = item.badge || '';
     document.getElementById('progFormDuration').value = item.duration || '';
     document.getElementById('progFormLabHours').value = item.labHours || '';
-    document.getElementById('progFormMode').value = item.mode || '';
     document.getElementById('progFormCredentials').value = item.credentials || '';
     document.getElementById('progFormDesc').value = item.description || '';
     document.getElementById('progFormTags').value = Array.isArray(item.techTags) ? item.techTags.join(', ') : '';
@@ -1316,10 +1578,21 @@ function initCertificateManagement() {
   if (certProgramFilter) certProgramFilter.addEventListener('change', fetchCertificates);
   if (refreshCertBtn) refreshCertBtn.addEventListener('click', () => { fetchCertificates(); fetchCertificateStats(); });
 
+  function setCertStudentIdLocked(locked) {
+    const sidInput = document.getElementById('certFormStudentId');
+    if (!sidInput) return;
+    sidInput.readOnly = Boolean(locked);
+    sidInput.disabled = Boolean(locked);
+    sidInput.style.background = locked ? '#f1f5f9' : '#ffffff';
+    sidInput.style.color = locked ? '#475569' : '';
+    sidInput.style.cursor = locked ? 'not-allowed' : '';
+  }
+
   function openModal(isEdit = false) {
     if (modal) {
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
+      setCertStudentIdLocked(isEdit);
       if (!isEdit && form) {
         form.reset();
         document.getElementById('certFormInternalId').value = '';
@@ -1363,9 +1636,11 @@ function initCertificateManagement() {
         program: document.getElementById('certFormProgram').value,
         issueDate: document.getElementById('certFormDate').value,
         grade: document.getElementById('certFormGrade').value.trim(),
-        studentId: document.getElementById('certFormStudentId').value.trim(),
         notes: document.getElementById('certFormNotes').value.trim()
       };
+      if (!isEdit) {
+        payload.studentId = document.getElementById('certFormStudentId').value.trim();
+      }
 
       try {
         submitBtn.disabled = true;
@@ -1574,7 +1849,6 @@ function initCandidateManagement() {
       const isEdit = Boolean(id);
 
       const payload = {
-        studentId: document.getElementById('candFormStudentId').value.trim(),
         fullName: document.getElementById('candFormFullName').value.trim(),
         email: document.getElementById('candFormEmail').value.trim(),
         phone: document.getElementById('candFormPhone').value.trim(),
@@ -1584,9 +1858,8 @@ function initCandidateManagement() {
         admissionDate: document.getElementById('candFormAdmissionDate').value,
         totalFees: Number(document.getElementById('candFormTotalFees').value) || 0,
         paidFees: Number(document.getElementById('candFormPaidFees').value) || 0,
-        learningMode: document.getElementById('candFormMode').value,
+        learningMode: 'Online',
         attendance: Number(document.getElementById('candFormAttendance').value) || 90,
-        projectTitle: document.getElementById('candFormProject').value.trim(),
         eligibleForCertificate: document.getElementById('candFormEligibleCert').checked,
         notes: document.getElementById('candFormNotes').value.trim()
       };
@@ -1607,6 +1880,9 @@ function initCandidateManagement() {
         const data = await res.json();
         if (data.success) {
           closeCandidateModal();
+          if (!isEdit && data.data && data.data.studentId) {
+            alert(`Student enrolled successfully! Auto-assigned Student ID: ${data.data.studentId}`);
+          }
           fetchCandidates();
           fetchCandidateStats();
         } else {
@@ -1756,6 +2032,12 @@ function initCandidateManagement() {
     if (candForm) {
       candForm.reset();
       document.getElementById('candFormId').value = '';
+      const sidInput = document.getElementById('candFormStudentId');
+      if (sidInput) {
+        sidInput.value = '';
+        sidInput.disabled = true;
+        sidInput.readOnly = true;
+      }
       document.getElementById('candidateModalHeading').innerText = 'Enroll Converted Candidate';
       document.getElementById('candFormAdmissionDate').value = new Date().toISOString().slice(0, 10);
       document.getElementById('candFormEligibleCert').checked = false;
@@ -1768,7 +2050,12 @@ function initCandidateManagement() {
     if (!cand) return;
 
     document.getElementById('candFormId').value = cand.id;
-    document.getElementById('candFormStudentId').value = cand.studentId || '';
+    const sidInput = document.getElementById('candFormStudentId');
+    if (sidInput) {
+      sidInput.value = cand.studentId || '';
+      sidInput.disabled = true;
+      sidInput.readOnly = true;
+    }
     document.getElementById('candidateModalHeading').innerText = `Edit Candidate: ${cand.fullName}`;
     document.getElementById('candFormFullName').value = cand.fullName || '';
     document.getElementById('candFormEmail').value = cand.email || '';
@@ -1779,9 +2066,7 @@ function initCandidateManagement() {
     document.getElementById('candFormAdmissionDate').value = (cand.admissionDate || '').slice(0, 10);
     document.getElementById('candFormTotalFees').value = cand.totalFees || 0;
     document.getElementById('candFormPaidFees').value = cand.paidFees || 0;
-    document.getElementById('candFormMode').value = cand.learningMode || 'Classroom Training';
     document.getElementById('candFormAttendance').value = cand.attendance || 90;
-    document.getElementById('candFormProject').value = cand.projectTitle || '';
     document.getElementById('candFormEligibleCert').checked = Boolean(cand.eligibleForCertificate);
     document.getElementById('candFormNotes').value = cand.notes || '';
 
@@ -1860,8 +2145,17 @@ function initCandidateManagement() {
       document.getElementById('certFormProgram').value = cand.program;
       document.getElementById('certFormDate').value = new Date().toISOString().slice(0, 10);
       document.getElementById('certFormGrade').value = 'Distinction (Grade A+ • 95%)';
-      document.getElementById('certFormStudentId').value = cand.studentId || '';
-      document.getElementById('certFormNotes').value = `Successfully completed ${cand.program}. Capstone: ${cand.projectTitle || 'Industrial Project'}.`;
+      const sidInput = document.getElementById('certFormStudentId');
+      if (sidInput) {
+        sidInput.value = cand.studentId || '';
+        const hasSid = Boolean(cand.studentId && cand.studentId.trim());
+        sidInput.readOnly = hasSid;
+        sidInput.disabled = hasSid;
+        sidInput.style.background = hasSid ? '#f1f5f9' : '#ffffff';
+        sidInput.style.color = hasSid ? '#475569' : '';
+        sidInput.style.cursor = hasSid ? 'not-allowed' : '';
+      }
+      document.getElementById('certFormNotes').value = `Successfully completed ${cand.program}.`;
 
       certModal.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -2050,9 +2344,6 @@ function renderCandidatesTable(list) {
                 <i class="fa-solid fa-user-check"></i> ${item.attendance || 90}% Practical Attendance
               </span>
             </div>
-            <span style="font-size: 0.74rem; color: var(--text-secondary); line-height: 1.3;" title="${escapeHtml(item.projectTitle || 'Capstone Project')}">
-              <i class="fa-solid fa-diagram-project"></i> ${escapeHtml(item.projectTitle || 'Industrial Capstone Rig')}
-            </span>
           </div>
         </td>
 

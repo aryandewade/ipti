@@ -38,12 +38,13 @@ if (!fs.existsSync(dataDir)) {
 
 const enquiriesFile = path.join(dataDir, 'enquiries.json');
 const programsFile = path.join(dataDir, 'programs.json');
+const categoriesFile = path.join(dataDir, 'categories.json');
 const certificatesFile = path.join(dataDir, 'certificates.json');
 const candidatesFile = path.join(dataDir, 'candidates.json');
 
 // Seed ephemeral /tmp storage from bundled data/*.json on Vercel cold start
 if (isVercel) {
-  for (const fname of ['enquiries.json', 'programs.json', 'certificates.json', 'candidates.json']) {
+  for (const fname of ['enquiries.json', 'programs.json', 'categories.json', 'certificates.json', 'candidates.json']) {
     const src = path.join(bundledDataDir, fname);
     const dst = path.join(dataDir, fname);
     if (!fs.existsSync(dst) && fs.existsSync(src)) {
@@ -158,10 +159,19 @@ const programSchema = new mongoose.Schema({
   featured: { type: Boolean, default: false }
 }, { collection: 'programs', timestamps: true });
 
+// 5. Category Schema (Training Program Categories)
+const categorySchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  slug: { type: String, required: true, unique: true, index: true },
+  name: { type: String, required: true },
+  isDefault: { type: Boolean, default: false }
+}, { collection: 'categories', timestamps: true });
+
 const EnquiryModel = mongoose.models.Enquiry || mongoose.model('Enquiry', enquirySchema);
 const CandidateModel = mongoose.models.Candidate || mongoose.model('Candidate', candidateSchema);
 const CertificateModel = mongoose.models.Certificate || mongoose.model('Certificate', certificateSchema);
 const ProgramModel = mongoose.models.Program || mongoose.model('Program', programSchema);
+const CategoryModel = mongoose.models.Category || mongoose.model('Category', categorySchema);
 
 async function initDatabase() {
   if (!MONGODB_URI) {
@@ -264,6 +274,22 @@ async function migrateLocalDataToMongo() {
         fs.writeFileSync(programsFile, JSON.stringify(cleaned, null, 2), 'utf-8');
       }
     }
+
+    // 5. Sync Categories
+    const catCount = await CategoryModel.countDocuments();
+    if (catCount === 0) {
+      const local = readCategories();
+      if (local.length > 0) {
+        await CategoryModel.insertMany(local);
+        console.log(`[MongoDB Seeder] Migrated ${local.length} categories to MongoDB Atlas.`);
+      }
+    } else {
+      const docs = await CategoryModel.find().lean();
+      if (docs.length > 0) {
+        const cleaned = docs.map(({ _id, __v, ...rest }) => rest);
+        fs.writeFileSync(categoriesFile, JSON.stringify(cleaned, null, 2), 'utf-8');
+      }
+    }
   } catch (err) {
     console.error('[MongoDB Initial Migration Error]:', err.message);
   }
@@ -317,21 +343,27 @@ async function syncProgramsToMongo(programs) {
   return enqueueMongoSync(() => syncCollectionToMongo(ProgramModel, programs, 'Programs'));
 }
 
+async function syncCategoriesToMongo(categories) {
+  return enqueueMongoSync(() => syncCollectionToMongo(CategoryModel, categories, 'Categories'));
+}
+
 async function refreshLocalCacheFromMongo() {
   if (!isMongoConnected) return;
   try {
     await pendingMongoSync;
-    const [enqs, cands, certs, progs] = await Promise.all([
+    const [enqs, cands, certs, progs, cats] = await Promise.all([
       EnquiryModel.find().lean(),
       CandidateModel.find().lean(),
       CertificateModel.find().lean(),
-      ProgramModel.find().lean()
+      ProgramModel.find().lean(),
+      CategoryModel.find().lean()
     ]);
     const clean = (docs) => docs.map(({ _id, __v, ...rest }) => rest);
     if (enqs.length > 0) fs.writeFileSync(enquiriesFile, JSON.stringify(clean(enqs), null, 2), 'utf-8');
     if (cands.length > 0) fs.writeFileSync(candidatesFile, JSON.stringify(clean(cands), null, 2), 'utf-8');
     if (certs.length > 0) fs.writeFileSync(certificatesFile, JSON.stringify(clean(certs), null, 2), 'utf-8');
     if (progs.length > 0) fs.writeFileSync(programsFile, JSON.stringify(clean(progs), null, 2), 'utf-8');
+    if (cats.length > 0) fs.writeFileSync(categoriesFile, JSON.stringify(clean(cats), null, 2), 'utf-8');
   } catch (err) {
     console.error('[MongoDB Live Cache Refresh Error]:', err.message);
   }
@@ -464,6 +496,41 @@ function writePrograms(programs) {
     return true;
   } catch (err) {
     console.error('Error saving programs to database:', err);
+    return false;
+  }
+}
+
+const defaultCategories = [
+  { id: 'cat_automation', slug: 'automation', name: 'Automation & Robotics', isDefault: true },
+  { id: 'cat_embedded', slug: 'embedded', name: 'Embedded & IoT', isDefault: true },
+  { id: 'cat_mechanical', slug: 'mechanical', name: 'Mechanical CAD/CAM', isDefault: true },
+  { id: 'cat_software', slug: 'software', name: 'Software & AI', isDefault: true }
+];
+
+if (!fs.existsSync(categoriesFile)) {
+  fs.writeFileSync(categoriesFile, JSON.stringify(defaultCategories, null, 2), 'utf-8');
+}
+
+function readCategories() {
+  try {
+    const raw = fs.readFileSync(categoriesFile, 'utf-8');
+    const parsed = JSON.parse(raw || '[]');
+    return parsed.length > 0 ? parsed : defaultCategories;
+  } catch (err) {
+    console.error('Error reading categories database:', err);
+    return defaultCategories;
+  }
+}
+
+function writeCategories(categories) {
+  try {
+    fs.writeFileSync(categoriesFile, JSON.stringify(categories, null, 2), 'utf-8');
+    if (isMongoConnected) {
+      syncCategoriesToMongo(categories);
+    }
+    return true;
+  } catch (err) {
+    console.error('Error saving categories to database:', err);
     return false;
   }
 }
@@ -1168,6 +1235,19 @@ const handleAdminLogin = (req, res) => {
 app.post('/api/auth/login', authRateLimiter, handleAdminLogin);
 app.post('/api/admin/login', authRateLimiter, handleAdminLogin);
 
+// 2b. Verify Converted Candidates Section Access Password (Admin protected)
+const CANDIDATES_SECTION_PASSWORD = process.env.CANDIDATES_SECTION_PASSWORD || 'convertadmin0011';
+app.post('/api/admin/verify-candidates-password', requireAdmin, authRateLimiter, (req, res) => {
+  const { password } = req.body || {};
+  if (!password) {
+    return res.status(400).json({ success: false, error: 'Section password is required.' });
+  }
+  if (safeStringCompare(String(password), CANDIDATES_SECTION_PASSWORD)) {
+    return res.json({ success: true });
+  }
+  return res.status(401).json({ success: false, error: 'Incorrect section access password. Please try again.' });
+});
+
 // 3. Admin Verify Session
 app.post('/api/auth/verify', (req, res) => {
   const { token } = req.body;
@@ -1215,7 +1295,7 @@ app.post('/api/enquiries', (req, res) => {
       phone: phone.trim(),
       whatsapp: (whatsapp || phone).trim(),
       course: course || 'General Professional Training',
-      learningMode: learningMode || 'Offline Classroom Training',
+      learningMode: 'Online',
       experience: experience || 'Not specified',
       message: message ? message.trim() : '',
       status: 'New',
@@ -1448,7 +1528,7 @@ app.get('/api/enquiries/export/csv', (req, res) => {
       escapeCsv(item.priority),
       escapeCsv(item.source),
       escapeCsv(item.message),
-      escapeCsv(new Date(item.createdAt).toLocaleString('en-IN'))
+      escapeCsv(new Date(item.createdAt).toLocaleString('en-IN').replace(/\b(am|pm)\b/gi, m => m.toUpperCase()))
     ].join(','));
 
     // UTF-8 BOM for Microsoft Excel compatibility
@@ -1637,7 +1717,7 @@ app.post('/api/programs', requireAdmin, (req, res) => {
       description: description.trim(),
       duration: duration ? duration.trim() : '3 Months',
       labHours: labHours ? labHours.trim() : '100+ Hrs Practical',
-      mode: mode ? mode.trim() : 'Classroom / Hybrid',
+      mode: mode ? mode.trim() : 'Online',
       credentials: credentials ? credentials.trim() : 'Industry Certification',
       techTags: parsedTags.length > 0 ? parsedTags : ['Hands-on Practice', 'Industry Project'],
       syllabusUrl: syllabusUrl ? String(syllabusUrl).trim() : '',
@@ -1655,6 +1735,87 @@ app.post('/api/programs', requireAdmin, (req, res) => {
       message: 'Training program created successfully',
       data: newProgram
     });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 3b. Training Categories (Public list + Admin create/delete)
+app.get('/api/categories', (req, res) => {
+  try {
+    const categories = readCategories();
+    const programs = readPrograms();
+    const seen = new Set(categories.map(c => c.slug));
+    const merged = [...categories];
+    for (const p of programs) {
+      const slug = (p.category || '').toLowerCase().trim();
+      if (slug && !seen.has(slug)) {
+        seen.add(slug);
+        merged.push({
+          id: `cat_${slug}`,
+          slug,
+          name: slug.replace(/[-_]+/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()),
+          isDefault: false
+        });
+      }
+    }
+    res.json({ success: true, count: merged.length, data: merged });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/categories', requireAdmin, (req, res) => {
+  try {
+    const rawName = String(req.body.name || '').trim();
+    if (!rawName) {
+      return res.status(400).json({ success: false, error: 'Category name is required.' });
+    }
+    const slug = (req.body.slug ? String(req.body.slug) : rawName)
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (!slug) {
+      return res.status(400).json({ success: false, error: 'Category name must contain letters or numbers.' });
+    }
+
+    const categories = readCategories();
+    const exists = categories.find(c => c.slug === slug || c.name.toLowerCase() === rawName.toLowerCase());
+    if (exists) {
+      return res.status(409).json({ success: false, error: 'This training category already exists.' });
+    }
+
+    const newCat = {
+      id: `cat_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      slug,
+      name: rawName,
+      isDefault: false
+    };
+    categories.push(newCat);
+    writeCategories(categories);
+
+    res.status(201).json({
+      success: true,
+      message: `Training category "${rawName}" added successfully.`,
+      data: newCat
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/categories/:id', requireAdmin, (req, res) => {
+  try {
+    const { id } = req.params;
+    const categories = readCategories();
+    const target = categories.find(c => c.id === id || c.slug === id);
+    if (!target) {
+      return res.status(404).json({ success: false, error: 'Training category not found.' });
+    }
+    const updated = categories.filter(c => c.id !== target.id);
+    writeCategories(updated);
+    res.json({ success: true, message: 'Training category removed.' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -2042,18 +2203,11 @@ app.put('/api/certificates/:id', requireAdmin, (req, res) => {
     const { studentId, studentName, studentEmail, studentPhone, program, grade, issueDate, standard, status, notes } = req.body;
     const cert = list[index];
 
-    if (studentId !== undefined) {
-      const cleanSid = studentId.trim();
-      if (!cleanSid) {
-        return res.status(400).json({ success: false, error: 'Student ID cannot be empty' });
-      }
-      if (isStudentIdTaken(cleanSid, list, cert.id)) {
-        return res.status(409).json({
-          success: false,
-          error: `Student ID "${cleanSid}" is already used by another certificate. Student ID must be unique.`
-        });
-      }
-      cert.studentId = cleanSid;
+    if (studentId !== undefined && String(studentId).trim().toUpperCase() !== String(cert.studentId || '').toUpperCase()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Student ID is permanently locked once assigned and cannot be changed.'
+      });
     }
 
     if (studentName) cert.studentName = studentName.trim();
@@ -2234,15 +2388,14 @@ app.post('/api/candidates', requireAdmin, (req, res) => {
       return res.status(400).json({ success: false, error: 'A student candidate with this email address already exists.' });
     }
 
-    let studentId = '';
     if (requestedStudentId && requestedStudentId.trim()) {
-      studentId = requestedStudentId.trim();
-      if (isStudentIdTaken(studentId, list) || isStudentIdTaken(studentId, certs)) {
-        return res.status(409).json({ success: false, error: `Student ID "${studentId}" already exists. Student ID must be unique.` });
+      const cleanReqSid = requestedStudentId.trim();
+      if (isStudentIdTaken(cleanReqSid, list) || isStudentIdTaken(cleanReqSid, certs)) {
+        return res.status(409).json({ success: false, error: `Student ID "${cleanReqSid}" already exists. Student ID must be unique.` });
       }
-    } else {
-      studentId = generateUniqueStudentId(list, certs);
     }
+    // Always auto-generate Student ID server-side; admins cannot specify a custom ID
+    const studentId = generateUniqueStudentId(list, certs);
 
     const year = new Date().getFullYear();
     const timestamp = new Date().toISOString();
@@ -2277,7 +2430,7 @@ app.post('/api/candidates', requireAdmin, (req, res) => {
       program: program.trim(),
       batch: batch || 'Morning Cohort (09:00 AM - 01:00 PM)',
       admissionDate: admissionDate || timestamp.slice(0, 10),
-      learningMode: learningMode || 'Classroom Training',
+      learningMode: 'Online',
       totalFees: tFees,
       paidFees: pFees,
       balanceFees: bFees,
@@ -2286,7 +2439,7 @@ app.post('/api/candidates', requireAdmin, (req, res) => {
       eligibleForCertificate: Boolean(eligibleForCertificate),
       certificateIssued: false,
       attendance: Number(attendance) || 90,
-      projectTitle: projectTitle ? projectTitle.trim() : 'Industrial Capstone Benchmark',
+      projectTitle: projectTitle ? projectTitle.trim() : '',
       password: hashPassword('ipti@123'),
       hasChangedPassword: false,
       notes: notes ? notes.trim() : 'Newly enrolled candidate.',
@@ -2333,26 +2486,8 @@ app.patch('/api/candidates/:id', requireAdmin, (req, res) => {
       notes
     } = req.body;
 
-    if (newStudentId !== undefined) {
-      const cleanSid = newStudentId.trim();
-      if (!cleanSid) {
-        return res.status(400).json({ success: false, error: 'Student ID cannot be empty' });
-      }
-      if (cleanSid.toUpperCase() !== cand.studentId.toUpperCase()) {
-        const certs = readCertificates();
-        if (isStudentIdTaken(cleanSid, list, cand.id) || isStudentIdTaken(cleanSid, certs)) {
-          return res.status(409).json({ success: false, error: `Student ID "${cleanSid}" already exists. Student ID must be unique.` });
-        }
-        const oldSid = cand.studentId;
-        cand.studentId = cleanSid;
-        // Keep linked certificate synchronized with updated Student ID
-        const certIdx = certs.findIndex(c => c.studentId && c.studentId.toUpperCase() === oldSid.toUpperCase());
-        if (certIdx !== -1) {
-          certs[certIdx].studentId = cleanSid;
-          certs[certIdx].updatedAt = new Date().toISOString();
-          writeCertificates(certs);
-        }
-      }
+    if (newStudentId !== undefined && String(newStudentId).trim().toUpperCase() !== cand.studentId.toUpperCase()) {
+      return res.status(403).json({ success: false, error: 'Student ID is permanently locked once assigned and cannot be changed.' });
     }
 
     if (fullName) cand.fullName = fullName.trim();
@@ -2534,7 +2669,7 @@ app.post('/api/enquiries/:id/convert', requireAdmin, (req, res) => {
       program: enq.course || 'Industrial Automation & Robotics (PLC/SCADA)',
       batch: batch || 'Morning Cohort (09:00 AM - 01:00 PM)',
       admissionDate: timestamp.slice(0, 10),
-      learningMode: learningMode || enq.learningMode || 'Classroom Training',
+      learningMode: 'Online',
       totalFees: tFees,
       paidFees: pFees,
       balanceFees: bFees,
@@ -2543,7 +2678,7 @@ app.post('/api/enquiries/:id/convert', requireAdmin, (req, res) => {
       eligibleForCertificate: false,
       certificateIssued: false,
       attendance: 90,
-      projectTitle: 'Industrial Capstone Project',
+      projectTitle: '',
       password: hashPassword('ipti@123'),
       hasChangedPassword: false,
       notes: notes ? notes.trim() : `Converted from enquiry (${enq.trackingId}).`,

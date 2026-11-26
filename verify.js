@@ -154,13 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
               <span>${escapeHtml(cert.grade || 'Awarded with Distinction')}</span>
             </div>
 
-            ${cert.projectTitle ? `
-            <div class="cert-capstone-box">
-              <span class="capstone-lbl"><i class="fa-solid fa-diagram-project"></i> Capstone:</span>
-              <span class="capstone-val">${escapeHtml(cert.projectTitle)}</span>
-            </div>
-            ` : ''}
-
             ${cert.notes ? `
             <div class="cert-notes-box">
               <strong>Registry Endorsement:</strong> ${escapeHtml(cert.notes)}
@@ -288,10 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="dossier-item">
               <span class="d-label">Enrolled Program</span>
               <span class="d-val">${escapeHtml(candidate.program)}</span>
-            </div>
-            <div class="dossier-item">
-              <span class="d-label">Learning Mode</span>
-              <span class="d-val">${escapeHtml(candidate.learningMode || 'Classroom Training')}</span>
             </div>
             <div class="dossier-item">
               <span class="d-label">Certificate Status</span>

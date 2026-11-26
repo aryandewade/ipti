@@ -1,0 +1,42 @@
+[
+  {
+    "id": "cat_automation",
+    "slug": "automation",
+    "name": "Automation & Robotics",
+    "isDefault": true,
+    "createdAt": "2026-11-26T14:14:10.451Z",
+    "updatedAt": "2026-11-26T14:19:45.866Z"
+  },
+  {
+    "id": "cat_embedded",
+    "slug": "embedded",
+    "name": "Embedded & IoT",
+    "isDefault": true,
+    "createdAt": "2026-11-26T14:14:10.454Z",
+    "updatedAt": "2026-11-26T14:19:45.866Z"
+  },
+  {
+    "id": "cat_mechanical",
+    "slug": "mechanical",
+    "name": "Mechanical CAD/CAM",
+    "isDefault": true,
+    "createdAt": "2026-11-26T14:14:10.454Z",
+    "updatedAt": "2026-11-26T14:19:45.866Z"
+  },
+  {
+    "id": "cat_software",
+    "slug": "software",
+    "name": "Software & AI",
+    "isDefault": true,
+    "createdAt": "2026-11-26T14:14:10.454Z",
+    "updatedAt": "2026-11-26T14:19:45.866Z"
+  },
+  {
+    "id": "cat_1795702785797_8peb",
+    "createdAt": "2026-11-26T14:19:45.866Z",
+    "isDefault": false,
+    "name": "AI",
+    "slug": "ai",
+    "updatedAt": "2026-11-26T14:19:45.866Z"
+  }
+]
