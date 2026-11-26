@@ -6,12 +6,17 @@
     "studentEmail": "vikram.joshi@example.com",
     "studentPhone": "+91 92729 02182",
     "program": "AI, Machine Learning & Vision Systems",
-    "grade": "Distinction (Grade A+ • 95%)",
     "issueDate": "2026-11-24",
+    "grade": "Distinction (Grade A+ • 95%)",
     "standard": "Government Recognized Standard",
     "status": "Verified",
     "notes": "Successfully completed AI, Machine Learning & Vision Systems. Capstone: Computer Vision Automated Quality Inspection.",
-    "createdAt": "2026-11-24T11:46:08.440Z"
+    "verified": true,
+    "score": 95,
+    "issuedBy": "IPTI Academic Council",
+    "downloadUrl": "",
+    "createdAt": "2026-11-24T11:46:08.440Z",
+    "updatedAt": "2026-11-26T10:21:16.672Z"
   },
   {
     "id": "cert_1795427001042_a1b2",
@@ -20,12 +25,17 @@
     "studentEmail": "rahul.sharma@example.com",
     "studentPhone": "+91 98230 45671",
     "program": "Industrial Automation & Robotics (PLC/SCADA)",
-    "grade": "Distinction (Grade A+ • 96%)",
     "issueDate": "2026-02-18",
+    "grade": "Distinction (Grade A+ • 96%)",
     "standard": "Government Recognized Standard",
     "status": "Verified",
     "notes": "Completed 120+ hours of physical PLC/SCADA benchwork and Automated Sorting Line capstone.",
-    "createdAt": "2026-02-18T10:00:00.000Z"
+    "verified": true,
+    "score": 95,
+    "issuedBy": "IPTI Academic Council",
+    "downloadUrl": "",
+    "createdAt": "2026-02-18T10:00:00.000Z",
+    "updatedAt": "2026-11-26T10:21:16.672Z"
   },
   {
     "id": "cert_1795427001120_e5f6",
@@ -34,12 +44,17 @@
     "studentEmail": "amitesh.k@example.com",
     "studentPhone": "+91 97640 88219",
     "program": "CAD / CAM & Mechanical Product Design",
-    "grade": "Distinction (Grade A+ • 94%)",
     "issueDate": "2026-03-02",
+    "grade": "Distinction (Grade A+ • 94%)",
     "standard": "Government Recognized Standard",
     "status": "Verified",
     "notes": "Completed Automotive Transmission casing parametric design with GD&T and 5-axis CAM.",
-    "createdAt": "2026-03-02T09:15:00.000Z"
+    "verified": true,
+    "score": 95,
+    "issuedBy": "IPTI Academic Council",
+    "downloadUrl": "",
+    "createdAt": "2026-03-02T09:15:00.000Z",
+    "updatedAt": "2026-11-26T10:21:16.672Z"
   },
   {
     "id": "cert_1795427001205_g7h8",
@@ -48,11 +63,35 @@
     "studentEmail": "neha.patil@example.com",
     "studentPhone": "+91 98901 23456",
     "program": "AI, Machine Learning & Vision Systems",
-    "grade": "Distinction (Grade A+ • 97%)",
     "issueDate": "2026-03-10",
+    "grade": "Distinction (Grade A+ • 97%)",
     "standard": "Government Recognized Standard",
     "status": "Verified",
     "notes": "Delivered production-grade defect detection vision pipeline using TensorRT.",
-    "createdAt": "2026-03-10T14:20:00.000Z"
+    "verified": true,
+    "score": 95,
+    "issuedBy": "IPTI Academic Council",
+    "downloadUrl": "",
+    "createdAt": "2026-03-10T14:20:00.000Z",
+    "updatedAt": "2026-11-26T10:21:16.672Z"
+  },
+  {
+    "id": "cert_1795688476625_239k",
+    "createdAt": "Thu Nov 26 2026 15:51:16 GMT+0530 (India Standard Time)",
+    "downloadUrl": "",
+    "grade": "Distinction (Grade A+ • 98%)",
+    "issueDate": "2026-11-26",
+    "issuedBy": "IPTI Academic Council",
+    "notes": "Automated Test Verification",
+    "program": "Robotics & AI Automation",
+    "score": 95,
+    "standard": "Government Recognized Standard",
+    "status": "Verified",
+    "studentEmail": "autotest@ipti.edu.in",
+    "studentId": "IPTI-TEST-STU-6617",
+    "studentName": "Automated Test Candidate",
+    "studentPhone": "+91 99999 00000",
+    "updatedAt": "2026-11-26T10:21:16.628Z",
+    "verified": true
   }
 ]

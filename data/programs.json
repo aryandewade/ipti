@@ -16,11 +16,14 @@
       "VFD & Servo",
       "Robotics PLC"
     ],
-    "active": true,
-    "createdAt": "2026-11-20T10:00:00.000Z",
-    "updatedAt": "2026-11-20T10:00:00.000Z",
     "syllabusUrl": "/uploads/syllabus/IPTI-Industrial-Automation-Syllabus.pdf",
-    "syllabusFilename": "IPTI-Industrial-Automation-Syllabus.pdf"
+    "syllabusFilename": "IPTI-Industrial-Automation-Syllabus.pdf",
+    "active": true,
+    "curriculum": [],
+    "enrolledStudentsCount": 0,
+    "featured": false,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
   },
   {
     "id": "prog_embedded_2",
@@ -39,11 +42,14 @@
       "Embedded C",
       "MQTT / BLE"
     ],
-    "active": true,
-    "createdAt": "2026-11-20T10:00:00.000Z",
-    "updatedAt": "2026-11-20T10:00:00.000Z",
     "syllabusUrl": "/uploads/syllabus/IPTI-Embedded-IoT-Syllabus.pdf",
-    "syllabusFilename": "IPTI-Embedded-IoT-Syllabus.pdf"
+    "syllabusFilename": "IPTI-Embedded-IoT-Syllabus.pdf",
+    "active": true,
+    "curriculum": [],
+    "enrolledStudentsCount": 0,
+    "featured": false,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
   },
   {
     "id": "prog_mechanical_3",
@@ -62,11 +68,14 @@
       "Ansys FEA",
       "GD&T"
     ],
-    "active": true,
-    "createdAt": "2026-11-20T10:00:00.000Z",
-    "updatedAt": "2026-11-20T10:00:00.000Z",
     "syllabusUrl": "/uploads/syllabus/IPTI-CAD-CAM-Syllabus.pdf",
-    "syllabusFilename": "IPTI-CAD-CAM-Syllabus.pdf"
+    "syllabusFilename": "IPTI-CAD-CAM-Syllabus.pdf",
+    "active": true,
+    "curriculum": [],
+    "enrolledStudentsCount": 0,
+    "featured": false,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
   },
   {
     "id": "prog_software_4",
@@ -85,11 +94,14 @@
       "PostgreSQL",
       "AWS Cloud"
     ],
-    "active": true,
-    "createdAt": "2026-11-20T10:00:00.000Z",
-    "updatedAt": "2026-11-20T10:00:00.000Z",
     "syllabusUrl": "/uploads/syllabus/IPTI-Full-Stack-Software-Syllabus.pdf",
-    "syllabusFilename": "IPTI-Full-Stack-Software-Syllabus.pdf"
+    "syllabusFilename": "IPTI-Full-Stack-Software-Syllabus.pdf",
+    "active": true,
+    "curriculum": [],
+    "enrolledStudentsCount": 0,
+    "featured": false,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
   },
   {
     "id": "prog_ai_5",
@@ -108,11 +120,14 @@
       "OpenCV",
       "Edge AI"
     ],
-    "active": true,
-    "createdAt": "2026-11-20T10:00:00.000Z",
-    "updatedAt": "2026-11-20T10:00:00.000Z",
     "syllabusUrl": "/uploads/syllabus/IPTI-AI-Machine-Learning-Syllabus.pdf",
-    "syllabusFilename": "IPTI-AI-Machine-Learning-Syllabus.pdf"
+    "syllabusFilename": "IPTI-AI-Machine-Learning-Syllabus.pdf",
+    "active": true,
+    "curriculum": [],
+    "enrolledStudentsCount": 0,
+    "featured": false,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
   },
   {
     "id": "prog_ev_6",
@@ -131,10 +146,13 @@
       "CAN Protocol",
       "Motor Inverters"
     ],
-    "active": true,
-    "createdAt": "2026-11-20T10:00:00.000Z",
-    "updatedAt": "2026-11-20T10:00:00.000Z",
     "syllabusUrl": "/uploads/syllabus/IPTI-EV-Systems-BMS-Syllabus.pdf",
-    "syllabusFilename": "IPTI-EV-Systems-BMS-Syllabus.pdf"
+    "syllabusFilename": "IPTI-EV-Systems-BMS-Syllabus.pdf",
+    "active": true,
+    "curriculum": [],
+    "enrolledStudentsCount": 0,
+    "featured": false,
+    "createdAt": "2026-11-20T10:00:00.000Z",
+    "updatedAt": "2026-11-20T10:00:00.000Z"
   }
 ]

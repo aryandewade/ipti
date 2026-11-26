@@ -8,12 +8,9 @@
     "whatsapp": "+919272902182",
     "course": "AI, Machine Learning & Computer Vision",
     "learningMode": "Offline Classroom Training",
-    "experience": "Not specified",
     "message": "",
     "status": "New",
-    "priority": "High",
     "interest": "Converted",
-    "source": "Website Hero Quick Form",
     "notes": [
       {
         "note": "Inquiry submitted via Website Hero Quick Form.",
@@ -22,7 +19,7 @@
       }
     ],
     "createdAt": "2026-11-23T09:03:20.569Z",
-    "updatedAt": "2026-11-24T11:45:30.389Z"
+    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
   },
   {
     "id": "ipti_enq_1795424172322_3qxl5",
@@ -33,12 +30,9 @@
     "whatsapp": "+91 98300 12345",
     "course": "AI, Machine Learning & Computer Vision",
     "learningMode": "Online Live Interactive",
-    "experience": "Not specified",
     "message": "Need curriculum and placement statistics.",
     "status": "New",
-    "priority": "High",
     "interest": "Not Interested",
-    "source": "Verification Test",
     "notes": [
       {
         "note": "Inquiry submitted via Verification Test.",
@@ -47,7 +41,7 @@
       }
     ],
     "createdAt": "2026-11-23T08:56:12.322Z",
-    "updatedAt": "2026-11-25T10:03:04.716Z"
+    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
   },
   {
     "id": "ipti_enq_sample_1",
@@ -58,12 +52,9 @@
     "whatsapp": "+91 98230 45671",
     "course": "Industrial Automation & Robotics (PLC/SCADA)",
     "learningMode": "Offline Classroom Training",
-    "experience": "Final Year B.Tech (Electrical / Mechatronics)",
     "message": "Interested in the 4-month practical cohort. Requesting curriculum details and weekend batch timings.",
     "status": "New",
-    "priority": "High",
     "interest": "Interested",
-    "source": "Website Hero Quick Form",
     "notes": [
       {
         "note": "Inquiry received from website. Candidate interested in upcoming batch starting next month.",
@@ -72,7 +63,7 @@
       }
     ],
     "createdAt": "2026-11-23T06:56:09.258Z",
-    "updatedAt": "2026-11-23T06:56:09.258Z"
+    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
   },
   {
     "id": "ipti_enq_sample_2",
@@ -83,12 +74,9 @@
     "whatsapp": "+91 99750 12894",
     "course": "Embedded Systems & IoT Engineering",
     "learningMode": "Weekend Professional Hybrid",
-    "experience": "Working Professional (1-2 Years)",
     "message": "Working as a junior hardware engineer, want to upgrade firmware development and RTOS skills.",
     "status": "Contacted",
-    "priority": "Medium",
     "interest": "Pending",
-    "source": "Course Brochure Download",
     "notes": [
       {
         "note": "Called candidate, shared complete syllabus on WhatsApp.",
@@ -97,7 +85,7 @@
       }
     ],
     "createdAt": "2026-11-22T08:56:09.258Z",
-    "updatedAt": "2026-11-22T14:56:09.258Z"
+    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
   },
   {
     "id": "ipti_enq_sample_3",
@@ -108,12 +96,9 @@
     "whatsapp": "+91 94220 89123",
     "course": "CAD/CAM & Mechanical Product Design",
     "learningMode": "Offline Classroom Training",
-    "experience": "Diploma in Mechanical Engineering",
     "message": "Looking for CATIA, SolidWorks & GD&T industry certification with placement support.",
     "status": "Enrolled",
-    "priority": "High",
     "interest": "Converted",
-    "source": "Admissions Modal",
     "notes": [
       {
         "note": "Document verification completed. Seat confirmed for upcoming batch.",
@@ -122,7 +107,7 @@
       }
     ],
     "createdAt": "2026-11-21T08:56:09.258Z",
-    "updatedAt": "2026-11-23T04:56:09.258Z"
+    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
   },
   {
     "id": "ipti_enq_sample_4",
@@ -133,12 +118,9 @@
     "whatsapp": "+91 97110 54321",
     "course": "Full-Stack Software Development",
     "learningMode": "Online Live Interactive",
-    "experience": "Non-IT Graduate",
     "message": "Inquired about batch schedule; relocated to another city so not joining currently.",
     "status": "Archived",
-    "priority": "Low",
     "interest": "Not Interested",
-    "source": "Website Enquiry Form",
     "notes": [
       {
         "note": "Candidate decided not to pursue the program this quarter.",
@@ -147,6 +129,50 @@
       }
     ],
     "createdAt": "2026-11-20T10:30:00.000Z",
-    "updatedAt": "2026-11-23T08:00:00.000Z"
+    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
+  },
+  {
+    "id": "ipti_enq_1795691425761_uy3ob",
+    "course": "Industrial Automation & Robotics (PLC/SCADA)",
+    "createdAt": "Thu Nov 26 2026 11:10:25 GMT+0000 (Coordinated Universal Time)",
+    "email": "s@gmail.com",
+    "fullName": "aryan",
+    "interest": "Pending",
+    "learningMode": "Classroom Training",
+    "message": "",
+    "notes": [
+      {
+        "note": "Inquiry submitted via Modal Popup Form.",
+        "author": "System",
+        "timestamp": "2026-11-26T11:10:25.761Z"
+      }
+    ],
+    "phone": "6756653423",
+    "status": "New",
+    "trackingId": "IPTI-2026-5092",
+    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)",
+    "whatsapp": "6756653423"
+  },
+  {
+    "id": "ipti_enq_1795693927742_trmtg",
+    "course": "Industrial Automation & Robotics (PLC/SCADA)",
+    "createdAt": "Thu Nov 26 2026 17:22:07 GMT+0530 (India Standard Time)",
+    "email": "enrvices@gmail.com",
+    "fullName": "af",
+    "interest": "Converted",
+    "learningMode": "Classroom Training",
+    "message": "",
+    "notes": [
+      {
+        "note": "Inquiry submitted via Modal Popup Form.",
+        "author": "System",
+        "timestamp": "2026-11-26T11:52:07.741Z"
+      }
+    ],
+    "phone": "6756653424",
+    "status": "New",
+    "trackingId": "IPTI-2026-8237",
+    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)",
+    "whatsapp": "6756653424"
   }
 ]

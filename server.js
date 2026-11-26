@@ -269,68 +269,71 @@ async function migrateLocalDataToMongo() {
   }
 }
 
-// Background sync helpers
-async function syncEnquiriesToMongo(enquiries) {
-  if (!isMongoConnected || !Array.isArray(enquiries)) return;
+// Synchronization state & shared MongoDB sync helper
+let pendingMongoSync = Promise.resolve();
+
+function enqueueMongoSync(task) {
+  pendingMongoSync = pendingMongoSync
+    .then(task)
+    .catch((err) => console.error('[MongoDB Async Sync Error]:', err.message));
+  return pendingMongoSync;
+}
+
+async function syncCollectionToMongo(Model, items, label) {
+  if (!isMongoConnected || !Array.isArray(items)) return;
   try {
-    const ops = enquiries.map(e => ({
-      updateOne: {
-        filter: { id: e.id },
-        update: { $set: e },
-        upsert: true
-      }
-    }));
-    await EnquiryModel.bulkWrite(ops);
+    const ids = items.map(item => item.id).filter(Boolean);
+    if (ids.length > 0) {
+      await Model.deleteMany({ id: { $nin: ids } });
+      const ops = items.map(item => ({
+        updateOne: {
+          filter: { id: item.id },
+          update: { $set: item },
+          upsert: true
+        }
+      }));
+      await Model.bulkWrite(ops);
+    } else {
+      await Model.deleteMany({});
+    }
   } catch (err) {
-    console.error('[MongoDB Sync Enquiries Error]:', err.message);
+    console.error(`[MongoDB Sync ${label} Error]:`, err.message);
   }
+}
+
+async function syncEnquiriesToMongo(enquiries) {
+  return enqueueMongoSync(() => syncCollectionToMongo(EnquiryModel, enquiries, 'Enquiries'));
 }
 
 async function syncCandidatesToMongo(candidates) {
-  if (!isMongoConnected || !Array.isArray(candidates)) return;
-  try {
-    const ops = candidates.map(c => ({
-      updateOne: {
-        filter: { id: c.id },
-        update: { $set: c },
-        upsert: true
-      }
-    }));
-    await CandidateModel.bulkWrite(ops);
-  } catch (err) {
-    console.error('[MongoDB Sync Candidates Error]:', err.message);
-  }
+  return enqueueMongoSync(() => syncCollectionToMongo(CandidateModel, candidates, 'Candidates'));
 }
 
 async function syncCertificatesToMongo(certificates) {
-  if (!isMongoConnected || !Array.isArray(certificates)) return;
-  try {
-    const ops = certificates.map(c => ({
-      updateOne: {
-        filter: { id: c.id },
-        update: { $set: c },
-        upsert: true
-      }
-    }));
-    await CertificateModel.bulkWrite(ops);
-  } catch (err) {
-    console.error('[MongoDB Sync Certificates Error]:', err.message);
-  }
+  return enqueueMongoSync(() => syncCollectionToMongo(CertificateModel, certificates, 'Certificates'));
 }
 
 async function syncProgramsToMongo(programs) {
-  if (!isMongoConnected || !Array.isArray(programs)) return;
+  return enqueueMongoSync(() => syncCollectionToMongo(ProgramModel, programs, 'Programs'));
+}
+
+async function refreshLocalCacheFromMongo() {
+  if (!isMongoConnected) return;
   try {
-    const ops = programs.map(p => ({
-      updateOne: {
-        filter: { id: p.id },
-        update: { $set: p },
-        upsert: true
-      }
-    }));
-    await ProgramModel.bulkWrite(ops);
+    await pendingMongoSync;
+    const [enqs, cands, certs, progs] = await Promise.all([
+      EnquiryModel.find().lean(),
+      CandidateModel.find().lean(),
+      CertificateModel.find().lean(),
+      ProgramModel.find().lean()
+    ]);
+    const clean = (docs) => docs.map(({ _id, __v, ...rest }) => rest);
+    if (enqs.length > 0) fs.writeFileSync(enquiriesFile, JSON.stringify(clean(enqs), null, 2), 'utf-8');
+    if (cands.length > 0) fs.writeFileSync(candidatesFile, JSON.stringify(clean(cands), null, 2), 'utf-8');
+    if (certs.length > 0) fs.writeFileSync(certificatesFile, JSON.stringify(clean(certs), null, 2), 'utf-8');
+    if (progs.length > 0) fs.writeFileSync(programsFile, JSON.stringify(clean(progs), null, 2), 'utf-8');
   } catch (err) {
-    console.error('[MongoDB Sync Programs Error]:', err.message);
+    console.error('[MongoDB Live Cache Refresh Error]:', err.message);
   }
 }
 
@@ -1080,11 +1083,23 @@ function sanitizeCandidate(cand) {
 // API ROUTES
 // =========================================================================
 
-// Ensure MongoDB connection & initial data sync complete before serving API requests
+// Ensure MongoDB connection & live data sync complete before serving API requests,
+// and flush pending MongoDB writes before sending serverless responses
 app.use('/api', async (req, res, next) => {
   try {
     await dbReadyPromise;
+    if (isMongoConnected) {
+      await refreshLocalCacheFromMongo();
+    }
   } catch (_) {}
+
+  const origJson = res.json.bind(res);
+  res.json = (body) => {
+    Promise.resolve(pendingMongoSync)
+      .catch(() => {})
+      .finally(() => origJson(body));
+    return res;
+  };
   next();
 });
 
