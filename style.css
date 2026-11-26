@@ -651,7 +651,7 @@ section[id] {
   color: var(--text-secondary);
   margin: 0 0 28px 0;
   max-width: 680px;
-  text-align: left;
+  text-align: justify;
 }
 
 /* Prompt Box (Oma Mindly Interactive Training Explorer) */
@@ -1666,9 +1666,17 @@ section[id] {
 
 .marquee-track {
   display: flex;
-  gap: 40px;
+  gap: 20px;
   width: max-content;
-  animation: marqueeScroll 28s linear infinite;
+  animation: marqueeScroll 40s linear infinite;
+}
+
+.marquee-track.reverse {
+  animation: marqueeScrollReverse 40s linear infinite;
+}
+
+.marquee-container:hover .marquee-track {
+  animation-play-state: paused;
 }
 
 @keyframes marqueeScroll {
@@ -1678,6 +1686,16 @@ section[id] {
 
   100% {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes marqueeScrollReverse {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
   }
 }
 
@@ -1701,6 +1719,88 @@ section[id] {
   height: 6px;
   border-radius: 50%;
   background: var(--accent-gold);
+}
+
+/* Justified body copy across homepage sections */
+.stat-counter-desc,
+.vm-card p,
+.mission-points-list p,
+.audience-card p,
+.journey-step-card p,
+.program-desc,
+.methodology-text p,
+.lab-preview-card p,
+.enquiry-info-box .section-subtitle,
+.faq-answer p,
+.footer-brand p {
+  text-align: justify;
+}
+
+/* Partner Companies Logo Grid */
+.partners-logo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.partner-logo-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 67, 50, 0.12);
+  border-radius: var(--radius-full);
+  padding: 8px 18px 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(15, 67, 50, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.partner-logo-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(197, 160, 89, 0.55);
+  box-shadow: 0 8px 20px rgba(15, 67, 50, 0.08);
+}
+
+.partner-logo-wrap {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.partner-logo-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: none;
+  background: transparent;
+}
+
+.partner-monogram {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 0.02em;
+}
+
+.partner-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.3;
 }
 
 /* --------------------------------------------------------------------------
