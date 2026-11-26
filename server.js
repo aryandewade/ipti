@@ -30,7 +30,8 @@ process.on('uncaughtException', (err) => {
 
 // Ensure data storage directory exists (supports local disk or Vercel serverless /tmp)
 const isVercel = Boolean(process.env.VERCEL || process.env.NOW_REGION);
-const dataDir = isVercel ? '/tmp' : path.join(__dirname, 'data');
+const bundledDataDir = path.join(__dirname, 'data');
+const dataDir = isVercel ? '/tmp/ipti_data' : bundledDataDir;
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
@@ -40,8 +41,20 @@ const programsFile = path.join(dataDir, 'programs.json');
 const certificatesFile = path.join(dataDir, 'certificates.json');
 const candidatesFile = path.join(dataDir, 'candidates.json');
 
-// Uploads Directories
-const uploadsDir = path.join(__dirname, 'uploads');
+// Seed ephemeral /tmp storage from bundled data/*.json on Vercel cold start
+if (isVercel) {
+  for (const fname of ['enquiries.json', 'programs.json', 'certificates.json', 'candidates.json']) {
+    const src = path.join(bundledDataDir, fname);
+    const dst = path.join(dataDir, fname);
+    if (!fs.existsSync(dst) && fs.existsSync(src)) {
+      fs.copyFileSync(src, dst);
+    }
+  }
+}
+
+// Uploads Directories (writable /tmp/uploads on Vercel read-only deployment)
+const bundledUploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = isVercel ? '/tmp/uploads' : bundledUploadsDir;
 const syllabusDir = path.join(uploadsDir, 'syllabus');
 const avatarsDir = path.join(uploadsDir, 'avatars');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
@@ -228,6 +241,12 @@ async function migrateLocalDataToMongo() {
         await CertificateModel.insertMany(local);
         console.log(`[MongoDB Seeder] Migrated ${local.length} certificates to MongoDB Atlas.`);
       }
+    } else {
+      const docs = await CertificateModel.find().lean();
+      if (docs.length > 0) {
+        const cleaned = docs.map(({ _id, __v, ...rest }) => rest);
+        fs.writeFileSync(certificatesFile, JSON.stringify(cleaned, null, 2), 'utf-8');
+      }
     }
 
     // 4. Sync Programs
@@ -237,6 +256,12 @@ async function migrateLocalDataToMongo() {
       if (local.length > 0) {
         await ProgramModel.insertMany(local);
         console.log(`[MongoDB Seeder] Migrated ${local.length} programs to MongoDB Atlas.`);
+      }
+    } else {
+      const docs = await ProgramModel.find().lean();
+      if (docs.length > 0) {
+        const cleaned = docs.map(({ _id, __v, ...rest }) => rest);
+        fs.writeFileSync(programsFile, JSON.stringify(cleaned, null, 2), 'utf-8');
       }
     }
   } catch (err) {
@@ -309,8 +334,8 @@ async function syncProgramsToMongo(programs) {
   }
 }
 
-// Trigger initial DB connection
-initDatabase().catch(err => console.error('[DB Initialization Error]:', err.message));
+// Trigger initial DB connection (awaited by /api middleware before serving routes)
+const dbReadyPromise = initDatabase().catch(err => console.error('[DB Initialization Error]:', err.message));
 
 // Initial default training programs
 const defaultPrograms = [
@@ -872,7 +897,10 @@ app.use((req, res, next) => {
 
 // Safe Static Asset Serving (whitelist /assets, /uploads and safe public files, ignoring dotfiles)
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+if (isVercel) {
+  app.use('/uploads', express.static(uploadsDir));
+}
+app.use('/uploads', express.static(bundledUploadsDir));
 app.use(express.static(__dirname, {
   dotfiles: 'ignore',
   index: ['index.html']
@@ -1051,6 +1079,14 @@ function sanitizeCandidate(cand) {
 // =========================================================================
 // API ROUTES
 // =========================================================================
+
+// Ensure MongoDB connection & initial data sync complete before serving API requests
+app.use('/api', async (req, res, next) => {
+  try {
+    await dbReadyPromise;
+  } catch (_) {}
+  next();
+});
 
 // 1. Health check & Database Status
 app.get('/api/health', (req, res) => {
