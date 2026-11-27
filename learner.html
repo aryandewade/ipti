@@ -463,10 +463,16 @@
         </div>
         <input type="file" id="learnerPhotoInput" accept="image/*" style="display: none;">
 
-        <button type="button" id="changePhotoBtn" class="btn-refresh"
-          style="font-size: 0.78rem; padding: 6px 14px; background: #ffffff; border: 1px solid var(--border-medium); cursor: pointer; border-radius: var(--radius-full);">
-          <i class="fa-solid fa-upload"></i> Choose Photo
-        </button>
+        <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+          <button type="button" id="changePhotoBtn" class="btn-refresh"
+            style="font-size: 0.78rem; padding: 6px 14px; background: #ffffff; border: 1px solid var(--border-medium); cursor: pointer; border-radius: var(--radius-full);">
+            <i class="fa-solid fa-upload"></i> Choose Photo
+          </button>
+          <button type="button" id="removePhotoBtn" class="btn-refresh"
+            style="font-size: 0.78rem; padding: 6px 14px; background: #fff5f5; color: #dc2626; border: 1px solid #fecaca; cursor: pointer; border-radius: var(--radius-full); display: none;">
+            <i class="fa-solid fa-trash-can"></i> Remove Photo
+          </button>
+        </div>
         <span id="photoUploadStatus"
           style="display: block; font-size: 0.72rem; color: var(--text-muted); margin-top: 6px;">Supported: JPG, PNG,
           WebP (Max 5MB)</span>

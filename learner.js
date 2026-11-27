@@ -582,6 +582,7 @@ function initProfileManagementModal() {
   const cancelBtn = document.getElementById('cancelProfileModalBtn');
   const triggerPhotoBtn = document.getElementById('triggerPhotoSelectBtn');
   const changePhotoBtn = document.getElementById('changePhotoBtn');
+  const removePhotoBtn = document.getElementById('removePhotoBtn');
   const photoInput = document.getElementById('learnerPhotoInput');
   const photoStatus = document.getElementById('photoUploadStatus');
   const avatarPreview = document.getElementById('modalProfileAvatarPreview');
@@ -607,6 +608,9 @@ function initProfileManagementModal() {
     // Render current photo in modal preview (with human fallback on missing/broken image)
     if (avatarPreview) {
       renderAvatarInto(avatarPreview, s);
+    }
+    if (removePhotoBtn) {
+      removePhotoBtn.style.display = (s.photoUrl || s.avatarUrl) ? 'inline-flex' : 'none';
     }
 
     if (photoStatus) {
@@ -642,6 +646,39 @@ function initProfileManagementModal() {
   }
   if (changePhotoBtn && photoInput) {
     changePhotoBtn.addEventListener('click', () => photoInput.click());
+  }
+
+  if (removePhotoBtn) {
+    removePhotoBtn.addEventListener('click', async () => {
+      if (!confirm('Remove your current profile photo?')) return;
+      removePhotoBtn.disabled = true;
+      try {
+        const res = await fetch('/api/learner/photo', {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${currentLearnerToken}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          if (currentStudentData) {
+            currentStudentData.photoUrl = '';
+            currentStudentData.avatarUrl = '';
+          }
+          setHumanFallbackAvatar(avatarPreview);
+          setHumanFallbackAvatar(document.getElementById('welcomeProfileAvatar'));
+          removePhotoBtn.style.display = 'none';
+          if (photoStatus) {
+            photoStatus.innerText = 'Profile photo removed.';
+            photoStatus.style.color = '#059669';
+          }
+        } else {
+          alert('Could not remove photo: ' + (data.error || 'Server error'));
+        }
+      } catch (err) {
+        alert('Error removing photo: ' + err.message);
+      } finally {
+        removePhotoBtn.disabled = false;
+      }
+    });
   }
 
   // Handle Photo File Selection & Upload
@@ -698,6 +735,7 @@ function initProfileManagementModal() {
             const resolvedPhoto = window.iptiResolveUrl ? window.iptiResolveUrl(data.photoUrl) : data.photoUrl;
             const welcomeProfileAvatar = document.getElementById('welcomeProfileAvatar');
             if (welcomeProfileAvatar) welcomeProfileAvatar.innerHTML = `<img src="${resolvedPhoto}" alt="Avatar">`;
+            if (removePhotoBtn) removePhotoBtn.style.display = 'inline-flex';
 
             if (photoStatus) {
               photoStatus.innerText = 'Profile photo updated successfully!';

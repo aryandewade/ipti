@@ -38,11 +38,11 @@
     "projectTitle": "Automated Sorting Line & SCADA Telemetry Rig",
     "password": "scrypt:f9a9faad15c286fbde1cfacf9ed21922:a9bcbc9aa60f20775a763fbab0bc8da4109cfa1f534710adb46e20ed285d1cc06a1868532157827596bc56b7c6e16ddb52031a45233cb2d27a8cccf5871aab6f",
     "hasChangedPassword": true,
-    "photoUrl": "/uploads/avatars/avatar_IPTI-2026-STU-01_1795766682743.png",
-    "avatarUrl": "/uploads/avatars/avatar_IPTI-2026-STU-01_1795766682743.png",
+    "photoUrl": "/uploads/avatars/avatar_IPTI-2026-STU-01_1795767325926.jpg",
+    "avatarUrl": "/uploads/avatars/avatar_IPTI-2026-STU-01_1795767325926.jpg",
     "notes": "Distinction student. All practical benchmarks and capstone project completed.",
     "createdAt": "2026-01-10T10:00:00.000Z",
-    "updatedAt": "2026-11-27T08:04:42.759Z"
+    "updatedAt": "Fri Nov 27 2026 13:45:26 GMT+0530 (India Standard Time)"
   },
   {
     "id": "cand_2026_stu_02",
@@ -79,7 +79,7 @@
     "avatarUrl": "",
     "notes": "Second installment of ₹13,000 pending before certificate eligibility.",
     "createdAt": "2026-01-15T09:30:00.000Z",
-    "updatedAt": "Fri Nov 27 2026 13:34:31 GMT+0530 (India Standard Time)"
+    "updatedAt": "Fri Nov 27 2026 13:45:26 GMT+0530 (India Standard Time)"
   },
   {
     "id": "cand_2026_stu_03",
@@ -116,7 +116,7 @@
     "avatarUrl": "",
     "notes": "Certificate issued. 100% attendance in SolidWorks module.",
     "createdAt": "2026-01-20T11:00:00.000Z",
-    "updatedAt": "Fri Nov 27 2026 13:34:31 GMT+0530 (India Standard Time)"
+    "updatedAt": "Fri Nov 27 2026 13:45:26 GMT+0530 (India Standard Time)"
   },
   {
     "id": "cand_2026_stu_04",
@@ -153,7 +153,7 @@
     "avatarUrl": "",
     "notes": "Top scorer in cohort. Successfully verified diploma.",
     "createdAt": "2026-02-01T14:20:00.000Z",
-    "updatedAt": "Fri Nov 27 2026 13:34:31 GMT+0530 (India Standard Time)"
+    "updatedAt": "Fri Nov 27 2026 13:45:26 GMT+0530 (India Standard Time)"
   },
   {
     "id": "cand_2026_stu_05",
@@ -190,7 +190,7 @@
     "avatarUrl": "/uploads/avatars/avatar_IPTI-2026-STU-05_1795608970235.jpg",
     "notes": "Ready for certificate issuance. Capstone reviewed by industry lead.",
     "createdAt": "2026-11-20T09:00:00.000Z",
-    "updatedAt": "Fri Nov 27 2026 13:34:31 GMT+0530 (India Standard Time)"
+    "updatedAt": "Fri Nov 27 2026 13:45:26 GMT+0530 (India Standard Time)"
   },
   {
     "id": "cand_1795698548879_0hgp",
@@ -226,7 +226,7 @@
     "projectTitle": "Industrial Capstone Project",
     "studentId": "IPTI-2026-STU-06",
     "totalFees": 35000,
-    "updatedAt": "Fri Nov 27 2026 13:34:31 GMT+0530 (India Standard Time)",
+    "updatedAt": "Fri Nov 27 2026 13:45:26 GMT+0530 (India Standard Time)",
     "whatsapp": "6756653423"
   }
 ]

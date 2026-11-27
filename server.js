@@ -2972,6 +2972,39 @@ app.post('/api/learner/photo', requireLearner, (req, res) => {
   }
 });
 
+// 4b. Learner Remove Profile Photo (Learner protected)
+app.delete('/api/learner/photo', requireLearner, (req, res) => {
+  try {
+    const { studentId } = req.learner;
+    const candidates = readCandidates();
+    const cand = candidates.find(c => c.studentId.toUpperCase() === studentId.toUpperCase());
+    if (!cand) {
+      return res.status(404).json({ success: false, error: 'Student record not found' });
+    }
+
+    const oldUrl = cand.photoUrl || cand.avatarUrl || '';
+    if (oldUrl.startsWith('/uploads/avatars/')) {
+      const targetFile = path.join(avatarsDir, path.basename(oldUrl));
+      if (fs.existsSync(targetFile)) {
+        try { fs.unlinkSync(targetFile); } catch (_) {}
+      }
+    }
+
+    cand.photoUrl = '';
+    cand.avatarUrl = '';
+    cand.updatedAt = new Date().toISOString();
+    writeCandidates(candidates);
+
+    res.json({
+      success: true,
+      message: 'Profile photo removed successfully',
+      student: sanitizeCandidate(cand)
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 5. Learner Update Profile Details (Learner protected)
 app.put('/api/learner/profile', requireLearner, (req, res) => {
   try {
