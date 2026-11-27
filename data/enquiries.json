@@ -19,7 +19,7 @@
       }
     ],
     "createdAt": "2026-11-23T09:03:20.569Z",
-    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
+    "updatedAt": "Thu Nov 26 2026 13:09:09 GMT+0000 (Coordinated Universal Time)"
   },
   {
     "id": "ipti_enq_1795424172322_3qxl5",
@@ -41,7 +41,7 @@
       }
     ],
     "createdAt": "2026-11-23T08:56:12.322Z",
-    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
+    "updatedAt": "Thu Nov 26 2026 13:09:09 GMT+0000 (Coordinated Universal Time)"
   },
   {
     "id": "ipti_enq_sample_1",
@@ -63,7 +63,7 @@
       }
     ],
     "createdAt": "2026-11-23T06:56:09.258Z",
-    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
+    "updatedAt": "Thu Nov 26 2026 13:09:09 GMT+0000 (Coordinated Universal Time)"
   },
   {
     "id": "ipti_enq_sample_2",
@@ -85,7 +85,7 @@
       }
     ],
     "createdAt": "2026-11-22T08:56:09.258Z",
-    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
+    "updatedAt": "Thu Nov 26 2026 13:09:09 GMT+0000 (Coordinated Universal Time)"
   },
   {
     "id": "ipti_enq_sample_3",
@@ -107,7 +107,7 @@
       }
     ],
     "createdAt": "2026-11-21T08:56:09.258Z",
-    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
+    "updatedAt": "Thu Nov 26 2026 13:09:09 GMT+0000 (Coordinated Universal Time)"
   },
   {
     "id": "ipti_enq_sample_4",
@@ -129,7 +129,7 @@
       }
     ],
     "createdAt": "2026-11-20T10:30:00.000Z",
-    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)"
+    "updatedAt": "Thu Nov 26 2026 13:09:09 GMT+0000 (Coordinated Universal Time)"
   },
   {
     "id": "ipti_enq_1795691425761_uy3ob",
@@ -137,10 +137,15 @@
     "createdAt": "Thu Nov 26 2026 11:10:25 GMT+0000 (Coordinated Universal Time)",
     "email": "s@gmail.com",
     "fullName": "aryan",
-    "interest": "Pending",
+    "interest": "Converted",
     "learningMode": "Classroom Training",
     "message": "",
     "notes": [
+      {
+        "note": "Lead successfully CONVERTED to Enrolled Student. Student ID: IPTI-2026-STU-06",
+        "author": "admin",
+        "timestamp": "2026-11-26T13:09:08.879Z"
+      },
       {
         "note": "Inquiry submitted via Modal Popup Form.",
         "author": "System",
@@ -148,31 +153,9 @@
       }
     ],
     "phone": "6756653423",
-    "status": "New",
+    "status": "Enrolled",
     "trackingId": "IPTI-2026-5092",
-    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)",
+    "updatedAt": "Thu Nov 26 2026 13:09:09 GMT+0000 (Coordinated Universal Time)",
     "whatsapp": "6756653423"
-  },
-  {
-    "id": "ipti_enq_1795693927742_trmtg",
-    "course": "Industrial Automation & Robotics (PLC/SCADA)",
-    "createdAt": "Thu Nov 26 2026 17:22:07 GMT+0530 (India Standard Time)",
-    "email": "enrvices@gmail.com",
-    "fullName": "af",
-    "interest": "Converted",
-    "learningMode": "Classroom Training",
-    "message": "",
-    "notes": [
-      {
-        "note": "Inquiry submitted via Modal Popup Form.",
-        "author": "System",
-        "timestamp": "2026-11-26T11:52:07.741Z"
-      }
-    ],
-    "phone": "6756653424",
-    "status": "New",
-    "trackingId": "IPTI-2026-8237",
-    "updatedAt": "Thu Nov 26 2026 17:22:27 GMT+0530 (India Standard Time)",
-    "whatsapp": "6756653424"
   }
 ]

@@ -452,7 +452,7 @@ function initModals() {
             <i class="fa-solid fa-file-pdf" style="color: #dc2626; font-size: 1.1rem;"></i>
             <span>Official Syllabus Attached</span>
           </div>
-          <a href="${matched.syllabusUrl}" download="${matched.syllabusFilename || 'Syllabus.pdf'}" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.78rem; text-decoration: none;">
+          <a href="${window.iptiResolveUrl ? window.iptiResolveUrl(matched.syllabusUrl) : matched.syllabusUrl}" download="${matched.syllabusFilename || 'Syllabus.pdf'}" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.78rem; text-decoration: none;">
             <i class="fa-solid fa-download"></i> Direct Download PDF
           </a>
         `;
@@ -770,7 +770,7 @@ function renderPublicPrograms(programs) {
           </div>
           <div class="program-card-cta">
             ${p.syllabusUrl ? `
-            <a href="${p.syllabusUrl}" download="${p.syllabusFilename || 'IPTI-Program-Syllabus.pdf'}" class="btn btn-secondary" style="text-decoration: none;" title="Download Official Syllabus PDF">
+            <a href="${window.iptiResolveUrl ? window.iptiResolveUrl(p.syllabusUrl) : p.syllabusUrl}" download="${p.syllabusFilename || 'IPTI-Program-Syllabus.pdf'}" class="btn btn-secondary" style="text-decoration: none;" title="Download Official Syllabus PDF">
               <i class="fa-solid fa-file-arrow-down" style="color: var(--accent-gold); margin-right: 4px;"></i>
               <span>Syllabus</span>
             </a>

@@ -175,27 +175,36 @@ async function loadLearnerProfile() {
   }
 }
 
-function renderDashboard(student, certificate) {
-  // 1. Header Profile Info
-  const headerName = document.getElementById('headerStudentName');
-  const headerId = document.getElementById('headerStudentId');
-  const headerAvatar = document.getElementById('headerAvatar');
+function setHumanFallbackAvatar(el) {
+  if (!el) return;
+  el.innerHTML = '<i class="fa-solid fa-user" aria-hidden="true"></i>';
+}
 
-  if (headerName) headerName.innerText = student.fullName || 'Student';
-  if (headerId) headerId.innerText = student.studentId || 'IPTI-STU';
-  if (headerAvatar) {
-    if (student.photoUrl || student.avatarUrl) {
-      headerAvatar.innerHTML = `<img src="${student.photoUrl || student.avatarUrl}" alt="${escapeHtml(student.fullName)}">`;
-    } else {
-      const initials = (student.fullName || 'ST')
-        .split(' ')
-        .map(n => n[0])
-        .slice(0, 2)
-        .join('')
-        .toUpperCase();
-      headerAvatar.innerText = initials;
-    }
+function renderAvatarInto(el, student) {
+  if (!el) return;
+  const rawAvatar = student && (student.photoUrl || student.avatarUrl);
+  if (rawAvatar) {
+    const avatarSrc = window.iptiResolveUrl ? window.iptiResolveUrl(rawAvatar) : rawAvatar;
+    el.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = avatarSrc;
+    img.alt = (student && student.fullName) ? student.fullName : 'Student Profile';
+    img.onerror = () => setHumanFallbackAvatar(el);
+    el.appendChild(img);
+  } else {
+    setHumanFallbackAvatar(el);
   }
+}
+
+function renderDashboard(student, certificate) {
+  // 1. Hero Profile Circle Card
+  const welcomeProfileAvatar = document.getElementById('welcomeProfileAvatar');
+  const welcomeProfileName = document.getElementById('welcomeProfileName');
+  const welcomeProfileId = document.getElementById('welcomeProfileId');
+
+  renderAvatarInto(welcomeProfileAvatar, student);
+  if (welcomeProfileName) welcomeProfileName.innerText = student.fullName || 'Student';
+  if (welcomeProfileId) welcomeProfileId.innerText = student.studentId || 'IPTI-STU';
 
   // 2. Default Password Security Warning
   const banner = document.getElementById('defaultPasswordBanner');
@@ -568,7 +577,7 @@ window.simulateDownloadReceipt = function(receiptNo, amount) {
 function initProfileManagementModal() {
   const modal = document.getElementById('learnerProfileModal');
   const openBtn = document.getElementById('openManageProfileBtn');
-  const studentPill = document.getElementById('studentPillProfileTrigger');
+  const welcomeProfileCard = document.getElementById('welcomeProfileCard');
   const closeBtn = document.getElementById('closeProfileModalBtn');
   const cancelBtn = document.getElementById('cancelProfileModalBtn');
   const triggerPhotoBtn = document.getElementById('triggerPhotoSelectBtn');
@@ -595,14 +604,9 @@ function initProfileManagementModal() {
     if (phoneEl) phoneEl.value = s.phone || '';
     if (whatsappEl) whatsappEl.value = s.whatsapp || s.phone || '';
 
-    // Render current photo in modal preview
-    if (s.photoUrl || s.avatarUrl) {
-      if (avatarPreview) avatarPreview.innerHTML = `<img src="${s.photoUrl || s.avatarUrl}" alt="${escapeHtml(s.fullName)}" style="width: 100%; height: 100%; object-fit: cover;">`;
-    } else {
-      const initials = (s.fullName || 'ST').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-      const modalInitials = document.getElementById('modalAvatarInitials');
-      if (modalInitials) modalInitials.innerText = initials;
-      if (avatarPreview) avatarPreview.innerHTML = `<span id="modalAvatarInitials">${initials}</span>`;
+    // Render current photo in modal preview (with human fallback on missing/broken image)
+    if (avatarPreview) {
+      renderAvatarInto(avatarPreview, s);
     }
 
     if (photoStatus) {
@@ -622,7 +626,7 @@ function initProfileManagementModal() {
   }
 
   if (openBtn) openBtn.addEventListener('click', openProfileModal);
-  if (studentPill) studentPill.addEventListener('click', openProfileModal);
+  if (welcomeProfileCard) welcomeProfileCard.addEventListener('click', openProfileModal);
   if (closeBtn) closeBtn.addEventListener('click', closeProfileModal);
   if (cancelBtn) cancelBtn.addEventListener('click', closeProfileModal);
 
@@ -690,11 +694,10 @@ function initProfileManagementModal() {
               currentStudentData.avatarUrl = data.photoUrl;
             }
 
-            // Update header avatar
-            const headerAvatar = document.getElementById('headerAvatar');
-            if (headerAvatar) {
-              headerAvatar.innerHTML = `<img src="${data.photoUrl}" alt="Avatar">`;
-            }
+            // Update welcome card avatar
+            const resolvedPhoto = window.iptiResolveUrl ? window.iptiResolveUrl(data.photoUrl) : data.photoUrl;
+            const welcomeProfileAvatar = document.getElementById('welcomeProfileAvatar');
+            if (welcomeProfileAvatar) welcomeProfileAvatar.innerHTML = `<img src="${resolvedPhoto}" alt="Avatar">`;
 
             if (photoStatus) {
               photoStatus.innerText = 'Profile photo updated successfully!';

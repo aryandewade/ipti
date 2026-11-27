@@ -453,8 +453,8 @@ function initDashboardControls() {
   if (exportCsvBtn) {
     exportCsvBtn.addEventListener('click', () => {
       // Trigger CSV download with token parameter
-      const downloadUrl = `/api/enquiries/export/csv?token=${encodeURIComponent(currentToken)}`;
-      window.open(downloadUrl, '_blank');
+      const rawUrl = `/api/enquiries/export/csv?token=${encodeURIComponent(currentToken)}`;
+      window.open(window.iptiResolveUrl ? window.iptiResolveUrl(rawUrl) : rawUrl, '_blank');
     });
   }
 
@@ -881,7 +881,7 @@ function renderAdminPrograms(programs) {
             <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i>
             ${escapeHtml(p.syllabusFilename || 'Syllabus Attached')}
           </span>
-          <a href="${p.syllabusUrl}" target="_blank" download style="font-size: 0.74rem; font-weight: 700; color: #059669; text-decoration: none;">
+          <a href="${window.iptiResolveUrl ? window.iptiResolveUrl(p.syllabusUrl) : p.syllabusUrl}" target="_blank" download style="font-size: 0.74rem; font-weight: 700; color: #059669; text-decoration: none;">
             <i class="fa-solid fa-download"></i> Download
           </a>
         </div>
@@ -1370,7 +1370,7 @@ function initProgramManagement() {
       if (sylDisplay) sylDisplay.innerText = item.syllabusFilename ? item.syllabusFilename : 'Syllabus Attached';
       if (sylPreview) {
         sylPreview.style.display = 'inline-flex';
-        sylPreview.href = item.syllabusUrl;
+        sylPreview.href = window.iptiResolveUrl ? window.iptiResolveUrl(item.syllabusUrl) : item.syllabusUrl;
       }
       if (sylBadge) {
         sylBadge.innerText = 'Uploaded';
@@ -1812,8 +1812,8 @@ function initCandidateManagement() {
 
   if (exportCsvBtn) {
     exportCsvBtn.addEventListener('click', () => {
-      const downloadUrl = `/api/candidates/export/csv?token=${encodeURIComponent(currentToken)}`;
-      window.open(downloadUrl, '_blank');
+      const rawUrl = `/api/candidates/export/csv?token=${encodeURIComponent(currentToken)}`;
+      window.open(window.iptiResolveUrl ? window.iptiResolveUrl(rawUrl) : rawUrl, '_blank');
     });
   }
 

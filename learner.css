@@ -682,6 +682,75 @@ body {
   color: #8c6c29;
 }
 
+.welcome-profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  margin-right: 48px;
+  flex: 0 0 auto;
+  min-width: 200px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.welcome-profile-card:hover {
+  transform: translateY(-2px);
+}
+
+.welcome-profile-avatar {
+  width: 136px;
+  height: 136px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0f4332, #17543f);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 3.5px solid var(--accent-gold);
+  box-shadow: 0 6px 18px rgba(15, 67, 50, 0.16);
+  margin-bottom: 12px;
+}
+
+.welcome-profile-avatar i {
+  font-size: 3.4rem;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.welcome-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.welcome-profile-name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.25;
+}
+
+.welcome-profile-id {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #8c6c29;
+  background: var(--accent-gold-bg);
+  border: 1px solid var(--accent-gold-border);
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  margin-top: 5px;
+}
+
 .welcome-stats-box {
   display: flex;
   align-items: center;
@@ -690,6 +759,13 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 16px 24px;
+}
+
+.welcome-stats-box.welcome-stats-banner {
+  background: #ffffff;
+  justify-content: space-around;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(15, 67, 50, 0.04);
 }
 
 .welcome-stat-col {

@@ -16,7 +16,7 @@
     "issuedBy": "IPTI Academic Council",
     "downloadUrl": "",
     "createdAt": "2026-11-24T11:46:08.440Z",
-    "updatedAt": "2026-11-26T10:21:16.672Z"
+    "updatedAt": "2026-11-27T08:03:24.535Z"
   },
   {
     "id": "cert_1795427001042_a1b2",
@@ -35,7 +35,7 @@
     "issuedBy": "IPTI Academic Council",
     "downloadUrl": "",
     "createdAt": "2026-02-18T10:00:00.000Z",
-    "updatedAt": "2026-11-26T10:21:16.672Z"
+    "updatedAt": "2026-11-27T08:03:24.535Z"
   },
   {
     "id": "cert_1795427001120_e5f6",
@@ -54,7 +54,7 @@
     "issuedBy": "IPTI Academic Council",
     "downloadUrl": "",
     "createdAt": "2026-03-02T09:15:00.000Z",
-    "updatedAt": "2026-11-26T10:21:16.672Z"
+    "updatedAt": "2026-11-27T08:03:24.535Z"
   },
   {
     "id": "cert_1795427001205_g7h8",
@@ -73,25 +73,6 @@
     "issuedBy": "IPTI Academic Council",
     "downloadUrl": "",
     "createdAt": "2026-03-10T14:20:00.000Z",
-    "updatedAt": "2026-11-26T10:21:16.672Z"
-  },
-  {
-    "id": "cert_1795688476625_239k",
-    "createdAt": "Thu Nov 26 2026 15:51:16 GMT+0530 (India Standard Time)",
-    "downloadUrl": "",
-    "grade": "Distinction (Grade A+ • 98%)",
-    "issueDate": "2026-11-26",
-    "issuedBy": "IPTI Academic Council",
-    "notes": "Automated Test Verification",
-    "program": "Robotics & AI Automation",
-    "score": 95,
-    "standard": "Government Recognized Standard",
-    "status": "Verified",
-    "studentEmail": "autotest@ipti.edu.in",
-    "studentId": "IPTI-TEST-STU-6617",
-    "studentName": "Automated Test Candidate",
-    "studentPhone": "+91 99999 00000",
-    "updatedAt": "2026-11-26T10:21:16.628Z",
-    "verified": true
+    "updatedAt": "2026-11-27T08:03:24.535Z"
   }
 ]

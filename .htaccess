@@ -1,0 +1,13 @@
+Options -Indexes
+RewriteEngine On
+
+# Clean URL routes for IPTI static frontend on Hostinger
+RewriteRule ^verify-certificate/?$ verify.html [L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^([^/]+)/?$ $1.html [L]
+
+# Block direct access to sensitive config or backend files if ever uploaded
+<FilesMatch "^(\.env|server\.js|package\.json|package-lock\.json|test-suite\.js)$">
+  Require all denied
+</FilesMatch>
