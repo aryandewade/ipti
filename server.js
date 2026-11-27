@@ -211,52 +211,53 @@ async function initDatabase() {
 
 async function migrateLocalDataToMongo() {
   try {
+    const clean = (docs) => docs.map(({ _id, __v, ...rest }) => rest);
+    const metaCol = mongoose.connection.db.collection('app_meta');
+    const seedMeta = await metaCol.findOne({ key: 'initial_seed_v1' });
+    const allowInitialSeed = !seedMeta;
+
     // 1. Sync Enquiries
-    const enqCount = await EnquiryModel.countDocuments();
-    if (enqCount === 0) {
+    const enqs = await EnquiryModel.find().lean();
+    if (enqs.length === 0 && allowInitialSeed) {
       const local = readEnquiries();
       if (local.length > 0) {
         await EnquiryModel.insertMany(local);
         console.log(`[MongoDB Seeder] Migrated ${local.length} enquiries to MongoDB Atlas.`);
       }
     } else {
-      const docs = await EnquiryModel.find().lean();
-      if (docs.length > 0) {
-        const cleaned = docs.map(({ _id, __v, ...rest }) => rest);
-        fs.writeFileSync(enquiriesFile, JSON.stringify(cleaned, null, 2), 'utf-8');
-      }
+      fs.writeFileSync(enquiriesFile, JSON.stringify(clean(enqs), null, 2), 'utf-8');
     }
 
     // 2. Sync Candidates
-    const candCount = await CandidateModel.countDocuments();
-    if (candCount === 0) {
+    const cands = await CandidateModel.find().lean();
+    if (cands.length === 0 && allowInitialSeed) {
       const local = readCandidates();
       if (local.length > 0) {
         await CandidateModel.insertMany(local);
         console.log(`[MongoDB Seeder] Migrated ${local.length} candidates to MongoDB Atlas.`);
       }
     } else {
-      const docs = await CandidateModel.find().lean();
-      if (docs.length > 0) {
-        const cleaned = docs.map(({ _id, __v, ...rest }) => rest);
-        fs.writeFileSync(candidatesFile, JSON.stringify(cleaned, null, 2), 'utf-8');
-      }
+      fs.writeFileSync(candidatesFile, JSON.stringify(clean(cands), null, 2), 'utf-8');
     }
 
     // 3. Sync Certificates
-    const certCount = await CertificateModel.countDocuments();
-    if (certCount === 0) {
+    const certs = await CertificateModel.find().lean();
+    if (certs.length === 0 && allowInitialSeed) {
       const local = readCertificates();
       if (local.length > 0) {
         await CertificateModel.insertMany(local);
         console.log(`[MongoDB Seeder] Migrated ${local.length} certificates to MongoDB Atlas.`);
       }
     } else {
-      const docs = await CertificateModel.find().lean();
-      if (docs.length > 0) {
-        const cleaned = docs.map(({ _id, __v, ...rest }) => rest);
-        fs.writeFileSync(certificatesFile, JSON.stringify(cleaned, null, 2), 'utf-8');
-      }
+      fs.writeFileSync(certificatesFile, JSON.stringify(clean(certs), null, 2), 'utf-8');
+    }
+
+    if (allowInitialSeed) {
+      await metaCol.updateOne(
+        { key: 'initial_seed_v1' },
+        { $set: { key: 'initial_seed_v1', value: true, updatedAt: new Date().toISOString() } },
+        { upsert: true }
+      );
     }
 
     // 4. Sync Programs
@@ -359,9 +360,9 @@ async function refreshLocalCacheFromMongo() {
       CategoryModel.find().lean()
     ]);
     const clean = (docs) => docs.map(({ _id, __v, ...rest }) => rest);
-    if (enqs.length > 0) fs.writeFileSync(enquiriesFile, JSON.stringify(clean(enqs), null, 2), 'utf-8');
-    if (cands.length > 0) fs.writeFileSync(candidatesFile, JSON.stringify(clean(cands), null, 2), 'utf-8');
-    if (certs.length > 0) fs.writeFileSync(certificatesFile, JSON.stringify(clean(certs), null, 2), 'utf-8');
+    fs.writeFileSync(enquiriesFile, JSON.stringify(clean(enqs), null, 2), 'utf-8');
+    fs.writeFileSync(candidatesFile, JSON.stringify(clean(cands), null, 2), 'utf-8');
+    fs.writeFileSync(certificatesFile, JSON.stringify(clean(certs), null, 2), 'utf-8');
     if (progs.length > 0) fs.writeFileSync(programsFile, JSON.stringify(clean(progs), null, 2), 'utf-8');
     if (cats.length > 0) fs.writeFileSync(categoriesFile, JSON.stringify(clean(cats), null, 2), 'utf-8');
   } catch (err) {
@@ -602,7 +603,7 @@ function readCertificates() {
     }
     const raw = fs.readFileSync(certificatesFile, 'utf-8');
     const parsed = JSON.parse(raw || '[]');
-    return parsed.length > 0 ? parsed : defaultCertificates;
+    return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
     console.error('Error reading certificates database:', err);
     return defaultCertificates;
@@ -775,7 +776,7 @@ function readCandidates() {
     }
     const raw = fs.readFileSync(candidatesFile, 'utf-8');
     const parsed = JSON.parse(raw || '[]');
-    return parsed.length > 0 ? parsed : defaultCandidates;
+    return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
     console.error('Error reading candidates database:', err);
     return defaultCandidates;
